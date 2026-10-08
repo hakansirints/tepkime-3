@@ -1,0 +1,6607 @@
+/* ==========================================================================
+   TEPKİME ARENASI - ÖZEL DÜZEN VE SİMÜLASYON STİLLERİ (arena.css)
+   ========================================================================== */
+
+html, body {
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+
+#app {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 10px 16px 40px;
+}
+.mebi-top-shell { position:relative; z-index:20; margin-bottom:14px; border:1px solid var(--mebi-border); border-radius:16px; background:var(--mebi-bg-surface); box-shadow:0 5px 24px rgba(36,53,44,.08); overflow:visible; }
+.mebi-top-shell > .mebi-topbar { margin:0; border:0; border-radius:16px 16px 0 0; box-shadow:none; background-color:transparent; }
+.mebi-top-shell > .mebi-stepper { min-height:54px; margin:0; padding:7px 16px; border-top:1px solid var(--mebi-border); border-radius:0 0 16px 16px; background:transparent; }
+.mebi-top-shell:not(.has-stage) > .mebi-topbar { border-radius:16px; }
+
+/* Rapor, soru ve tanecik ekranlarında laboratuvar kartlarıyla ortak kompakt yüzey dili. */
+#app[data-screen="card"],#app[data-screen="micro"] { max-width:1200px; }
+#app[data-screen="card"] > .mebi-card,
+#app[data-screen="micro"] > .mebi-card {
+  width:min(1180px,calc(100% - 28px));
+  margin:14px auto 24px;
+  padding:14px;
+  border:1px solid var(--mebi-border);
+  border-radius:16px;
+  background:var(--mebi-bg-surface);
+  box-shadow:0 5px 24px rgba(36,53,44,.08);
+}
+#app[data-screen="card"] .mebi-top-shell > .mebi-stepper,
+#app[data-screen="micro"] .mebi-top-shell > .mebi-stepper { margin:0; padding:7px 12px; border:0; border-top:1px solid var(--mebi-border); border-radius:0 0 16px 16px; background:transparent; }
+#app[data-screen="card"] .mebi-report-sheet,
+#app[data-screen="micro"] :is(.camera-meta-banner,.report-connected-nav,.cpk-smart-bar,.camera-macro-strip,.camera-note-box,.particle-subcard) {
+  border:1px solid var(--mebi-border);
+  border-radius:14px;
+  background:var(--mebi-bg-surface);
+  box-shadow:0 5px 24px rgba(36,53,44,.07);
+}
+#app[data-screen="card"] .mebi-report-sheet { margin:8px 0; padding:12px 14px; background-image:none; }
+#app[data-screen="card"] .report-meta-banner { padding-bottom:7px; margin-bottom:8px; }
+#app[data-screen="card"] .report-connected-nav,
+#app[data-screen="micro"] .report-connected-nav { margin:8px 0 10px; padding:4px; border-radius:14px; }
+#app[data-screen="card"] .report-conn-tab,
+#app[data-screen="micro"] .report-conn-tab { min-height:38px; padding:6px 12px; border-radius:10px; }
+#app[data-screen="card"] .report-metrics-grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-bottom:8px; }
+#app[data-screen="card"] .report-metric-tile { min-height:68px; padding:8px 10px; border-radius:11px; box-shadow:none; }
+#app[data-screen="card"] .chemical-eq-card,
+#app[data-screen="card"] .report-quiz-panel,
+#app[data-screen="card"] .report-tab-footer-prompt { border-radius:12px; box-shadow:none; }
+#app[data-screen="card"] .report-bottom-bar,
+#app[data-screen="micro"] .camera-bottom-bar { margin-top:9px; }
+#app[data-screen="micro"] .camera-meta-banner { padding:9px 12px; margin-bottom:8px; }
+#app[data-screen="micro"] .cpk-smart-bar,
+#app[data-screen="micro"] .camera-macro-strip,
+#app[data-screen="micro"] .camera-note-box { padding:7px 10px; margin-bottom:8px; }
+#app[data-screen="micro"] .camera-particles-row { gap:10px; margin-bottom:8px; align-items:stretch; }
+#app[data-screen="micro"] .particle-subcard { min-height:0; height:100%; padding:10px 12px; overflow:hidden; display:flex; flex-direction:column; }
+.particle-subcard-body { flex:none !important; }
+.particle-3d-host { position:relative !important; width:100% !important; height:180px !important; min-height:180px !important; max-height:180px !important; flex:none !important; padding:0!important; overflow:hidden !important; border-radius:11px; background:radial-gradient(circle at 50% 42%,rgba(102,163,130,.13),transparent 72%); touch-action:none; }
+.particle-3d-host canvas { position:absolute !important; inset:0 !important; display:block !important; width:100%!important; height:100%!important; min-height:0 !important; outline:none; }
+.particle-3d-host::after { display:none; }
+.particle-interaction-hint { margin:6px 10px 6px; font-size:11px; font-weight:500; color:var(--mebi-text-secondary); text-align:center; line-height:1.3; opacity:0.85; }
+.particle-divider { width:92%; height:1px; margin:0 auto 10px; background:color-mix(in srgb,var(--mebi-border) 60%,transparent); }
+[data-theme="dark"] .particle-divider { background:rgba(255,255,255,0.10); }
+.particle-formula-line { display:block; margin:0 10px 3px; color:var(--mebi-text-main); font-size:1.15rem; font-weight:800; letter-spacing:.01em; line-height:1.2; text-align:center; }
+.particle-formula-tag, .particle-ionic-tag { display:none; }
+.particle-ionic-line { display:block; margin:2px 10px 4px; color:#1d4ed8; font-family:var(--mebi-font-family, 'Plus Jakarta Sans', sans-serif); font-size:1.05rem; font-weight:800; line-height:1.3; text-align:center; }
+[data-theme="dark"] .particle-ionic-line { color:#60a5fa; }
+.particle-chemical-name { display:block; margin:2px 10px 6px; color:var(--mebi-text-main); font-size:1.5rem; font-weight:700; line-height:1.3; text-align:center; }
+[data-theme="dark"] .particle-chemical-name { color:#f1f5f9; }
+.particle-identity-compact { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 8px 2px; text-align:center; }
+.particle-element-legend { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 14px; min-height:24px; margin:0 10px 10px; padding:0; background:transparent; }
+.particle-element-item { display:inline-flex; align-items:center; gap:5px; color:var(--mebi-text-secondary); font-size:0.75rem; font-weight:500; line-height:1; white-space:nowrap; }
+[data-theme="dark"] .particle-element-item { color:var(--mebi-text-main); }
+.particle-element-item i { width:11px; height:11px; flex:0 0 11px; border:1px solid color-mix(in srgb,var(--mebi-text-main) 18%,transparent); border-radius:50%; background:var(--atom-color); box-shadow:inset 0 0 0 1px rgba(255,255,255,.22); }
+.particle-element-item b { color:var(--mebi-text-main); font-size:0.75rem; font-weight:700; }
+.particle-modal-stage-wrap .particle-3d-host { width:100% !important; height:330px !important; min-height:330px !important; max-height:330px !important; }
+.particle-modal-stage-wrap .particle-3d-host canvas { width:100% !important; height:330px !important; min-height:330px !important; max-height:330px !important; }
+@media(max-width:850px) {
+  #app[data-screen="card"] .report-metrics-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-height:650px) and (orientation:landscape) {
+  #app[data-screen="card"] > .mebi-card,#app[data-screen="micro"] > .mebi-card { margin:7px auto 14px; padding:9px 11px; }
+  #app[data-screen="micro"] .particle-subcard { min-height:0; }
+  #app[data-screen="micro"] .particle-3d-host { height:120px !important; min-height:120px !important; max-height:120px !important; }
+  #app[data-screen="micro"] .particle-3d-host canvas { min-height:0 !important; }
+}
+
+/* ----------------- 1. AÇILIŞ MENÜSÜ EKRANI ----------------- */
+.arena-menu-card {
+  text-align: center;
+  padding: 30px 24px;
+  width: 100%;
+  margin: 0 auto 16px;
+}
+
+.arena-hero-badge {
+  margin-bottom: 10px;
+}
+.arena-hero-badge .mebi-badge { min-width:min(430px,92%); justify-content:center; padding-inline:24px; }
+
+.arena-title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--mebi-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.arena-title-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--mebi-primary-light);
+  color: var(--mebi-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .arena-title-icon {
+  background: #27272b;
+  color: #38bdf8;
+}
+
+.arena-lead {
+  font-size: 14.5px;
+  color: var(--mebi-text-secondary);
+  max-width: 580px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+
+.arena-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 480px;
+  margin: 0 auto 18px;
+}
+
+.arena-menu-btn {
+  width: 100%;
+  height: 52px;
+  font-size: 14px;
+  border-radius: var(--mebi-radius-lg);
+  justify-content: flex-start;
+  padding: 0 16px;
+  gap: 12px;
+  text-align: left;
+}
+
+.arena-menu-btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.arena-menu-btn-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.arena-menu-btn-main {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.arena-menu-btn-sub {
+  font-size: 11px;
+  opacity: 0.88;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* 16:9 Geniş Ekran Kimya Temalı Menü Kartı Stilleri (Madde 5) */
+.arena-menu-card.arena-menu-16-9 {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 28px;
+  width: min(940px, 94vw);
+  max-width: 940px;
+  aspect-ratio: 16 / 9;
+  max-height: min(85dvh, 540px);
+  margin: 20px auto 24px;
+  padding: 24px 32px;
+  text-align: left;
+  border-radius: 20px;
+  background: radial-gradient(circle at 12% 20%, rgba(16, 185, 129, 0.09) 0%, transparent 45%),
+              radial-gradient(circle at 88% 80%, rgba(6, 182, 212, 0.10) 0%, transparent 50%),
+              var(--mebi-bg-surface);
+  border: 1.5px solid var(--mebi-border);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.1);
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+[data-theme="dark"] .arena-menu-card.arena-menu-16-9 {
+  background: radial-gradient(circle at 12% 20%, rgba(16, 185, 129, 0.14) 0%, transparent 48%),
+              radial-gradient(circle at 88% 80%, rgba(6, 182, 212, 0.14) 0%, transparent 52%),
+              rgba(15, 23, 42, 0.94);
+  border: 1.5px solid rgba(52, 211, 153, 0.28);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 28px rgba(6, 182, 212, 0.12);
+}
+
+/* Kimya Moleküler Kafes / Heksagon Zemin Deseni (Watermark) */
+.arena-menu-card.arena-menu-16-9::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  background-image: 
+    radial-gradient(circle at center, #10b981 1.2px, transparent 1.2px),
+    linear-gradient(60deg, rgba(6, 182, 212, 0.08) 25%, transparent 25.5%, transparent 75%, rgba(6, 182, 212, 0.08) 75.5%),
+    linear-gradient(120deg, rgba(16, 185, 129, 0.08) 25%, transparent 25.5%, transparent 75%, rgba(16, 185, 129, 0.08) 75.5%);
+  background-size: 28px 28px, 48px 84px, 48px 84px;
+  background-position: 0 0, 0 0, 0 0;
+}
+
+[data-theme="dark"] .arena-menu-card.arena-menu-16-9::before {
+  opacity: 0.22;
+}
+
+/* Sol Kolon: Marka, İkon, Başlık ve Rozetler */
+.arena-menu-16-9 .arena-menu-left {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.arena-menu-16-9 .arena-hero-badge {
+  margin-bottom: 2px;
+  text-align: left;
+}
+
+.arena-menu-16-9 .arena-hero-badge .mebi-badge {
+  min-width: 0;
+  padding: 4px 12px;
+}
+
+.arena-menu-16-9 .arena-brand-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.arena-menu-16-9 .arena-brand-glow-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.25));
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+}
+
+[data-theme="dark"] .arena-menu-16-9 .arena-brand-glow-icon {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.3));
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  color: #34d399;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.35);
+}
+
+.arena-menu-16-9 .arena-brand-glow-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.arena-menu-16-9 .arena-title {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin: 0;
+  text-align: left;
+  justify-content: flex-start;
+  color: var(--mebi-text-main);
+}
+
+.arena-menu-16-9 .arena-lead {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--mebi-text-secondary);
+  margin: 0 0 4px;
+  max-width: 100%;
+  text-align: left;
+}
+
+.arena-menu-16-9 .arena-status-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.arena-menu-16-9 .arena-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--mebi-bg-subtle);
+  border: 1px solid var(--mebi-border);
+  color: var(--mebi-text-main);
+}
+
+/* Sağ Kolon: Aksiyon Kartları Grid */
+.arena-menu-16-9 .arena-menu-right {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.arena-menu-16-9 .arena-menu-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.arena-menu-16-9 .arena-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  min-height: 56px;
+  height: auto;
+  border-radius: 12px;
+  text-align: left;
+  border: 1px solid var(--mebi-border);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.arena-menu-16-9 .arena-menu-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.arena-menu-16-9 .arena-menu-btn-hero {
+  grid-column: span 2;
+  background: linear-gradient(135deg, #059669 0%, #0d9488 50%, #0284c7 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35) !important;
+}
+
+.arena-menu-16-9 .arena-menu-btn-hero:hover {
+  box-shadow: 0 8px 24px rgba(5, 150, 105, 0.5) !important;
+}
+
+.arena-menu-16-9 .arena-menu-btn-reset {
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  background: rgba(239, 68, 68, 0.06) !important;
+}
+
+.arena-menu-16-9 .arena-menu-btn-reset:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.arena-menu-16-9 .arena-menu-btn-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .arena-menu-16-9 .arena-menu-btn-icon {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.arena-menu-16-9 .arena-menu-btn-hero .arena-menu-btn-icon {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.arena-menu-16-9 .arena-menu-btn-main {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.arena-menu-16-9 .arena-menu-btn-sub {
+  font-size: 10px;
+  line-height: 1.25;
+  opacity: 0.85;
+}
+
+/* -------------------------------------------------------------
+   MİNT KİMYA TEMALI 16:9 YATAY GİRİŞ KARTI (media_1791378738382.png)
+   ------------------------------------------------------------- */
+.arena-menu-card.arena-menu-mint-16-9 {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  align-items: center;
+  gap: 22px;
+  width: min(920px, 94vw);
+  max-width: 920px;
+  aspect-ratio: 16 / 9;
+  max-height: min(80dvh, 460px);
+  margin: 14px auto 18px;
+  padding: 22px 32px;
+  text-align: left;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.92) 0%, rgba(209, 250, 229, 0.85) 50%, rgba(167, 243, 208, 0.65) 100%), rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 48px rgba(16, 185, 129, 0.14), 0 4px 14px rgba(5, 150, 105, 0.08);
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] .arena-menu-card.arena-menu-mint-16-9 {
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.42) 0%, rgba(4, 47, 46, 0.52) 100%), rgba(12, 28, 22, 0.94);
+  border: 2px solid rgba(52, 211, 153, 0.3);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 32px rgba(16, 185, 129, 0.15);
+}
+
+/* Dekoratif Kimya Çizimleri (Arka Plan Çerçevesi) */
+.arena-mint-decorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.arena-mint-decorations svg {
+  position: absolute;
+  color: rgba(16, 185, 129, 0.22);
+}
+
+[data-theme="dark"] .arena-mint-decorations svg {
+  color: rgba(52, 211, 153, 0.18);
+}
+
+.mint-decor-hex.top-left {
+  top: -12px;
+  left: -12px;
+  width: 140px;
+  height: 140px;
+  transform: rotate(-10deg);
+}
+
+.mint-decor-bubbles.top-right {
+  top: 10px;
+  right: 18px;
+  width: 110px;
+  height: 110px;
+  opacity: 0.85;
+}
+
+.mint-decor-atom.bottom-left {
+  bottom: 8px;
+  left: 12px;
+  width: 100px;
+  height: 100px;
+  opacity: 0.9;
+}
+
+.mint-decor-hex.bottom-right {
+  bottom: -16px;
+  right: -16px;
+  width: 135px;
+  height: 135px;
+  transform: rotate(15deg);
+}
+
+/* Sol Kolon: Başlık, Açıklama ve Erlenmayer Rozeti */
+.arena-mint-left {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+  padding-right: 8px;
+}
+
+.arena-mint-flask-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 2px;
+}
+
+.arena-mint-flask-badge {
+  width: 66px;
+  height: 66px;
+  min-width: 66px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(255, 255, 255, 1);
+  box-shadow: 0 10px 24px rgba(5, 150, 105, 0.16), 0 2px 6px rgba(0, 0, 0, 0.04);
+  animation: mintFlaskFloat 4s ease-in-out infinite;
+}
+
+[data-theme="dark"] .arena-mint-flask-badge {
+  background: rgba(6, 78, 59, 0.55);
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes mintFlaskFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.arena-mint-title {
+  font-size: clamp(24px, 2.8vw, 32px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #064e3b;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+[data-theme="dark"] .arena-mint-title {
+  color: #ecfdf5;
+}
+
+.arena-mint-subtitle {
+  font-size: clamp(13px, 1.35vw, 15px);
+  line-height: 1.45;
+  color: #047857;
+  margin: 0;
+  max-width: 380px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .arena-mint-subtitle {
+  color: #a7f3d0;
+}
+
+/* Sağ Kolon: Beyaz Buzlu Kapsül Buton Paneli */
+.arena-mint-right {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.arena-mint-actions-panel {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  padding: 16px 16px 12px;
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+[data-theme="dark"] .arena-mint-actions-panel {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(52, 211, 153, 0.24);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.arena-mint-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 5px 12px 5px 6px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  text-align: left;
+}
+
+.arena-mint-pill-btn.is-primary {
+  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #059669 100%);
+  background-size: 200% auto;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+}
+
+.arena-mint-pill-btn.is-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.45);
+  background-position: right center;
+}
+
+.arena-mint-pill-btn.is-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.arena-mint-pill-btn.is-white {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #d1fae5;
+  color: #064e3b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.arena-mint-pill-btn.is-white:hover {
+  background: #ffffff;
+  border-color: #a7f3d0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+}
+
+.arena-mint-pill-btn.is-white:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .arena-mint-pill-btn.is-white {
+  background: rgba(30, 41, 59, 0.88);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: #ecfdf5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .arena-mint-pill-btn.is-white:hover {
+  background: rgba(30, 41, 59, 1);
+  border-color: #34d399;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(52, 211, 153, 0.25);
+}
+
+.pill-btn-icon-wrap {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arena-mint-pill-btn.is-primary .pill-btn-icon-wrap {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.arena-mint-pill-btn.is-white .pill-btn-icon-wrap.mint-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+[data-theme="dark"] .arena-mint-pill-btn.is-white .pill-btn-icon-wrap.mint-icon {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.pill-btn-text {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arena-mint-reset-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3px;
+}
+
+.arena-mint-reset-link {
+  background: none;
+  border: none;
+  color: #059669;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: color 0.18s ease;
+  font-family: inherit;
+}
+
+.arena-mint-reset-link:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+
+[data-theme="dark"] .arena-mint-reset-link {
+  color: #34d399;
+}
+
+[data-theme="dark"] .arena-mint-reset-link:hover {
+  color: #6ee7b7;
+}
+
+/* Sıfırlama Onay Modalı Stilleri */
+.reset-modal-card {
+  width: min(92vw, 440px);
+  background: var(--mebi-bg-surface);
+  border: 1.5px solid var(--mebi-border);
+  border-radius: var(--mebi-radius-lg, 16px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  transform: scale(0.94);
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  overflow: hidden;
+}
+
+.mebi-modal-overlay.is-active .reset-modal-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.reset-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--mebi-border);
+  background: var(--mebi-bg-subtle);
+}
+
+.reset-modal-icon-badge {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reset-modal-title-wrap {
+  flex: 1 1 auto;
+}
+
+.reset-modal-title {
+  font-size: 15px;
+  font-weight: 800;
+  margin: 0 0 2px;
+  color: var(--mebi-text-main);
+}
+
+.reset-modal-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--mebi-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.reset-modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.reset-modal-body {
+  padding: 16px 18px;
+}
+
+.reset-modal-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mebi-text-secondary);
+  margin: 0;
+}
+
+.reset-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--mebi-border);
+  background: var(--mebi-bg-subtle);
+}
+
+.mebi-btn-danger {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+
+.mebi-btn-danger:hover {
+  background: #b91c1c !important;
+}
+
+/* Mobil / Dikey Ekran Uyumu */
+@media (max-width: 760px) {
+  .arena-menu-card.arena-menu-16-9 {
+    grid-template-columns: 1fr;
+    aspect-ratio: auto;
+    max-height: none;
+    padding: 18px 16px;
+    gap: 16px;
+  }
+  .arena-menu-16-9 .arena-title {
+    font-size: 22px;
+  }
+  .arena-menu-16-9 .arena-lead {
+    font-size: 12px;
+  }
+  .arena-menu-16-9 .arena-menu-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  .arena-menu-16-9 .arena-menu-btn-hero {
+    grid-column: span 1;
+  }
+  .arena-menu-card.arena-menu-mint-16-9 {
+    grid-template-columns: 1fr;
+    aspect-ratio: auto;
+    max-height: calc(100dvh - 20px);
+    padding: 14px 16px 10px;
+    gap: 10px;
+    text-align: center;
+    margin: 8px auto;
+  }
+  .arena-menu-mint-16-9 .arena-mint-left {
+    align-items: center;
+    text-align: center;
+    padding-right: 0;
+    gap: 6px;
+  }
+  .arena-menu-mint-16-9 .arena-mint-flask-badge {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 14px;
+  }
+  .arena-menu-mint-16-9 .arena-mint-flask-badge svg {
+    width: 36px;
+    height: 42px;
+  }
+  .arena-menu-mint-16-9 .arena-mint-title {
+    font-size: 20px;
+  }
+  .arena-menu-mint-16-9 .arena-mint-subtitle {
+    font-size: 11px;
+    line-height: 1.35;
+    max-width: 100%;
+  }
+  .arena-menu-mint-16-9 .arena-mint-actions-panel {
+    max-width: 100%;
+    padding: 12px 14px 8px;
+    gap: 7px;
+    border-radius: 18px;
+  }
+  .arena-menu-mint-16-9 .arena-mint-pill-btn {
+    min-height: 38px;
+    padding: 4px 10px 4px 6px;
+  }
+  .arena-menu-mint-16-9 .pill-btn-icon-wrap {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+  .arena-menu-mint-16-9 .pill-btn-icon-wrap svg {
+    width: 16px;
+    height: 16px;
+  }
+  .arena-menu-mint-16-9 .pill-btn-text {
+    font-size: 11.5px;
+  }
+  .arena-menu-mint-16-9 .arena-mint-reset-link {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+}
+
+/* ----------------- 2. MADDE HAVUZU EKRANI ----------------- */
+.pool-intro {
+  margin-bottom: 22px;
+  text-align: center;
+  position: relative;
+  padding: 4px 12px;
+}
+
+.pool-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.pool-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: var(--mebi-radius-full);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  background: var(--mebi-bg-subtle);
+  color: var(--mebi-text-secondary);
+  border: 1px solid var(--mebi-border);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.pool-status-chip.status-partial {
+  background: var(--mebi-primary-light);
+  color: var(--mebi-primary);
+  border-color: var(--mebi-primary-border);
+}
+
+.pool-status-chip.status-ready {
+  background: var(--mebi-success-light);
+  color: var(--mebi-success-taban);
+  border-color: var(--mebi-success-border);
+}
+
+[data-theme="dark"] .pool-status-chip {
+  background: #27272a;
+  border-color: #3f3f46;
+  color: #a1a1aa;
+}
+[data-theme="dark"] .pool-status-chip.status-partial {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.4);
+}
+[data-theme="dark"] .pool-status-chip.status-ready {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.pool-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--mebi-text-main);
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.pool-subtitle {
+  color: var(--mebi-text-secondary);
+  font-size: 14px;
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.pool-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.pool-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mebi-filter-chip {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--mebi-radius-full);
+  border: 1px solid var(--mebi-border);
+  background: var(--mebi-bg-subtle);
+  color: var(--mebi-text-secondary);
+  box-shadow: 0 2px 0 var(--mebi-border);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 120ms ease;
+  user-select: none;
+}
+
+.mebi-filter-chip:hover {
+  background: var(--mebi-border);
+  color: var(--mebi-text-main);
+}
+
+.mebi-filter-chip.is-active {
+  background: var(--mebi-primary);
+  color: #ffffff;
+  border-color: var(--mebi-primary);
+  box-shadow: 0 2px 0 var(--mebi-primary-taban);
+}
+
+[data-theme="dark"] .mebi-filter-chip.is-active {
+  background: #3f3f46;
+  border-color: #52525b;
+  box-shadow: 0 2px 0 #18181b;
+  color: #ffffff;
+}
+
+/* Reaktifler Izgarası (Kesin 2 Satır x 6 Sütun Standart Düzeni) */
+.reagents-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+  .reagents-grid {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+}
+
+/* Mobil tarayıcılarda iki satır kuralını garantileyen akıllı düzen */
+@media (max-width: 760px) {
+  .reagents-grid {
+    display: grid;
+    grid-template-rows: repeat(2, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(130px, 1fr);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 12px;
+    gap: 8px;
+  }
+  .reagents-grid .beaker-card {
+    scroll-snap-align: start;
+    min-width: 0;
+  }
+}
+
+.beaker-card {
+  background: var(--mebi-bg-surface);
+  border: 1.5px solid var(--mebi-border);
+  box-shadow: 0 3px 10px -2px rgba(120, 113, 108, 0.06), 0 2px 0 var(--mebi-base-card);
+  border-radius: var(--mebi-radius-md);
+  padding: 9px 8px 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  user-select: none;
+  min-height: 122px;
+  justify-content: space-between;
+}
+
+.beaker-card:hover {
+  transform: translateY(-2px);
+  background: var(--mebi-bg-subtle);
+  box-shadow: 0 6px 16px -4px rgba(120, 113, 108, 0.10), 0 2px 0 var(--mebi-border-hover);
+  border-color: var(--mebi-primary);
+}
+
+[data-theme="dark"] .beaker-card {
+  background: rgba(34, 34, 40, 0.78);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4), 0 2px 0 var(--mebi-base-card);
+}
+
+[data-theme="dark"] .beaker-card:hover {
+  background: rgba(48, 48, 56, 0.90);
+  border-color: var(--mebi-border-hover);
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.6), 0 4px 0 #2e2e33;
+}
+
+.beaker-card.selected-1 {
+  background: var(--mebi-primary-light);
+  border-color: var(--mebi-primary);
+  box-shadow: 0 0 0 2.5px var(--mebi-primary), 0 8px 24px -4px rgba(37, 99, 235, 0.28), 0 4px 0 var(--mebi-primary-taban);
+}
+[data-theme="dark"] .beaker-card.selected-1 {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2.5px #3b82f6, 0 8px 24px -4px rgba(59, 130, 246, 0.35), 0 4px 0 #1e3a8a;
+}
+
+.beaker-card.selected-2 {
+  background: var(--mebi-success-light);
+  border-color: var(--mebi-success);
+  box-shadow: 0 0 0 2.5px var(--mebi-success), 0 8px 24px -4px rgba(16, 185, 129, 0.28), 0 4px 0 var(--mebi-success-taban);
+}
+[data-theme="dark"] .beaker-card.selected-2 {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #10b981;
+  box-shadow: 0 0 0 2.5px #10b981, 0 8px 24px -4px rgba(16, 185, 129, 0.35), 0 4px 0 #065f46;
+}
+
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 4px;
+}
+
+.card-cat-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1.5px 6px;
+  border-radius: var(--mebi-radius-full);
+  line-height: 1.25;
+  letter-spacing: 0.1px;
+}
+
+.card-cat-tag.cat-acid {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.card-cat-tag.cat-base {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.card-cat-tag.cat-salt {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+[data-theme="dark"] .card-cat-tag.cat-acid {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+[data-theme="dark"] .card-cat-tag.cat-base {
+  background: rgba(2, 132, 199, 0.2);
+  color: #7dd3fc;
+  border-color: rgba(2, 132, 199, 0.35);
+}
+
+[data-theme="dark"] .card-cat-tag.cat-salt {
+  background: rgba(16, 185, 129, 0.2);
+  color: #86efac;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.card-state-pill {
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: var(--mebi-radius-full);
+  background: var(--mebi-bg-subtle);
+  color: var(--mebi-text-secondary);
+  border: 1px solid var(--mebi-border);
+  line-height: 1.25;
+}
+
+.card-sel-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1.5px 5.5px;
+  border-radius: var(--mebi-radius-full);
+  letter-spacing: 0.2px;
+}
+.card-sel-badge.badge-slot1 {
+  background: var(--mebi-primary);
+  color: #ffffff;
+}
+.card-sel-badge.badge-slot2 {
+  background: var(--mebi-success);
+  color: #ffffff;
+}
+
+/* Kimyasal Reaktif Karo Alanı (2 satır uyumlu kompakt boyut) */
+.card-reagent-tile {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--mebi-bg-subtle);
+  border: 1px solid var(--mebi-border);
+  border-radius: var(--mebi-radius-sm);
+  margin: 6px 0 5px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="dark"] .card-reagent-tile {
+  background: rgba(0, 0, 0, 0.22);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.card-tile-watermark {
+  position: absolute;
+  opacity: 0.07;
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+}
+[data-theme="dark"] .card-tile-watermark {
+  opacity: 0.12;
+}
+
+.card-formula-hero {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--mebi-text-main);
+  position: relative;
+  z-index: 1;
+}
+
+.card-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--mebi-text-main);
+  margin-top: 1px;
+  line-height: 1.25;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Yatay mobil cihazlarda tek bakışta sığmayı sağlayan mikro optimizasyon */
+@media (max-height: 540px) {
+  .pool-intro {
+    margin-bottom: 10px;
+    padding: 2px 0;
+  }
+  .pool-badge-row {
+    margin-bottom: 4px;
+    gap: 6px;
+  }
+  .pool-title {
+    font-size: 19px;
+    margin-top: 1px;
+    margin-bottom: 2px;
+  }
+  .pool-subtitle {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .pool-controls-bar {
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .beaker-card {
+    min-height: 110px;
+    padding: 7px 5px 6px;
+  }
+  .card-reagent-tile {
+    height: 40px;
+    margin: 4px 0 4px;
+  }
+  .card-formula-hero {
+    font-size: 14px;
+  }
+  .card-name {
+    font-size: 10.5px;
+  }
+  .staging-area {
+    margin-top: 8px;
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+  .slot-card {
+    min-height: 78px;
+    padding: 10px 14px;
+  }
+}
+
+/* Deneme Alanı (Staging Area - Üst Yerleşim) */
+.staging-header-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.staging-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  color: var(--mebi-text-main);
+}
+
+.staging-subtitle {
+  font-size: 12px;
+  color: var(--mebi-text-muted);
+}
+
+.staging-area {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 2px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 820px) {
+  .staging-area {
+    grid-template-columns: 1fr;
+  }
+  .staging-plus {
+    display: none;
+  }
+}
+
+.staging-plus {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--mebi-text-muted);
+  text-align: center;
+}
+
+.slot-card {
+  background: var(--mebi-bg-surface);
+  border: 1.5px solid var(--mebi-border);
+  box-shadow: 0 2px 0 var(--mebi-base-card);
+  border-radius: var(--mebi-radius-lg);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  position: relative;
+  transition: all var(--mebi-transition);
+}
+
+.slot-card.slot-1.filled {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  box-shadow: 0 2px 0 #93c5fd, var(--mebi-shadow-sm);
+}
+
+.slot-card.slot-2.filled {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  box-shadow: 0 2px 0 #86efac, var(--mebi-shadow-sm);
+}
+
+[data-theme="dark"] .slot-card {
+  background: rgba(20, 20, 23, 0.72);
+  border-color: var(--mebi-border);
+}
+
+[data-theme="dark"] .slot-card.filled {
+  background: rgba(38, 38, 44, 0.86);
+}
+
+.slot-card.slot-1.filled {
+  box-shadow: 0 4px 0 #3b82f6, 0 0 14px rgba(59, 130, 246, 0.2);
+}
+
+.slot-card.slot-2.filled {
+  box-shadow: 0 4px 0 #10b981, 0 0 14px rgba(16, 185, 129, 0.2);
+}
+
+.slot-tile-badge {
+  width: 58px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mebi-radius-md);
+  border: 1.5px solid var(--mebi-border);
+  background: var(--mebi-bg-subtle);
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.slot-1-badge {
+  background: var(--mebi-primary-light);
+  border-color: var(--mebi-primary-border);
+  color: var(--mebi-primary);
+}
+
+.slot-2-badge {
+  background: var(--mebi-success-light);
+  border-color: var(--mebi-success-border);
+  color: var(--mebi-success-taban);
+}
+
+[data-theme="dark"] .slot-1-badge {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .slot-2-badge {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+
+.slot-order-tag {
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  opacity: 0.85;
+}
+
+.slot-formula-big {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  margin-top: 1px;
+}
+
+.slot-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--mebi-bg-subtle);
+  border: 2px dashed var(--mebi-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mebi-text-muted);
+  flex-shrink: 0;
+}
+
+.slot-icon-box svg {
+  width: 20px;
+  height: 20px;
+}
+
+.slot-beaker-box {
+  width: 76px;
+  height: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.slot-text-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.slot-main-text {
+  font-size: 15.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+}
+
+.slot-sub-text {
+  font-size: 12px;
+  color: var(--mebi-text-muted);
+  margin-top: 2px;
+}
+
+.btn-remove-slot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 120ms ease;
+}
+
+.btn-remove-slot:hover {
+  transform: scale(1.15);
+  background: #ef4444;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn-remove-slot {
+  background: #361d1d;
+  color: #fca5a5;
+}
+
+/* ----------------- 3. DENEY TEZGAHI VE SİMÜLASYON (GERÇEK LABORATUVAR MASASI) ----------------- */
+.lab-bench {
+  background-color: #0b0f19;
+  background-image: url('../image/deney-masa.jpg');
+  background-image: -webkit-image-set(
+    url('../image/deney-masa.webp') 1x,
+    url('../image/deney-masa.jpg') 1x
+  );
+  background-image: image-set(
+    url('../image/deney-masa.webp') type('image/webp'),
+    url('../image/deney-masa.jpg') type('image/jpeg')
+  );
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  border-radius: var(--mebi-radius-xl);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4), 0 8px 0 var(--mebi-base-card), 0 16px 36px rgba(15, 23, 42, 0.2);
+  padding: 0;
+  margin: 14px 0;
+  position: relative;
+  min-height: 460px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  isolation: isolate;
+}
+
+.lab-bench::before {
+  display: none !important;
+}
+
+[data-theme="dark"] .lab-bench {
+  box-shadow: inset 0 2px 14px rgba(0, 0, 0, 0.8), 0 8px 0 #09090b, 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .lab-bench::before {
+  display: none !important;
+}
+
+/* Canlı Sensör ve Telemetri Paneli (Sensor Bar) */
+.lab-sensor-bar {
+  background: var(--mebi-bg-surface);
+  border: 1.5px solid var(--mebi-border);
+  box-shadow: 0 2px 0 var(--mebi-base-card), var(--mebi-shadow-sm);
+  border-radius: var(--mebi-radius-lg);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: auto;
+  position: relative;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+
+[data-theme="dark"] .lab-sensor-bar {
+  border-color: var(--mebi-border);
+}
+
+.sensor-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  padding: 6px 14px;
+  border-radius: var(--mebi-radius-full);
+}
+
+.sensor-pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3b82f6;
+  box-shadow: 0 0 8px #3b82f6;
+  animation: mebiPulse 1.4s infinite;
+}
+
+.sensor-pulse-dot.dot-reacting {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+}
+
+.sensor-pulse-dot.dot-done {
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: none;
+}
+
+.sensor-detectors-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sensor-detector-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: var(--mebi-radius-full);
+  background: var(--mebi-bg-subtle);
+  color: var(--mebi-text-muted);
+  transition: all 180ms ease;
+  user-select: none;
+}
+
+.sensor-detector-pill svg {
+  width: 13px;
+  height: 13px;
+}
+
+.sensor-detector-pill.is-active {
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+[data-theme="dark"] .sensor-detector-pill.is-active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.sensor-temp-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sensor-temp-display {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #dc2626;
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  padding: 5px 12px;
+  border-radius: var(--mebi-radius-full);
+}
+
+.sensor-temp-display svg {
+  width: 15px;
+  height: 15px;
+}
+
+.sensor-temp-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--mebi-radius-full);
+  letter-spacing: 0.3px;
+}
+
+.badge-exothermic {
+  background: #fef2f2;
+  color: #dc2626;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+}
+[data-theme="dark"] .badge-exothermic {
+  background: #361d1d;
+  color: #f87171;
+}
+
+.badge-isothermic {
+  background: var(--mebi-bg-subtle);
+  color: var(--mebi-text-secondary);
+}
+
+
+/* Yapay Stand ve Yüzey Çizimleri (Gerçek Masa Görseli Kullanıldığından Gizlendi) */
+.lab-stand-rod,
+.lab-stand-base,
+.lab-stand-clamp,
+.lab-surface {
+  display: none !important;
+}
+
+.bench-stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 20px 24px 22px;
+  position: relative;
+  z-index: 5;
+}
+
+.bench-items {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 65px;
+  min-height: 290px;
+  position: relative;
+  z-index: 5;
+  padding-bottom: 32px;
+  padding-left: 20px;
+}
+
+@media (max-width: 768px) {
+  .lab-bench {
+    flex-direction: column !important;
+    min-height: auto;
+  }
+  .bench-stage {
+    width: 100%;
+    padding: 16px 12px 10px;
+    align-items: center;
+    justify-content: center;
+  }
+  .bench-items {
+    justify-content: center;
+    padding-left: 0;
+    gap: 36px;
+    padding-bottom: 20px;
+  }
+  .bench-dock {
+    width: calc(100% - 10px) !important;
+    max-width: calc(100% - 10px) !important;
+    border: 1.5px solid var(--mebi-border);
+    border-radius: 0 0 calc(var(--mebi-radius-xl) - 5px) calc(var(--mebi-radius-xl) - 5px);
+    padding: 16px 14px 16px;
+    margin: 0 5px 5px 5px !important;
+  }
+  [data-theme="dark"] .bench-dock {
+  background: #222226;
+  border-color: var(--mebi-border);
+  box-shadow: 0 4px 0 #121214;
+}
+}
+
+/* Deney Masası Sağ Kontrol ve Gözlem Dock'u (Konsept 1: Fildişi & Milimetrik) */
+.bench-dock {
+  width: 400px;
+  max-width: 45%;
+  flex-shrink: 0;
+  background-color: var(--mebi-bg-surface);
+  background-image: var(--mebi-dot-pattern);
+  background-size: 16px 16px;
+  border: 1.5px solid var(--mebi-border);
+  border-radius: 0 calc(var(--mebi-radius-xl) - 5px) calc(var(--mebi-radius-xl) - 5px) 0;
+  padding: 20px 18px 18px;
+  margin: 5px 5px 5px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 10;
+  box-shadow: -4px 0 0 var(--mebi-base-card), var(--mebi-shadow-md);
+  overflow-y: auto;
+  transition: all var(--mebi-transition);
+}
+
+[data-theme="dark"] .bench-dock {
+  background-color: #222226;
+  background-image: var(--mebi-dot-pattern);
+  background-size: 16px 16px;
+  border-color: var(--mebi-border);
+  box-shadow: -4px 0 0 #121214, var(--mebi-shadow-md);
+}
+
+.dock-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dock-badge {
+  align-self: flex-start;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--mebi-primary-light);
+  color: var(--mebi-primary);
+  border: 1px solid var(--mebi-primary-border);
+}
+
+.dock-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  margin: 0;
+}
+
+.dock-subtext {
+  font-size: 11px;
+  color: var(--mebi-text-secondary);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.dock-obs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dock-obs-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--mebi-radius-md);
+  border: 1.5px solid var(--mebi-border);
+  background: var(--mebi-bg-subtle);
+  color: var(--mebi-text-main);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 120ms ease;
+  user-select: none;
+}
+
+[data-theme="dark"] .dock-obs-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.10);
+  color: var(--mebi-text-main);
+}
+
+.dock-obs-chip:hover {
+  border-color: var(--mebi-primary);
+  background: var(--mebi-border);
+}
+
+[data-theme="dark"] .dock-obs-chip:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dock-obs-chip.is-selected {
+  background: var(--mebi-primary-light);
+  border-color: var(--mebi-primary);
+  color: var(--mebi-primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+[data-theme="dark"] .dock-obs-chip.is-selected {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #60a5fa;
+  color: #93c5fd;
+}
+
+.dock-obs-chip.is-dimmed {
+  opacity: 0.40;
+
+}
+
+.dock-obs-chip.is-locked {
+  cursor: default;
+}
+
+.dock-obs-chip.is-locked:hover {
+  transform: none;
+}
+
+/* Deney Sonrası Geri Bildirim Vurgu Stilleri */
+.dock-obs-chip.feedback-correct {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+  color: #065f46 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25) !important;
+}
+
+[data-theme="dark"] .dock-obs-chip.feedback-correct {
+  background: rgba(16, 185, 129, 0.24) !important;
+  border-color: #34d399 !important;
+  color: #6ee7b7 !important;
+}
+
+.dock-obs-chip.feedback-wrong {
+  background: rgba(239, 68, 68, 0.13) !important;
+  border-color: #ef4444 !important;
+  color: #991b1b !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
+}
+
+[data-theme="dark"] .dock-obs-chip.feedback-wrong {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: #f87171 !important;
+  color: #fca5a5 !important;
+}
+
+.dock-obs-chip.feedback-missed {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: #f59e0b !important;
+  color: #92400e !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+}
+
+[data-theme="dark"] .dock-obs-chip.feedback-missed {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: #fbbf24 !important;
+  color: #fde68a !important;
+}
+
+.dock-obs-chip.feedback-neutral {
+  background: rgba(255, 255, 255, 0.35) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+  color: var(--mebi-text-secondary) !important;
+  opacity: 0.65;
+}
+
+[data-theme="dark"] .dock-obs-chip.feedback-neutral {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+  opacity: 0.55;
+}
+
+/* Çip İçerisindeki Durum / Geri Bildirim Rozeti */
+.dock-chip-status {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-correct {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.status-wrong {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.status-missed {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.status-neutral {
+  background: rgba(148, 163, 184, 0.22);
+  color: var(--mebi-text-secondary);
+}
+
+[data-theme="dark"] .status-neutral {
+  background: rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+.status-pred {
+  background: var(--mebi-primary);
+  color: #ffffff;
+}
+
+.dock-chip-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dock-chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+.dock-chip-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.dock-chip-label {
+  font-size: 12px;
+  color: inherit;
+}
+
+.dock-chip-check {
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--mebi-primary);
+  width: 14px;
+  text-align: right;
+}
+
+.dock-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.dock-btn-full {
+  width: 100%;
+  justify-content: center;
+  height: 38px;
+  font-size: 12.5px;
+  padding: 0 12px;
+}
+
+.dock-predictions-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px 9px;
+  border-radius: var(--mebi-radius-md);
+  background: var(--mebi-bg-subtle);
+}
+
+.dock-summary-label {
+  font-weight: 700;
+  color: var(--mebi-text-secondary);
+  font-size: 11px;
+}
+
+.dock-summary-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.dock-summary-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--mebi-primary-light);
+  color: var(--mebi-primary);
+  border: 1px solid var(--mebi-primary-border);
+}
+
+.dock-live-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--mebi-radius-md);
+  background: var(--mebi-bg-subtle);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--mebi-text-main);
+  line-height: 1.4;
+}
+
+.dock-obs-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.dock-result-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--mebi-text-main);
+  padding: 5px 8px;
+  border-radius: var(--mebi-radius-sm);
+  background: var(--mebi-bg-subtle);
+}
+
+.dock-result-check {
+  color: var(--mebi-success);
+  font-weight: 900;
+}
+
+/* Sabit Beher ve Daldırılmış Termometre */
+.vessel-main-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 175px;
+}
+
+.main-beaker-glass {
+  width: 160px;
+  height: 200px;
+  position: relative;
+  filter: drop-shadow(0 14px 26px var(--mebi-glass-shadow));
+}
+
+/* Gerçekçi Cam İç Haznesi (Sıvı ve Çökelti Duvarı) */
+.main-beaker-interior {
+  position: absolute;
+  left: 26px;
+  top: 24px;
+  width: 112px;
+  height: 154px;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+  background: transparent;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Sabit Beher İçindeki Katı Beyaz Toz Yığını */
+.main-beaker-powder {
+  position: absolute;
+  bottom: 0;
+  left: 1px;
+  right: 1px;
+  height: 42%;
+  background: #ffffff;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.98) 0%, transparent 60%),
+    radial-gradient(circle, rgba(148, 163, 184, 0.45) 1.5px, transparent 1.6px),
+    linear-gradient(180deg, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%);
+  background-size: 100% 100%, 6px 6px, 100% 100%;
+  border-radius: 38% 38% 10px 10px / 16px 16px 10px 10px;
+  box-shadow: inset 0 3px 8px rgba(15, 23, 42, 0.14), 0 -2px 6px rgba(0, 0, 0, 0.05);
+  border-top: 2px solid rgba(203, 213, 225, 0.95);
+  z-index: 6;
+  transition: all 1.2s ease;
+}
+
+.main-beaker-powder.settled {
+  height: 26%;
+  opacity: 0.92;
+}
+
+/* ----------------- DİJİTAL LABORATUVAR TERMOMETRESİ (DALDIRMA PROBU) ----------------- */
+.digital-thermo-wrap {
+  position: absolute;
+  left: 20px;
+  top: -68px;
+  bottom: 18px;
+  width: 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: auto;
+}
+
+/* Dijital Gösterge Başlığı (Modern Laboratuvar Cihazı Gövdesi - Beherin Üstünde) */
+.digital-thermo-head {
+  width: 86px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 1.5px solid #334155;
+  border-radius: 7px;
+  padding: 4px 6px 3px;
+  box-shadow: 0 8px 20px -2px rgba(15, 23, 42, 0.45), 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: all 0.35s ease;
+  position: relative;
+  z-index: 18;
+}
+
+[data-theme="dark"] .digital-thermo-head {
+  background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+  border-color: #27272a;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Isınma Durumunda (Ekzotermik Tepkime Işıması) */
+.digital-thermo-head.is-heating {
+  border-color: #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.45), 0 4px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.digital-head-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 1px;
+}
+
+.digital-brand-label {
+  font-size: 6.5px;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.digital-status-led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.digital-thermo-head.is-heating .digital-status-led {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: thermoLedPulse 0.9s infinite alternate;
+}
+
+@keyframes thermoLedPulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  100% { transform: scale(1.25); opacity: 1; }
+}
+
+/* Dijital LCD Ekran */
+.digital-lcd-display {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 2px 4px;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
+  transition: all 0.35s ease;
+}
+
+.digital-thermo-head.is-heating .digital-lcd-display {
+  background: #1c1002;
+  border-color: #78350f;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 6px rgba(245, 158, 11, 0.2);
+}
+
+.digital-temp-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: -0.4px;
+  line-height: 1.1;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.45);
+  transition: color 0.35s ease, text-shadow 0.35s ease;
+}
+
+.digital-thermo-head.is-heating .digital-temp-value {
+  color: #fbbf24;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.7);
+}
+
+.digital-temp-unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-left: 2px;
+  line-height: 1;
+}
+
+.digital-thermo-head.is-heating .digital-temp-unit {
+  color: #fcd34d;
+}
+
+.digital-head-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 5.5px;
+  font-weight: 700;
+  color: #64748b;
+  padding: 0 1px;
+}
+
+.digital-sub-label {
+  letter-spacing: 0.2px;
+}
+
+.digital-mode-tag {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-size: 5px;
+}
+
+/* Prob Bağlantı Halkası / Boğaz (Göstergenin hemen altında) */
+.digital-probe-collar {
+  width: 12px;
+  height: 8px;
+  background: linear-gradient(90deg, #475569 0%, #94a3b8 50%, #334155 100%);
+  border-radius: 2px;
+  margin-top: -1px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  position: relative;
+  z-index: 18;
+}
+
+/* Paslanmaz Çelik Daldırma Çubuğu (Probe Stem - Beherin İçinde, Ön Camın Arkasında) */
+.digital-probe-stem {
+  width: 5px;
+  flex: 1;
+  background: linear-gradient(90deg, #475569 0%, #cbd5e1 32%, #ffffff 50%, #94a3b8 72%, #334155 100%);
+  position: relative;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.25);
+  z-index: 6;
+}
+
+/* Prob Üzerindeki Ölçüm Derinliği Çizgileri */
+.digital-probe-ticks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(180deg, transparent, transparent 17px, rgba(51, 65, 85, 0.8) 17px, rgba(51, 65, 85, 0.8) 18px);
+}
+
+/* Algılayıcı Metal Uç (Sensor Tip - Beherin Tabanında) */
+.digital-probe-tip {
+  width: 5px;
+  height: 10px;
+  background: linear-gradient(90deg, #334155 0%, #cbd5e1 45%, #475569 100%);
+  border-radius: 0 0 2.5px 2.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 6;
+}
+
+/* Geriye dönük uyumluluk sınıfları */
+.beaker-thermo-wrap, .thermo-tube, .thermo-mercury, .thermo-bulb, .thermo-readout-pin {
+  display: none !important;
+}
+
+/* Sürüklenen / Dökülen Beher Taşıyıcı Alan (Masa Üzerinde Sabit) */
+.vessel-drag-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 20;
+  user-select: none;
+}
+
+/* Sadece Beherin Kendisi Taşınır ve Dökülür (Madde Kartı Masada Sabit Kalır) */
+.drag-beaker {
+  width: 115px;
+  height: 150px;
+  position: relative;
+  background: transparent;
+  border: none;
+  overflow: visible;
+  filter: drop-shadow(0 12px 26px var(--mebi-glass-shadow));
+  transition: transform 0.2s ease;
+  cursor: grab;
+  touch-action: none;
+  z-index: 22;
+}
+
+.drag-beaker.dragging {
+  cursor: grabbing;
+  z-index: 99;
+  filter: drop-shadow(0 20px 36px rgba(0, 0, 0, 0.45));
+  transition: none !important;
+}
+
+.drag-beaker.dragging .hand-guide-pill {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vessel-drag-wrap.pouring .drag-beaker,
+.drag-beaker.pouring {
+  transform: translate(-105px, -135px) rotate(-55deg) !important;
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
+  z-index: 99;
+}
+
+.hand-guide-pill {
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fef3c7;
+  border: 1.5px solid #f59e0b;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 3px 8px rgba(245, 158, 11, 0.25);
+  animation: mebiPulse 1.8s infinite;
+  z-index: 30;
+}
+
+[data-theme="dark"] .hand-guide-pill {
+  background: #342b1a;
+  border-color: #f59e0b;
+  color: #fde68a;
+}
+
+.drag-beaker::before,
+.drag-beaker-spout {
+  display: none !important;
+}
+
+.drag-liquid {
+  position: absolute;
+  bottom: 12px;
+  left: 18px;
+  right: 17px;
+  height: 65%;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  transition: height 1.2s ease;
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.45), inset 0 -4px 8px rgba(0, 0, 0, 0.22);
+  z-index: 4;
+}
+
+.drag-powder {
+  position: absolute;
+  bottom: 12px;
+  left: 18px;
+  right: 17px;
+  height: 60%;
+  background-color: #ffffff;
+  background-image: 
+    radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.98) 0%, transparent 60%),
+    radial-gradient(circle, rgba(148, 163, 184, 0.45) 1.5px, transparent 1.6px),
+    linear-gradient(180deg, #ffffff 0%, #f1f5f9 65%, #cbd5e1 100%);
+  background-size: 100% 100%, 6px 6px, 100% 100%;
+  border-radius: 35% 35% 10px 10px / 14px 14px 10px 10px;
+  border-top: 1.5px solid rgba(203, 213, 225, 0.95);
+  transition: height 1.2s ease, opacity 0.8s ease;
+  box-shadow: inset 0 3px 6px rgba(15, 23, 42, 0.12);
+  z-index: 4;
+}
+
+.pour-stream {
+  position: absolute;
+  top: 10px;
+  left: 1px;
+  width: 6px;
+  height: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), #38bdf8);
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 15;
+  transform-origin: top left;
+  transform: rotate(55deg);
+  transition: height 0.35s ease, opacity 0.2s ease;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+.pour-stream.powder-stream {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 40%, #cbd5e1 100%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.45) 1.2px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+
+.pour-stream.active {
+  height: 145px;
+  opacity: 0.95;
+}
+
+/* Deney Masası Dökülen Beherin Sağındaki Dökme Butonu */
+.beaker-side-pour-btn {
+  position: absolute;
+  left: calc(100% + 22px);
+  top: 38px;
+  white-space: nowrap;
+  z-index: 30;
+  box-shadow: 0 2px 0 #1e3a8a, 0 4px 14px rgba(30, 64, 175, 0.25);
+  animation: mebiPulse 2.2s infinite;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.beaker-side-pour-btn:hover {
+  animation: none;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 #1e3a8a, 0 6px 18px rgba(30, 64, 175, 0.3);
+}
+
+.beaker-side-pour-btn:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 1px 0 #1e3a8a !important;
+}
+
+/* Sürükleme veya dökülme sırasında yan butonu gizle */
+.vessel-drag-wrap.dragging .beaker-side-pour-btn,
+.vessel-drag-wrap.pouring .beaker-side-pour-btn {
+  display: none !important;
+}
+
+/* Gaz Kabarcıkları ve Buhar Efektleri */
+.gas-vapor-container {
+  position: absolute;
+  top: -45px;
+  left: 35px;
+  width: 80px;
+  height: 60px;
+  pointer-events: none;
+}
+
+.vapor-cloud {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(186, 230, 253, 0.4) 60%, transparent 80%);
+  border-radius: 50%;
+  animation: riseSmoke 1.6s ease-out infinite;
+}
+
+@keyframes riseSmoke {
+  0% { transform: translate(0, 40px) scale(0.4); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translate(var(--drift-x, 10px), -45px) scale(2.3); opacity: 0; }
+}
+
+.bubble-item {
+  position: absolute;
+  bottom: 8px;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, rgba(255, 255, 255, 0.85) 40%, rgba(56, 189, 248, 0.5) 85%);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8), 0 0 12px rgba(56, 189, 248, 0.5);
+  animation: riseBubble 1.2s ease-in infinite;
+}
+
+@keyframes riseBubble {
+  0% { transform: translateY(0) scale(0.5); opacity: 0.3; }
+  40% { opacity: 1; }
+  100% { transform: translateY(-110px) scale(1.15); opacity: 0; }
+}
+
+.surface-fizz {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.85) 0%, rgba(186, 230, 253, 0.4) 60%, transparent 100%);
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: fizzPulse 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes fizzPulse {
+  0% { transform: scaleY(0.8) scaleX(0.98); opacity: 0.7; }
+  100% { transform: scaleY(1.3) scaleX(1.02); opacity: 1; }
+}
+
+.precip-sludge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-radius: 0 0 16px 16px;
+  transition: height 2s cubic-bezier(0.1, 0.8, 0.3, 1);
+}
+
+.precip-flake {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: sinkFlake 1.6s ease-in forwards;
+}
+
+@keyframes sinkFlake {
+  0% { transform: translateY(0); opacity: 0.9; }
+  100% { transform: translateY(80px); opacity: 0.6; }
+}
+
+.reagent-tag {
+  margin-top: 10px;
+  text-align: center;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 5px 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  min-width: 110px;
+}
+
+.reagent-formula {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.reagent-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-top: 2px;
+}
+
+.reagent-state {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-top: 1px;
+}
+
+/* Tahmin & Gözlem Kartları (Observation Chips) */
+.observation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.observation-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: var(--mebi-radius-md);
+  border: 1.5px solid var(--mebi-border);
+  background: var(--mebi-bg-subtle);
+  box-shadow: 0 2px 0 var(--mebi-base-card);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--mebi-text-secondary);
+  text-align: center;
+  cursor: pointer;
+  transition: all 120ms ease;
+  user-select: none;
+}
+
+.observation-chip svg {
+  width: 28px;
+  height: 28px;
+}
+
+.observation-chip:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: var(--mebi-border);
+  color: var(--mebi-text-main);
+}
+
+.observation-chip.is-selected {
+  background: var(--mebi-primary-light);
+  border-color: var(--mebi-primary);
+  color: var(--mebi-primary);
+  box-shadow: 0 2px 0 var(--mebi-primary), 0 0 10px rgba(37, 99, 235, 0.2);
+}
+
+[data-theme="dark"] .observation-chip.is-selected {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #93c5fd;
+  box-shadow: 0 2px 0 #3b82f6;
+}
+
+.observation-chip.is-correct {
+  background: var(--mebi-success-light);
+  border-color: var(--mebi-success);
+  color: var(--mebi-success);
+  box-shadow: 0 2px 0 var(--mebi-success), 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+[data-theme="dark"] .observation-chip.is-correct {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+  box-shadow: 0 2px 0 #10b981;
+}
+
+.observation-chip.is-missed {
+  background: var(--mebi-danger-light);
+  border-color: var(--mebi-danger);
+  color: var(--mebi-danger);
+  box-shadow: 0 2px 0 var(--mebi-danger);
+}
+
+[data-theme="dark"] .observation-chip.is-missed {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #f87171;
+  box-shadow: 0 2px 0 #ef4444;
+}
+
+.observation-chip.is-dimmed {
+  opacity: 0.4;
+  filter: grayscale(60%);
+  transition: opacity 160ms ease, filter 160ms ease;
+}
+
+/* ----------------- GÖZLEM VE TAHMİN KARŞILAŞTIRMA MATRİSİ ----------------- */
+.obs-matrix-wrap {
+  margin-top: 22px;
+  margin-bottom: 20px;
+}
+
+.obs-matrix-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.obs-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.obs-matrix-card {
+  background: var(--mebi-bg-surface);
+  box-shadow: 0 4px 0 var(--mebi-base-card), var(--mebi-shadow-sm);
+  border-radius: var(--mebi-radius-lg);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: transform 120ms ease;
+}
+
+.obs-matrix-card:hover {
+  transform: translateY(-2px);
+}
+
+.obs-matrix-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.obs-matrix-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--mebi-text-main);
+}
+
+.obs-matrix-icon-box svg {
+  width: 20px;
+  height: 20px;
+}
+
+.obs-matrix-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  line-height: 1.2;
+}
+
+.obs-matrix-status-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11.5px;
+  padding: 8px 10px;
+  border-radius: var(--mebi-radius-sm);
+  background: var(--mebi-bg-subtle);
+}
+
+.obs-status-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--mebi-text-secondary);
+}
+
+.obs-status-label strong {
+  font-weight: 800;
+}
+
+.obs-matrix-result-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 8px;
+  border-radius: var(--mebi-radius-full);
+  text-align: center;
+}
+
+.obs-result-hit {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+[data-theme="dark"] .obs-result-hit {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.obs-result-miss {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+[data-theme="dark"] .obs-result-miss {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.obs-result-over {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+[data-theme="dark"] .obs-result-over {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+}
+
+.obs-matrix-reason-box {
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  border-radius: var(--mebi-radius-md);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--mebi-text-secondary);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+/* ----------------- 4. RESMİ MEBİ LABORATUVAR DENEY RAPORU (BÜTÜNLEŞİK ÇİFT SEKME) ----------------- */
+.mebi-report-sheet {
+  background-color: var(--mebi-bg-surface);
+  background-image: var(--mebi-dot-pattern);
+  background-size: 16px 16px;
+  border: 1.5px solid var(--mebi-border);
+  border-radius: var(--mebi-radius-xl);
+  box-shadow: 0 4px 0 var(--mebi-base-card), 0 12px 28px -4px rgba(120, 113, 108, 0.09);
+  padding: 16px 20px;
+  margin: 12px 0;
+  position: relative;
+}
+
+[data-theme="dark"] .mebi-report-sheet {
+  background-color: #222226;
+  background-image: var(--mebi-dot-pattern);
+  background-size: 16px 16px;
+  border-color: var(--mebi-border);
+  box-shadow: 0 4px 0 #121214, var(--mebi-shadow-md);
+}
+
+.report-meta-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--mebi-border);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.report-meta-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--mebi-primary);
+  text-transform: uppercase;
+}
+[data-theme="dark"] .report-meta-badge {
+  color: #38bdf8;
+}
+
+.report-meta-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  line-height: 1.25;
+}
+
+.report-meta-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.report-meta-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mebi-text-secondary);
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  padding: 5px 12px;
+  border-radius: var(--mebi-radius-full);
+}
+
+/* 🌟 BİRBİRİNİN DEVAMI ŞEKLİNDE BÜTÜNLEŞİK ÇİFT SEKME ÇUBUĞU (CONNECTED STEPPER TABS) */
+.report-connected-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  border: 1.5px solid var(--mebi-border);
+  border-radius: var(--mebi-radius-full);
+  padding: 5px;
+  margin: 12px 0 16px;
+  position: relative;
+}
+
+.report-conn-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border-radius: var(--mebi-radius-full);
+  border: 0;
+  background: transparent;
+  color: var(--mebi-text-secondary);
+  cursor: pointer;
+  transition: all 180ms var(--mebi-ease);
+  user-select: none;
+  text-align: left;
+  min-height: 44px;
+}
+
+.report-conn-tab:hover {
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--mebi-text-main);
+}
+
+[data-theme="dark"] .report-conn-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.report-conn-tab.is-active {
+  background: var(--mebi-bg-surface-solid);
+  color: var(--mebi-primary);
+  font-weight: 800;
+  box-shadow: 0 2px 0 var(--mebi-base-card), var(--mebi-shadow-sm);
+}
+
+[data-theme="dark"] .report-conn-tab.is-active {
+  background: #27272a;
+  color: #38bdf8;
+  box-shadow: 0 2px 0 #121214;
+}
+
+.report-conn-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--mebi-border);
+  color: var(--mebi-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: all 180ms ease;
+}
+
+.report-conn-tab.is-active .report-conn-badge {
+  background: var(--mebi-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+}
+
+[data-theme="dark"] .report-conn-tab.is-active .report-conn-badge {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4);
+}
+
+.report-conn-tab.is-completed .report-conn-badge {
+  background: var(--mebi-success);
+  color: #ffffff;
+}
+
+.report-conn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.report-conn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.report-conn-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.report-conn-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.report-conn-sub {
+  font-size: 11px;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.report-conn-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mebi-text-muted);
+  opacity: 0.5;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.report-conn-check {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--mebi-success);
+  margin-left: auto;
+}
+
+.report-conn-status {
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--mebi-radius-full);
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.report-conn-status.is-pending {
+  background: var(--mebi-primary-light);
+  color: var(--mebi-primary);
+}
+
+[data-theme="dark"] .report-conn-status.is-pending {
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+}
+
+.report-conn-status.is-correct {
+  background: var(--mebi-success-light);
+  color: var(--mebi-success);
+}
+
+.report-conn-status.is-partial {
+  background: var(--mebi-warning-light);
+  color: var(--mebi-warning);
+}
+
+/* 4 Metrik Karosu (2x2 Grid) */
+.report-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.report-metric-tile {
+  background: var(--mebi-bg-subtle);
+  box-shadow: 0 3px 0 var(--mebi-base-card);
+  border-radius: var(--mebi-radius-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--mebi-border);
+  transition: all 180ms ease;
+}
+
+/* Bölgesel Fonksiyonel Pastel Renk Blokları (Konsept 3) */
+.report-metric-tile:nth-child(1) {
+  background: #f0f7ff;
+  border-color: #bfdbfe;
+  box-shadow: 0 3px 0 #93c5fd;
+}
+.report-metric-tile:nth-child(2) {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  box-shadow: 0 3px 0 #fdba74;
+}
+.report-metric-tile:nth-child(3) {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  box-shadow: 0 3px 0 #86efac;
+}
+.report-metric-tile:nth-child(4) {
+  background: #ecfeff;
+  border-color: #a5f3fc;
+  box-shadow: 0 3px 0 #67e8f9;
+}
+
+[data-theme="dark"] .report-metric-tile:nth-child(1) {
+  background: rgba(30, 58, 138, 0.18);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 3px 0 #1e293b;
+}
+[data-theme="dark"] .report-metric-tile:nth-child(2) {
+  background: rgba(154, 52, 18, 0.18);
+  border-color: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 3px 0 #1e293b;
+}
+[data-theme="dark"] .report-metric-tile:nth-child(3) {
+  background: rgba(6, 78, 59, 0.18);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 3px 0 #1e293b;
+}
+[data-theme="dark"] .report-metric-tile:nth-child(4) {
+  background: rgba(14, 116, 144, 0.18);
+  border-color: rgba(6, 182, 212, 0.3);
+  box-shadow: 0 3px 0 #1e293b;
+}
+
+.metric-tile-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mebi-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.metric-tile-header svg {
+  width: 14px;
+  height: 14px;
+  color: var(--mebi-primary);
+}
+[data-theme="dark"] .metric-tile-header svg {
+  color: #38bdf8;
+}
+
+.metric-tile-val {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  line-height: 1.3;
+}
+
+.metric-tile-sub {
+  font-size: 11.5px;
+  color: var(--mebi-text-secondary);
+}
+
+/* 2-Sütunlu Şık Soru Seçenekleri Grid'i */
+.mebi-quiz-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+@media (max-width: 580px) {
+  .mebi-quiz-grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.report-quiz-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-quiz-header {
+  margin-bottom: 6px;
+}
+
+.report-quiz-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  line-height: 1.35;
+}
+
+.report-quiz-sub {
+  font-size: 11.5px;
+  color: var(--mebi-text-secondary);
+  margin-top: 2px;
+}
+
+.report-quiz-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.report-quiz-hint {
+  font-size: 11.5px;
+  color: var(--mebi-text-secondary);
+  font-style: italic;
+}
+
+/* Sekme 1 Alt Promptu */
+.report-tab-footer-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  box-shadow: 0 3px 0 #86efac;
+  border-radius: var(--mebi-radius-md);
+  padding: 10px 14px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+[data-theme="dark"] .report-tab-footer-prompt {
+  background: rgba(6, 78, 59, 0.18);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 3px 0 #064e3b;
+}
+
+.report-footer-hint {
+  font-size: 12px;
+  color: var(--mebi-text-secondary);
+  font-weight: 600;
+}
+
+.report-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+/* MOBİL YATAY EKRAN (LANDSCAPE) ÖZEL OPTİMİZASYONLARI (max-height: 520px) */
+@media (max-height: 520px) {
+  #app {
+    padding: 4px 12px 16px;
+  }
+  .mebi-card {
+    padding: 10px 14px;
+  }
+  .mebi-report-sheet {
+    padding: 10px 14px;
+    margin: 6px 0;
+  }
+  .report-meta-banner {
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    gap: 6px;
+  }
+  .report-meta-title {
+    font-size: 16px;
+  }
+  .report-connected-nav {
+    padding: 3px;
+    margin: 6px 0 10px;
+  }
+  .report-conn-tab {
+    padding: 6px 12px;
+    min-height: 36px;
+    gap: 8px;
+  }
+  .report-conn-title {
+    font-size: 11.5px;
+  }
+  .report-conn-sub {
+    display: none;
+  }
+  .report-conn-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+  .report-conn-status {
+    font-size: 9.5px;
+    padding: 2px 6px;
+  }
+  .mebi-stepper {
+    margin: 2px 0 6px;
+    padding: 2px 0;
+  }
+  .mebi-step-node {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+  .mebi-step-label {
+    font-size: 9.5px;
+  }
+
+  /* Tanecik Kamerası Yatay Ekran Optimizasyonu */
+  .camera-meta-banner {
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+  .camera-meta-title {
+    font-size: 13.5px;
+  }
+  .johnstone-pill-badge {
+    padding: 2px 8px;
+    font-size: 9.5px;
+  }
+  .cpk-smart-bar {
+    padding: 3px 8px;
+    margin-bottom: 6px;
+  }
+  .cpk-item {
+    font-size: 10px;
+  }
+  .camera-macro-strip {
+    padding: 4px 8px;
+    margin-bottom: 6px;
+    font-size: 10.5px;
+  }
+  .camera-particles-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .particle-subcard {
+    padding: 8px 10px;
+    min-height: 140px;
+  }
+  .particle-subcard-body {
+    padding: 4px 0;
+  }
+  .micro-chamber-svg {
+    max-height: 85px;
+    width: auto;
+  }
+  .particle-subcard-title {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .particle-caption {
+    font-size: 10.5px;
+    margin-top: 3px;
+  }
+  .particle-caption .sub-ion {
+    font-size: 9.5px;
+  }
+  .sub-zoom-hint {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .camera-note-box {
+    padding: 6px 10px;
+    font-size: 10.5px;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  .camera-bottom-bar {
+    margin-top: 8px;
+  }
+  .camera-mastery-pill {
+    padding: 2px 8px;
+    font-size: 10px;
+  }
+}
+/* Çoklu Tepkime Türü Soru Seçenekleri (Multi-select Checkbox & Durumlar) */
+.mebi-quiz-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--mebi-border-hover);
+  background: var(--mebi-bg-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: #ffffff;
+  flex-shrink: 0;
+  transition: all 140ms ease;
+  user-select: none;
+}
+
+.mebi-quiz-choice.is-selected .mebi-quiz-checkbox {
+  background: var(--mebi-primary);
+  border-color: var(--mebi-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+}
+
+.mebi-quiz-text {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.mebi-quiz-choice.is-correct-eval {
+  background: #ecfdf5 !important;
+  box-shadow: 0 2px 0 #10b981 !important;
+  color: #065f46 !important;
+}
+.mebi-quiz-choice.is-correct-eval .mebi-quiz-checkbox {
+  background: #10b981 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+}
+.mebi-quiz-choice.is-correct-eval .mebi-quiz-letter {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .mebi-quiz-choice.is-correct-eval {
+  background: #064e3b !important;
+  box-shadow: 0 2px 0 #047857 !important;
+  color: #a7f3d0 !important;
+}
+
+.mebi-quiz-choice.is-wrong-eval {
+  background: #fef2f2 !important;
+  box-shadow: 0 2px 0 #ef4444 !important;
+  color: #991b1b !important;
+}
+.mebi-quiz-choice.is-wrong-eval .mebi-quiz-checkbox {
+  background: #ef4444 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+.mebi-quiz-choice.is-wrong-eval .mebi-quiz-letter {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .mebi-quiz-choice.is-wrong-eval {
+  background: #450a0a !important;
+  box-shadow: 0 2px 0 #991b1b !important;
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .mebi-quiz-checkbox {
+  border-color: #52525b;
+  background: #27272a;
+}
+
+/* Kimyasal Denklem & Net İyon Kutusu (Konsept 1: Fildişi Alt Kartı) */
+.chemical-eq-card {
+  background-color: var(--mebi-bg-subcard);
+  border: 1px solid var(--mebi-border-subcard);
+  box-shadow: 0 2px 0 var(--mebi-base-card);
+  border-radius: var(--mebi-radius-lg);
+  padding: 16px 20px;
+  margin: 14px 0;
+  font-family: var(--mebi-font-family, 'Plus Jakarta Sans', sans-serif);
+  font-size: 14px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+[data-theme="dark"] .chemical-eq-card {
+  background-color: var(--mebi-bg-subcard);
+  border-color: var(--mebi-border-subcard);
+  box-shadow: 0 2px 0 #121214;
+}
+
+.chemical-eq-title {
+  font-family: var(--mebi-font-family, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(11px, 2.5vw, 12px);
+  font-weight: 800;
+  color: var(--mebi-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+[data-theme="dark"] .chemical-eq-title {
+  color: #94a3b8;
+}
+
+.chemical-eq-body {
+  font-family: var(--mebi-font-family, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(13px, 3.2vw, 15px);
+  font-weight: 700;
+  color: var(--mebi-text-main);
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.chemical-net-ionic {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1.5px dashed var(--mebi-border);
+  font-family: var(--mebi-font-family, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(12px, 2.8vw, 13.5px);
+  color: var(--mebi-primary);
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+[data-theme="dark"] .chemical-net-ionic {
+  color: #38bdf8;
+}
+
+/* Johnstone Üçgeni İlerleme Göstergesi */
+.johnstone-tracker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--mebi-bg-subtle);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  border-radius: var(--mebi-radius-lg);
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  gap: 8px;
+}
+
+@media (max-width: 680px) {
+  .johnstone-tracker {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .johnstone-arrow {
+    display: none;
+  }
+}
+
+.johnstone-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.johnstone-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mebi-bg-surface);
+  box-shadow: 0 2px 0 var(--mebi-base-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mebi-text-secondary);
+  flex-shrink: 0;
+}
+
+.johnstone-step.is-done .johnstone-step-num {
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 2px 0 #059669;
+}
+
+.johnstone-step.is-active .johnstone-step-num {
+  background: var(--mebi-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 0 var(--mebi-primary-taban);
+}
+[data-theme="dark"] .johnstone-step.is-active .johnstone-step-num {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 0 #1d4ed8;
+}
+
+.johnstone-step-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.johnstone-step-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+}
+
+.johnstone-step-sub {
+  font-size: 11px;
+  color: var(--mebi-text-muted);
+}
+
+.johnstone-arrow {
+  color: var(--mebi-text-muted);
+  font-size: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   5. AŞAMA: TANECİK KAMERASI (KONSEPT A - ULTRA KOMPAKT YATAY MİMARİ)
+   -------------------------------------------------------------------------- */
+.camera-meta-banner {
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--mebi-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.camera-meta-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.camera-meta-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.camera-meta-sep {
+  color: var(--mebi-text-muted);
+  opacity: 0.5;
+}
+
+.camera-meta-rx {
+  color: var(--mebi-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+.camera-meta-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  margin: 0;
+  line-height: 1.25;
+}
+
+/* Johnstone Üçgeni Yatay Mini Pill Göstergesi */
+.johnstone-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--mebi-bg-subtle);
+  border: 1px solid var(--mebi-border);
+  padding: 4px 10px;
+  border-radius: var(--mebi-radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.j-pill {
+  color: var(--mebi-text-muted);
+}
+
+.j-pill.is-done {
+  color: var(--mebi-success);
+  font-weight: 800;
+}
+
+.j-pill.is-active {
+  color: var(--mebi-primary);
+  font-weight: 800;
+}
+
+[data-theme="dark"] .j-pill.is-active {
+  color: #38bdf8;
+}
+
+.j-sep {
+  color: var(--mebi-text-muted);
+  opacity: 0.5;
+  font-size: 11px;
+}
+
+/* Akıllı CPK Atom Renk Lejantı */
+.cpk-smart-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--mebi-bg-surface);
+  box-shadow: 0 2px 0 var(--mebi-base-card);
+  border-radius: var(--mebi-radius-md);
+  padding: 6px 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--mebi-border);
+  flex-wrap: wrap;
+}
+
+.cpk-smart-items {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cpk-smart-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--mebi-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cpk-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--mebi-text-secondary);
+}
+
+.cpk-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.25);
+}
+
+.cpk-drawer-btn {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mebi-primary);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cpk-drawer-btn:hover {
+  background: var(--mebi-bg-subtle);
+  text-decoration: underline;
+}
+
+/* Makroskobik Durum Şeridi (Konsept 3: Pastel Kehribar Şerit) */
+.camera-macro-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 12px;
+  background: #fefce8;
+  border: 1.5px solid #fef08a;
+  border-left: 4px solid #f59e0b;
+  border-radius: var(--mebi-radius-md);
+  box-shadow: 0 2px 0 #fde047;
+  font-size: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+[data-theme="dark"] .camera-macro-strip {
+  background: rgba(120, 53, 15, 0.2);
+  border-color: rgba(245, 158, 11, 0.35);
+  border-left-color: #f59e0b;
+  box-shadow: 0 2px 0 #451a03;
+}
+
+.macro-strip-badge {
+  font-weight: 800;
+  color: var(--mebi-primary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.macro-strip-text {
+  flex: 1;
+  color: var(--mebi-text-main);
+  font-weight: 500;
+  min-width: 180px;
+}
+
+.macro-strip-hint {
+  font-size: 11px;
+  color: var(--mebi-text-muted);
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+/* Entegre Alt İşlem ve Başarı Çubuğu */
+.camera-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.camera-mastery-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(37, 99, 235, 0.08) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 5px 12px;
+  border-radius: var(--mebi-radius-full);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #15803d;
+}
+
+[data-theme="dark"] .camera-mastery-pill {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(56, 189, 248, 0.1) 100%);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #4ade80;
+}
+
+.mastery-pill-icon {
+  font-size: 14px;
+}
+
+.camera-bottom-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.camera-particles-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+@media (max-width: 680px) {
+  .camera-particles-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.particle-subcard {
+  background: #f8fafc;
+  box-shadow: 0 4px 0 #cbd5e1;
+  border-radius: var(--mebi-radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  border: 1.5px solid #e2e8f0;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s ease,
+              background-color 0.22s ease;
+}
+
+.particle-subcard:hover {
+  transform: translateY(-3px);
+  background: #ffffff;
+  box-shadow: 0 8px 0 #94a3b8, 0 14px 28px -4px rgba(2, 132, 199, 0.16);
+  border-color: var(--mebi-primary);
+}
+
+[data-theme="dark"] .particle-subcard {
+  background: rgba(39, 39, 42, 0.85);
+  box-shadow: 0 4px 0 #18181b;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .particle-subcard:hover {
+  background: #2e2e33;
+  box-shadow: 0 8px 0 #18181b, 0 14px 32px -4px rgba(0, 0, 0, 0.6);
+  border-color: var(--mebi-primary);
+}
+
+.particle-subcard:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 0 var(--mebi-base-card);
+}
+
+.particle-subcard:focus-visible {
+  outline: 2px solid var(--mebi-primary);
+  outline-offset: 2px;
+}
+
+.particle-subcard-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.particle-title-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.particle-zoom-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mebi-primary);
+  background: rgba(2, 132, 199, 0.12);
+  border: 1px solid rgba(2, 132, 199, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.particle-subcard:hover .particle-zoom-badge {
+  background: var(--mebi-primary);
+  color: #ffffff;
+  border-color: var(--mebi-primary);
+  transform: scale(1.04);
+}
+
+.particle-subcard-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.particle-caption {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--mebi-text-secondary);
+}
+
+.particle-caption .sub-ion {
+  color: var(--mebi-text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.sub-zoom-hint {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--mebi-primary);
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.particle-subcard:hover .sub-zoom-hint {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.particle-legend-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  padding-left: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+/* 3B Mikroskobik Odacık ve Durum Rozetleri */
+.micro-chamber-svg {
+  filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.08));
+  border-radius: 12px;
+  max-width: 100%;
+  height: auto;
+}
+
+[data-theme="dark"] .micro-chamber-svg {
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
+}
+
+.particle-state-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2.5px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.badge-aqueous {
+  background: rgba(2, 132, 199, 0.14);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.35);
+}
+
+[data-theme="dark"] .badge-aqueous {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.badge-solid {
+  background: rgba(20, 184, 166, 0.14);
+  color: #0d9488;
+  border: 1px solid rgba(20, 184, 166, 0.35);
+}
+
+[data-theme="dark"] .badge-solid {
+  background: rgba(45, 212, 191, 0.2);
+  color: #2dd4bf;
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+.badge-gas {
+  background: rgba(245, 158, 11, 0.14);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+[data-theme="dark"] .badge-gas {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.badge-complex {
+  background: rgba(99, 102, 241, 0.14);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+[data-theme="dark"] .badge-complex {
+  background: rgba(129, 140, 248, 0.2);
+  color: #818cf8;
+  border-color: rgba(129, 140, 248, 0.4);
+}
+
+.badge-physical {
+  background: rgba(100, 116, 139, 0.14);
+  color: #64748b;
+  border: 1px solid rgba(100, 116, 139, 0.35);
+}
+
+[data-theme="dark"] .badge-physical {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.camera-note-box {
+  background: #f0fdfa;
+  border: 1.5px solid #ccfbf1;
+  box-shadow: 0 3px 0 #99f6e4;
+  border-radius: var(--mebi-radius-md);
+  padding: 14px 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--mebi-text-main);
+  border-left: 4px solid var(--mebi-teal);
+  margin-top: 14px;
+}
+
+[data-theme="dark"] .camera-note-box {
+  background: rgba(13, 148, 136, 0.14);
+  border-color: rgba(20, 184, 166, 0.3);
+  box-shadow: 0 3px 0 #134e4a;
+  border-left-color: var(--mebi-teal);
+  color: #ccfbf1;
+}
+
+/* --------------------------------------------------------------------------
+   3B TANECİK BÜYÜTME VE İNCELEME MODALI (Particle Lightbox Modal)
+   -------------------------------------------------------------------------- */
+.mebi-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 900px), (max-height: 560px) {
+  .mebi-modal-overlay {
+    padding: 8px 12px;
+  }
+}
+
+.mebi-modal-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.particle-modal-card {
+  background-color: var(--mebi-bg-surface);
+  background-image: var(--mebi-dot-pattern);
+  background-size: 16px 16px;
+  border-radius: var(--mebi-radius-lg);
+  box-shadow: 0 6px 0 var(--mebi-base-modal), var(--mebi-shadow-xl);
+  max-width: min(96vw, 920px);
+  width: 100%;
+  max-height: min(95vh, 640px);
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.92);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid var(--mebi-border);
+  overflow: hidden;
+}
+
+.mebi-modal-overlay.is-active .particle-modal-card {
+  transform: scale(1);
+}
+
+.particle-modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--mebi-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: transparent;
+}
+
+.particle-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.particle-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  margin: 0;
+}
+
+.particle-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--mebi-text-secondary);
+  font-size: 18px;
+  font-weight: 700;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.particle-modal-close-btn:hover {
+  background: var(--mebi-bg-sunken);
+  color: var(--mebi-danger);
+}
+
+.particle-modal-body {
+  padding: 16px 24px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.particle-modal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.particle-modal-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--mebi-bg-sunken);
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: var(--mebi-base-sunken-shadow);
+}
+
+.zoom-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mebi-text-secondary);
+  margin-right: 4px;
+}
+
+.zoom-scale-btn {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--mebi-text-secondary);
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zoom-scale-btn:hover {
+  color: var(--mebi-primary);
+  background: rgba(2, 132, 199, 0.1);
+}
+
+.zoom-scale-btn.is-active {
+  background: var(--mebi-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+}
+
+.particle-modal-stage-wrap {
+  width: 100%;
+  height: 310px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  border: 1.5px solid var(--mebi-border);
+  border-radius: var(--mebi-radius-lg);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.particle-modal-stage-wrap.is-dragging {
+  cursor: grabbing;
+}
+
+.particle-modal-stage {
+  transform-origin: center center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.particle-modal-stage svg {
+  width: 320px;
+  height: 216px;
+  max-width: none;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.18);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .particle-modal-stage svg {
+  box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.7);
+}
+
+/* Sürükleme İpucu */
+.particle-modal-drag-hint {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 5;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--mebi-text-secondary);
+  background: var(--mebi-bg-surface);
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--mebi-border);
+  pointer-events: none;
+  opacity: 0.92;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 600px) {
+  .particle-modal-drag-hint {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}
+
+.particle-modal-info-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.particle-modal-desc-text {
+  background: var(--mebi-bg-sunken);
+  box-shadow: var(--mebi-base-sunken-shadow);
+  border-radius: var(--mebi-radius-md);
+  padding: 14px 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--mebi-text-secondary);
+  border-left: 4px solid var(--mebi-primary);
+}
+
+.particle-modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--mebi-border);
+  background: var(--mebi-bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.particle-modal-footer-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--mebi-text-muted);
+  font-weight: 600;
+}
+
+/* Responsive Optimizasyon: Genişletilmiş Tanecik Modalı (Mobil Yatay Ekranlar) */
+@media (min-width: 680px) and (max-height: 580px) {
+  .particle-modal-card {
+    max-width: min(97vw, 940px);
+    max-height: 96vh;
+  }
+  .particle-modal-header {
+    padding: 8px 16px;
+  }
+  .particle-modal-title {
+    font-size: 15px;
+  }
+  .particle-modal-body {
+    padding: 8px 16px;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 8px 14px;
+    align-items: stretch;
+    overflow-y: auto;
+  }
+  .particle-modal-toolbar {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+  .particle-modal-stage-wrap {
+    grid-column: 1;
+    height: 100%;
+    min-height: 180px;
+    max-height: 230px;
+  }
+  .particle-modal-stage svg {
+    width: 250px;
+    height: 168px;
+  }
+  .particle-modal-info-panel {
+    grid-column: 2;
+    height: 100%;
+    overflow-y: auto;
+    justify-content: center;
+  }
+  .particle-modal-desc-text {
+    padding: 8px 12px;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  .particle-modal-footer {
+    padding: 6px 16px;
+  }
+  .particle-modal-footer-hint {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 679px) {
+  .particle-modal-card {
+    max-width: 96vw;
+    max-height: 96vh;
+  }
+  .particle-modal-header {
+    padding: 8px 14px;
+  }
+  .particle-modal-title {
+    font-size: 14px;
+  }
+  .particle-modal-stage-wrap {
+    height: 200px;
+    min-height: 160px;
+  }
+  .particle-modal-stage svg {
+    width: 240px;
+    height: 162px;
+  }
+  .particle-modal-body {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .particle-modal-desc-text {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .particle-modal-footer {
+    padding: 8px 14px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   DEĞERLENDİRME GERİ BİLDİRİM BİLGİ KARTI MODALI (Evaluation Modal)
+   -------------------------------------------------------------------------- */
+.eval-modal-card {
+  background-color: var(--mebi-bg-surface);
+  background-image: var(--mebi-dot-pattern);
+  background-size: 16px 16px;
+  border-radius: var(--mebi-radius-lg);
+  box-shadow: 0 6px 0 var(--mebi-base-modal), var(--mebi-shadow-xl);
+  max-width: min(94vw, 680px);
+  width: 100%;
+  max-height: min(94vh, 460px);
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.92);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid var(--mebi-border);
+  overflow: hidden;
+}
+
+.mebi-modal-overlay.is-active .eval-modal-card {
+  transform: scale(1);
+}
+
+.eval-modal-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--mebi-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--mebi-bg-subtle);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.eval-modal-header.is-exact {
+  background: rgba(16, 185, 129, 0.09);
+  border-bottom-color: rgba(16, 185, 129, 0.25);
+}
+
+.eval-modal-header.is-partial {
+  background: rgba(245, 158, 11, 0.09);
+  border-bottom-color: rgba(245, 158, 11, 0.25);
+}
+
+.eval-modal-header.is-wrong {
+  background: rgba(239, 68, 68, 0.09);
+  border-bottom-color: rgba(239, 68, 68, 0.25);
+}
+
+.eval-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eval-status-badge {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: var(--mebi-radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.eval-badge-exact {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+[data-theme="dark"] .eval-badge-exact {
+  background: rgba(16, 185, 129, 0.2);
+  color: #4ade80;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.eval-badge-partial {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+[data-theme="dark"] .eval-badge-partial {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.eval-badge-wrong {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+[data-theme="dark"] .eval-badge-wrong {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.eval-modal-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  margin: 0;
+}
+
+.eval-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--mebi-text-secondary);
+  font-size: 18px;
+  font-weight: 700;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.eval-modal-close-btn:hover {
+  background: var(--mebi-bg-sunken);
+  color: var(--mebi-danger);
+}
+
+.eval-modal-body {
+  padding: 14px 18px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.eval-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--mebi-radius-md);
+  border: 1.5px solid transparent;
+}
+
+.eval-callout-exact {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.eval-callout-partial {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.eval-callout-wrong {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.eval-callout-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--mebi-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eval-callout-exact .eval-callout-icon {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.eval-callout-partial .eval-callout-icon {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.eval-callout-wrong .eval-callout-icon {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.eval-callout-content {
+  flex: 1;
+}
+
+.eval-callout-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+  margin-bottom: 4px;
+}
+
+.eval-callout-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mebi-text-main);
+  font-weight: 500;
+}
+
+.eval-selections-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--mebi-bg-subtle);
+  border-radius: var(--mebi-radius-md);
+  padding: 8px 12px;
+  border: 1px solid var(--mebi-border);
+}
+
+.eval-selections-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mebi-text-secondary);
+}
+
+.eval-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.eval-chip {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.eval-chip-valid {
+  background: rgba(16, 185, 129, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+[data-theme="dark"] .eval-chip-valid {
+  color: #4ade80;
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.eval-chip-invalid {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="dark"] .eval-chip-invalid {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.eval-pedagogy-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--mebi-text-secondary);
+  line-height: 1.4;
+  padding: 7px 10px;
+  background: var(--mebi-bg-sunken);
+  border-radius: var(--mebi-radius-sm);
+  border-left: 3px solid var(--mebi-primary);
+}
+
+.eval-pedagogy-tip svg {
+  flex-shrink: 0;
+  color: var(--mebi-primary);
+}
+
+.eval-modal-footer {
+  padding: 10px 18px;
+  border-top: 1px solid var(--mebi-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--mebi-bg-subtle);
+  flex-wrap: wrap;
+}
+
+@media (max-height: 520px) {
+  .eval-modal-card {
+    max-height: 94vh;
+    max-width: 540px;
+  }
+  .eval-modal-header {
+    padding: 7px 12px;
+  }
+  .eval-modal-title {
+    font-size: 13.5px;
+  }
+  .eval-modal-body {
+    padding: 8px 12px;
+    gap: 7px;
+  }
+  .eval-callout {
+    padding: 7px 10px;
+    gap: 8px;
+  }
+  .eval-callout-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .eval-callout-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+  .eval-callout-title {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+  .eval-callout-text {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .eval-selections-bar {
+    padding: 5px 8px;
+    gap: 4px;
+  }
+  .eval-pedagogy-tip {
+    font-size: 10px;
+    padding: 4px 6px;
+    gap: 6px;
+  }
+  .eval-modal-footer {
+    padding: 6px 12px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MEBİ ÖĞRENCİ BAŞLANGIÇ REHBERİ POP-UP KARTI (Welcome Guide Modal)
+   -------------------------------------------------------------------------- */
+.welcome-modal-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
+  max-width: min(94vw, 750px) !important;
+  width: 100% !important;
+  max-height: min(90vh, 520px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transform: scale(0.94);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease;
+  border: 1px solid #e2e8f0 !important;
+  overflow: hidden !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.mebi-modal-overlay.is-active .welcome-modal-card {
+  transform: scale(1);
+}
+
+/* Modal Başlık Çubuğu */
+.welcome-modal-header {
+  padding: 14px 20px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  background: #f8fafc !important;
+  flex-shrink: 0 !important;
+}
+
+.welcome-modal-title-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.welcome-modal-icon-badge {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  background: rgba(2, 132, 199, 0.1) !important;
+  color: #0284c7 !important;
+  border: 1px solid rgba(2, 132, 199, 0.18) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  box-shadow: none !important;
+  flex-shrink: 0 !important;
+}
+
+.welcome-modal-title {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  line-height: 1.25 !important;
+}
+
+.welcome-modal-subtitle {
+  font-size: 12px !important;
+  color: #64748b !important;
+  margin: 2px 0 0 0 !important;
+  line-height: 1.3 !important;
+  font-weight: 500 !important;
+}
+
+.welcome-modal-close-btn {
+  background: #f1f5f9 !important;
+  border: none !important;
+  color: #64748b !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.welcome-modal-close-btn:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Modal Gövdesi */
+.welcome-modal-body {
+  padding: 16px 20px !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 13px !important;
+  background: #ffffff !important;
+}
+
+/* 5'li Sekme Çubuğu (Segmented Step Controller) */
+.welcome-tabs-track {
+  display: flex !important;
+  gap: 5px !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  flex-shrink: 0 !important;
+}
+
+.welcome-tabs-track::-webkit-scrollbar {
+  display: none !important;
+}
+
+.welcome-tab-btn {
+  flex: 1 1 0 !important;
+  min-width: 95px !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  background: transparent !important;
+  color: #475569 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  user-select: none !important;
+}
+
+.welcome-tab-btn:hover:not(.tab-active) {
+  color: #0284c7 !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+.welcome-tab-btn .tab-num {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.welcome-tab-btn.tab-active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35) !important;
+}
+
+.welcome-tab-btn.tab-active .tab-num {
+  background: #ffffff !important;
+  color: #0284c7 !important;
+}
+
+/* Adım İçerik Kartı */
+.welcome-step-card {
+  display: none !important;
+  align-items: center !important;
+  gap: 16px !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  min-height: 154px !important;
+  box-sizing: border-box !important;
+  animation: welcomeCardIn 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.welcome-step-card.is-active {
+  display: flex !important;
+}
+
+@keyframes welcomeCardIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-step-illus {
+  width: 105px !important;
+  height: 100px !important;
+  min-width: 105px !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  flex-shrink: 0 !important;
+}
+
+.welcome-illus-svg {
+  width: 88px !important;
+  height: 75px !important;
+}
+
+.welcome-step-text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+.welcome-step-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.welcome-step-badge {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.welcome-step-badge.bg-sky { background: #0284c7 !important; }
+.welcome-step-badge.bg-amber { background: #f59e0b !important; }
+.welcome-step-badge.bg-cyan { background: #06b6d4 !important; }
+.welcome-step-badge.bg-emerald { background: #10b981 !important; }
+.welcome-step-badge.bg-purple { background: #8b5cf6 !important; }
+
+.welcome-step-title {
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.welcome-step-desc {
+  font-size: 12px !important;
+  line-height: 1.48 !important;
+  color: #334155 !important;
+  margin: 0 !important;
+}
+
+.welcome-step-desc b {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.welcome-tip-box {
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  color: #475569 !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  margin-top: 2px !important;
+}
+
+.welcome-tip-box b {
+  color: #0f172a !important;
+}
+
+/* Alt Kontrol Hattı: Johnstone Boyutu Rozeti & İleri/Geri Navigasyon */
+.welcome-stepper-ctrl-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  padding-top: 2px !important;
+}
+
+.welcome-johnstone-tag-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+.welcome-johnstone-label {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #64748b !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+.welcome-johnstone-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.15s ease !important;
+}
+
+.welcome-johnstone-pill.pill-makro {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border-color: #bae6fd !important;
+}
+
+.welcome-johnstone-pill.pill-sembolik {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+
+.welcome-johnstone-pill.pill-cyan {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border-color: #bae6fd !important;
+}
+
+.welcome-johnstone-pill.pill-emerald {
+  background: #d1fae5 !important;
+  color: #065f46 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.welcome-johnstone-pill.pill-purple {
+  background: #ede9fe !important;
+  color: #5b21b6 !important;
+  border-color: #ddd6fe !important;
+}
+
+.welcome-step-nav-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.welcome-nav-btn {
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.welcome-nav-prev {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #475569 !important;
+  padding: 5px 12px !important;
+}
+
+.welcome-nav-prev:hover:not(:disabled) {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+.welcome-nav-prev:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+
+.welcome-step-counter {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #64748b !important;
+  padding: 0 4px !important;
+}
+
+.welcome-nav-next {
+  background: #0284c7 !important;
+  border: 1.5px solid #0369a1 !important;
+  color: #ffffff !important;
+  padding: 5px 14px !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+}
+
+.welcome-nav-next:hover {
+  background: #0369a1 !important;
+}
+
+/* Modal Alt Çubuk (Footer) */
+.welcome-modal-footer {
+  padding: 12px 20px !important;
+  border-top: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  background: #f8fafc !important;
+  flex-shrink: 0 !important;
+  flex-wrap: wrap !important;
+}
+
+.welcome-modal-dont-show {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  font-size: 11.5px !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
+.welcome-modal-dont-show input[type="checkbox"] {
+  accent-color: #0284c7 !important;
+  cursor: pointer !important;
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.welcome-modal-buttons {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.welcome-btn-close-footer {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #334155 !important;
+  border-radius: 8px !important;
+  padding: 6px 16px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.welcome-btn-close-footer:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+/* Karanlık Tema Uyumluluğu */
+[data-theme="dark"] .welcome-modal-card {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .welcome-modal-header,
+[data-theme="dark"] .welcome-modal-footer {
+  background: #0b1120 !important;
+  border-color: #1e293b !important;
+}
+
+[data-theme="dark"] .welcome-modal-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .welcome-modal-subtitle {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .welcome-modal-close-btn {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .welcome-modal-close-btn:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .welcome-modal-body {
+  background: #0f172a !important;
+}
+
+[data-theme="dark"] .welcome-tabs-track {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .welcome-tab-btn {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .welcome-tab-btn .tab-num {
+  background: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .welcome-tab-btn.tab-active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .welcome-tab-btn.tab-active .tab-num {
+  background: #ffffff !important;
+  color: #0284c7 !important;
+}
+
+[data-theme="dark"] .welcome-step-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .welcome-step-illus {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+[data-theme="dark"] .welcome-step-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .welcome-step-desc {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .welcome-step-desc b {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .welcome-tip-box {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .welcome-tip-box b {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .welcome-johnstone-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .welcome-nav-prev,
+[data-theme="dark"] .welcome-btn-close-footer {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .welcome-modal-dont-show {
+  color: #94a3b8 !important;
+}
+
+/* Mobil ve Tablet Dikey Düzen (max-width: 620px) */
+@media (max-width: 620px) {
+  .welcome-modal-card {
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+  }
+  .welcome-modal-header {
+    padding: 10px 14px !important;
+  }
+  .welcome-modal-title {
+    font-size: 14.5px !important;
+  }
+  .welcome-modal-subtitle {
+    font-size: 11px !important;
+  }
+  .welcome-modal-body {
+    padding: 12px 14px !important;
+    gap: 10px !important;
+  }
+  .welcome-tabs-track {
+    justify-content: flex-start !important;
+    padding: 3px !important;
+  }
+  .welcome-tab-btn {
+    min-width: 86px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+  .welcome-tab-btn .tab-num {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 9px !important;
+  }
+  .welcome-step-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 12px !important;
+    gap: 10px !important;
+    min-height: 0 !important;
+  }
+  .welcome-step-illus {
+    width: 100% !important;
+    height: 80px !important;
+    min-width: 0 !important;
+  }
+  .welcome-illus-svg {
+    width: 75px !important;
+    height: 65px !important;
+  }
+  .welcome-step-title {
+    font-size: 13.5px !important;
+  }
+  .welcome-step-desc {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+  .welcome-tip-box {
+    font-size: 10.5px !important;
+    padding: 5px 8px !important;
+  }
+  .welcome-stepper-ctrl-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .welcome-step-nav-wrap {
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+  .welcome-modal-footer {
+    padding: 10px 14px !important;
+  }
+  .welcome-modal-dont-show {
+    font-size: 10.5px !important;
+  }
+}
+
+/* Mobil Yatay Görünüm (max-height: 520px) */
+body.mebi-mobile-landscape .welcome-modal-card,
+@media (orientation: landscape) and (max-height: 520px) {
+  .welcome-modal-card {
+    max-width: min(98vw, 840px) !important;
+    max-height: calc(100dvh - 12px) !important;
+    border-radius: 14px !important;
+  }
+  .welcome-modal-header {
+    padding: 5px 14px !important;
+  }
+  .welcome-modal-icon-badge {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 14px !important;
+  }
+  .welcome-modal-title {
+    font-size: 13px !important;
+  }
+  .welcome-modal-subtitle {
+    display: none !important;
+  }
+  .welcome-modal-body {
+    padding: 6px 14px !important;
+    gap: 6px !important;
+  }
+  .welcome-tabs-track {
+    padding: 2px !important;
+    gap: 3px !important;
+  }
+  .welcome-tab-btn {
+    padding: 3px 8px !important;
+    min-width: 78px !important;
+    font-size: 10px !important;
+  }
+  .welcome-tab-btn .tab-num {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 8.5px !important;
+  }
+  .welcome-step-card {
+    padding: 6px 10px !important;
+    min-height: 0 !important;
+    gap: 10px !important;
+  }
+  .welcome-step-illus {
+    width: 75px !important;
+    height: 70px !important;
+    min-width: 75px !important;
+  }
+  .welcome-illus-svg {
+    width: 60px !important;
+    height: 55px !important;
+  }
+  .welcome-step-title {
+    font-size: 12px !important;
+  }
+  .welcome-step-desc {
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+  }
+  .welcome-tip-box {
+    font-size: 9.5px !important;
+    padding: 3px 6px !important;
+    margin-top: 1px !important;
+  }
+  .welcome-stepper-ctrl-bar {
+    gap: 4px !important;
+    padding-top: 0 !important;
+  }
+  .welcome-johnstone-label {
+    font-size: 9.5px !important;
+  }
+  .welcome-johnstone-pill {
+    font-size: 9.5px !important;
+    padding: 2px 7px !important;
+  }
+  .welcome-nav-prev,
+  .welcome-nav-next {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+  .welcome-step-counter {
+    font-size: 10px !important;
+  }
+  .welcome-modal-footer {
+    padding: 5px 14px !important;
+    min-height: 36px !important;
+  }
+  .welcome-btn-close-footer {
+    padding: 3px 10px !important;
+    font-size: 10.5px !important;
+    min-height: 26px !important;
+  }
+  .welcome-modal-dont-show {
+    font-size: 9.5px !important;
+  }
+}
+
+/* ----------------- 6. KOLEKSİYON VE REHBER EKRANLARI ----------------- */
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.collection-card {
+  background: var(--mebi-bg-surface);
+  border: 1.5px solid var(--mebi-border);
+  box-shadow: 0 2px 0 var(--mebi-base-card), var(--mebi-shadow-sm);
+  border-radius: var(--mebi-radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.collection-card:hover {
+  transform: translateY(-2px);
+  background: var(--mebi-bg-subtle);
+  border-color: var(--mebi-primary);
+  box-shadow: 0 3px 0 var(--mebi-base-card-hover), var(--mebi-shadow-md);
+}
+
+[data-theme="dark"] .collection-card {
+  background: var(--mebi-bg-surface);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.collection-card-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mebi-text-muted);
+  text-transform: uppercase;
+}
+
+.collection-card-formula {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--mebi-text-main);
+}
+
+.collection-card-type {
+  font-size: 11px;
+  color: var(--mebi-primary);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .collection-card-type {
+  color: #38bdf8;
+}
+
+.collection-card-eq {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--mebi-text-secondary);
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   MOBİL YATAY (LANDSCAPE) SIFIR KAYDIRMA (ZERO-SCROLL) OPTİMİZASYONU
+   ========================================================================== */
+@media (orientation: landscape) and (max-height: 520px) {
+  .mebi-topbar {
+    height: 42px;
+    padding: 0 14px;
+    margin-bottom: 8px;
+  }
+  .mebi-brand {
+    font-size: 13.5px;
+    gap: 7px;
+  }
+  .mebi-card {
+    padding: 10px 14px;
+  }
+  .lab-bench {
+    min-height: 290px;
+    padding: 0 !important;
+    margin: 6px 0;
+    flex-direction: row !important;
+    align-items: stretch !important;
+  }
+  .lab-sensor-bar {
+    padding: 4px 10px;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .sensor-status-chip {
+    font-size: 11px;
+    gap: 6px;
+  }
+  .sensor-detectors-wrap {
+    gap: 4px;
+  }
+  .sensor-detector-pill {
+    padding: 2px 7px;
+    font-size: 10px;
+  }
+  .sensor-temp-block {
+    gap: 6px;
+  }
+  .sensor-temp-display {
+    font-size: 12px;
+  }
+  .sensor-temp-badge {
+    font-size: 9.5px;
+    padding: 2px 6px;
+  }
+  .bench-stage {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: row !important;
+    align-items: flex-end !important;
+    padding: 8px 12px 10px;
+    gap: 12px;
+    margin-top: 0;
+  }
+  .bench-items {
+    min-height: 220px;
+    padding-bottom: 16px;
+    padding-left: 8px;
+    gap: 30px;
+    transform: scale(0.85);
+    transform-origin: left bottom;
+  }
+  .bench-dock {
+    width: 300px !important;
+    max-width: 44% !important;
+    padding: 10px 12px;
+    margin: 5px 5px 5px 0 !important;
+    border: 1.5px solid var(--mebi-border) !important;
+    border-radius: 0 calc(var(--mebi-radius-xl) - 5px) calc(var(--mebi-radius-xl) - 5px) 0 !important;
+    gap: 6px;
+  }
+  [data-theme="dark"] .bench-dock {
+    border-color: var(--mebi-border) !important;
+  }
+  .dock-title {
+    font-size: 12px;
+  }
+  .dock-subtext {
+    display: none;
+  }
+  .dock-obs-chip {
+    padding: 4px 8px;
+    font-size: 10.5px;
+  }
+  .dock-chip-icon {
+    width: 15px;
+    height: 15px;
+  }
+  .dock-chip-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .dock-btn-full {
+    height: 32px;
+    font-size: 11.5px;
+  }
+  .staging-area {
+    margin-top: 2px;
+    margin-bottom: 6px;
+    gap: 6px;
+  }
+  .slot-card {
+    min-height: 46px;
+    padding: 4px 10px;
+    gap: 6px;
+  }
+  .slot-tile-badge {
+    width: 46px;
+    height: 36px;
+  }
+  .slot-formula-big {
+    font-size: 12px;
+  }
+  .slot-main-text {
+    font-size: 12px;
+  }
+  .slot-sub-text {
+    font-size: 10px;
+  }
+  .staging-start-btn {
+    height: 44px !important;
+    min-width: 130px !important;
+    font-size: 12.5px !important;
+    padding: 0 12px !important;
+  }
+}
+
+/* Telefon ve küçük tabletlerin yatay görünümü: sayfa yerine içerik kartları sığar. */
+body.mebi-mobile-landscape { overflow:hidden; }
+body.mebi-mobile-landscape #app .mebi-top-shell { margin-bottom:5px; border-radius:11px; }
+body.mebi-mobile-landscape #app .mebi-top-shell.has-stage { margin-bottom:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important; height:0 !important; min-height:0 !important; }
+body.mebi-mobile-landscape #app .mebi-top-shell > .mebi-topbar { min-height:39px; height:39px; padding:0 8px; border-radius:11px 11px 0 0; }
+body.mebi-mobile-landscape #app .mebi-top-shell > .mebi-stepper { min-height:36px; height:36px; padding:2px 8px; border-radius:0 0 11px 11px; }
+body.mebi-mobile-landscape #app .mebi-step-node { width:20px; height:20px; font-size:9px; }
+body.mebi-mobile-landscape #app .mebi-step-label { margin-top:1px; font-size:7px; }
+body.mebi-mobile-landscape #app .mebi-step-line { top:12px; }
+body.mebi-mobile-landscape #app .mebi-brand { font-size:11px; gap:5px; white-space:nowrap; }
+body.mebi-mobile-landscape #app .mebi-brand-icon { width:25px; height:25px; }
+body.mebi-mobile-landscape #app .mebi-progress-wrapper { display:none; }
+body.mebi-mobile-landscape #app .mebi-topbar-tools { gap:3px; }
+body.mebi-mobile-landscape #app .mebi-topbar-tools .mebi-btn-icon { width:27px; min-width:27px; height:27px; }
+body.mebi-mobile-landscape #app .mebi-topbar-tools .mebi-btn { min-height:27px; padding:0 6px; font-size:8px; }
+body.mebi-mobile-landscape #app[data-screen="menu"] .arena-menu-card.arena-menu-16-9 {
+  width: min(840px, 98vw) !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: calc(100dvh - 30px) !important;
+  padding: 8px 16px !important;
+  gap: 12px !important;
+  grid-template-columns: 1fr 1.15fr !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+}
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-hero-badge { margin-bottom: 2px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-hero-badge .mebi-badge { min-width: 0 !important; padding: 2px 8px !important; font-size: 8px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-brand-glow-icon { width: 30px !important; height: 30px !important; min-width: 30px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-brand-glow-icon svg { width: 18px !important; height: 18px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-title { font-size: 16px !important; margin: 0 !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-lead { font-size: 9px !important; line-height: 1.25 !important; margin: 0 !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-status-pills { margin-top: 2px !important; gap: 4px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-status-pill { padding: 1px 6px !important; font-size: 8px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-menu-actions-grid { gap: 6px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-menu-btn { min-height: 34px !important; height: 34px !important; padding: 4px 8px !important; gap: 6px !important; border-radius: 8px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-menu-btn-icon { width: 22px !important; height: 22px !important; min-width: 22px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-menu-btn-main { font-size: 9px !important; }
+body.mebi-mobile-landscape .arena-menu-16-9 .arena-menu-btn-sub { font-size: 7.5px !important; }
+body.mebi-mobile-landscape #app[data-screen="menu"] .arena-menu-card.arena-menu-mint-16-9 {
+  width: min(840px, 98vw) !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: calc(100dvh - 30px) !important;
+  padding: 8px 18px !important;
+  gap: 14px !important;
+  grid-template-columns: 1fr 1fr !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .arena-mint-flask-badge {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  border-radius: 12px !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .arena-mint-flask-badge svg {
+  width: 32px !important;
+  height: 38px !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .arena-mint-title {
+  font-size: 17px !important;
+  margin: 0 !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .arena-mint-subtitle {
+  font-size: 9.5px !important;
+  line-height: 1.3 !important;
+  max-width: 280px !important;
+  margin: 0 !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .arena-mint-actions-panel {
+  padding: 10px 12px 6px !important;
+  gap: 6px !important;
+  border-radius: 16px !important;
+  max-width: 320px !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .arena-mint-pill-btn {
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 3px 10px 3px 5px !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .pill-btn-icon-wrap {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .pill-btn-icon-wrap svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .pill-btn-text {
+  font-size: 10px !important;
+}
+body.mebi-mobile-landscape .arena-menu-mint-16-9 .arena-mint-reset-link {
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+}
+body.mebi-mobile-landscape #app:is([data-screen="card"],[data-screen="micro"],[data-screen="collection"]) { padding: 48px 8px 6px 8px !important; }
+body.mebi-mobile-landscape #app:is([data-screen="card"],[data-screen="micro"],[data-screen="collection"]) > .mebi-card { width:100%; max-height:calc(100dvh - 54px) !important; margin:0; padding:7px 9px; overflow:auto; overscroll-behavior:contain; }
+body.mebi-mobile-landscape #app[data-screen="card"] .mebi-report-sheet { margin:3px 0; padding:6px 8px; }
+body.mebi-mobile-landscape #app[data-screen="card"] .report-meta-banner { padding-bottom:4px; margin-bottom:4px; gap:4px; }
+body.mebi-mobile-landscape #app[data-screen="card"] .report-meta-title { font-size:13px; }
+body.mebi-mobile-landscape #app[data-screen="card"] .report-meta-pill { padding:2px 6px; font-size:8px; }
+body.mebi-mobile-landscape #app[data-screen="card"] .report-connected-nav,
+body.mebi-mobile-landscape #app[data-screen="micro"] .report-connected-nav { min-height:30px; margin:3px 0 5px; padding:2px; }
+body.mebi-mobile-landscape #app[data-screen="card"] .report-conn-tab,
+body.mebi-mobile-landscape #app[data-screen="micro"] .report-conn-tab { min-height:28px; padding:3px 7px; font-size:9px; }
+body.mebi-mobile-landscape #app[data-screen="card"] .report-metrics-grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; margin-bottom:4px; }
+body.mebi-mobile-landscape #app[data-screen="card"] .report-metric-tile { min-height:48px; padding:4px 6px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .camera-meta-banner,
+body.mebi-mobile-landscape #app[data-screen="micro"] .camera-macro-strip,
+body.mebi-mobile-landscape #app[data-screen="micro"] .camera-note-box { display:none; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .cpk-smart-bar { margin-bottom:4px; padding:4px 7px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .camera-particles-row { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:3px 0; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-subcard { min-height:0; padding:5px 6px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-subcard-title { margin-bottom:2px; font-size:10px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-3d-host,
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-3d-host canvas { min-height:125px; height:125px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-interaction-hint { margin:2px 4px; font-size:8.5px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-divider { margin:2px auto 4px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-formula-line { font-size:12.5px; margin-bottom:1px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] :is(.particle-ionic-line,.particle-caption,.particle-caption .sub-ion) { font-size:9.5px; margin-bottom:1px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-chemical-name { font-size:14px !important; margin-bottom:1px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] :is(.particle-element-item,.particle-element-item b) { font-size:8.5px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-element-legend { min-height:16px; margin-bottom:2px; padding:1px 2px; gap:2px 5px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-caption { margin-top:2px; }
+body.mebi-mobile-landscape #app[data-screen="micro"] .particle-3d-host::after { display:none; }
+
+/* Override Thermo CSS to match 2nd image exactly */
+.digital-thermo-wrap {
+  width: 110px !important;
+}
+.digital-thermo-head {
+  width: 110px !important;
+  background: #3c444f !important;
+  border: 2px solid #5a6470 !important;
+  border-radius: 4px !important;
+  padding: 8px 10px 12px 10px !important;
+  box-shadow: 0 10px 20px -2px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.1) !important;
+  position: relative !important;
+  display: block !important;
+}
+.digital-head-screws {
+  display: flex !important;
+  justify-content: space-between !important;
+  position: absolute !important;
+  bottom: 2px !important;
+  left: 20px !important;
+  right: 20px !important;
+}
+.digital-head-screws .screw {
+  width: 6px !important;
+  height: 6px !important;
+  background: #73c8ca !important;
+  border-radius: 50% !important;
+  border: 1px solid #113 !important;
+  box-shadow: inset -1px -1px 2px rgba(0,0,0,0.5) !important;
+}
+.digital-lcd-display {
+  background: #111b27 !important;
+  border: 1px solid #000 !important;
+  border-radius: 2px !important;
+  padding: 4px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.85) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.digital-head-top {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 2px !important;
+}
+.digital-brand-label {
+  font-size: 6px !important;
+  font-weight: 800 !important;
+  color: #73c8ca !important;
+  letter-spacing: 0.2px !important;
+  text-shadow: none !important;
+}
+.digital-status-led-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  font-size: 5px !important;
+  font-weight: 800 !important;
+  color: #73c8ca !important;
+}
+.digital-status-led {
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 50% !important;
+  background: #73c8ca !important;
+  box-shadow: 0 0 4px #73c8ca !important;
+}
+.digital-thermo-head.is-heating .digital-status-led {
+  background: #f59e0b !important;
+  box-shadow: 0 0 6px #f59e0b !important;
+}
+.digital-temp-center {
+  margin: 2px 0 !important;
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+.digital-temp-value {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #73c8ca !important;
+  letter-spacing: -0.4px !important;
+  line-height: 1.1 !important;
+  text-shadow: 0 0 6px rgba(115, 200, 202, 0.5) !important;
+}
+.digital-temp-unit {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #73c8ca !important;
+  margin-left: 2px !important;
+}
+.digital-thermo-head.is-heating .digital-temp-value,
+.digital-thermo-head.is-heating .digital-temp-unit {
+  color: #fbbf24 !important;
+  text-shadow: 0 0 8px rgba(251,191,36,0.6) !important;
+}
+.digital-head-bottom {
+  font-size: 5px !important;
+  font-weight: 800 !important;
+  color: #589b9d !important;
+  width: 100% !important;
+  text-align: center !important;
+  margin-top: 2px !important;
+  display: block !important;
+}
+.digital-probe-collar {
+  width: 16px !important;
+  height: 6px !important;
+  background: transparent !important;
+  border-radius: 50% !important;
+  border: 2px solid #555 !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5) !important;
+  margin-top: 2px !important;
+  z-index: 18 !important;
+  transform: rotateX(60deg) !important;
+}
+.lab-3d-active #app .digital-thermo-head { width:84px !important; }
+.lab-3d-active #app .digital-thermo-wrap { width:84px !important; }
+
+/* Responsive styling for full 3D particles modeling cards */
+#app[data-screen="micro"] .camera-particles-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+  align-items: stretch !important;
+}
+@media (max-width: 760px) {
+  #app[data-screen="micro"] .camera-particles-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+@media (max-height: 650px) and (orientation: landscape) {
+  #app[data-screen="micro"] .camera-particles-row {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
+
+/* Dark mode font color and readability enhancements */
+[data-theme="dark"] .report-quiz-hint { color: #94a3b8 !important; }
+[data-theme="dark"] .report-conn-sub { color: #94a3b8; }
+[data-theme="dark"] .metric-tile-title { color: #94a3b8; }
+[data-theme="dark"] .metric-tile-sub { color: #cbd5e1; }
+[data-theme="dark"] .report-footer-hint { color: #cbd5e1; }
+[data-theme="dark"] .macro-strip-text { color: #f1f5f9; }
+[data-theme="dark"] .camera-note-box { color: #cbd5e1; }
+[data-theme="dark"] .dock-subtext { color: #94a3b8; }
+[data-theme="dark"] .lab-panel-hint { color: #94a3b8; }
+[data-theme="dark"] .mebi-quiz-text { color: #f1f5f9; }
+[data-theme="dark"] .reagent-name { color: #cbd5e1; }
+
+/* Mobile buttons and headings overflow prevention */
+@media (max-width: 640px) {
+  .mebi-btn {
+    white-space: normal !important;
+    text-align: center;
+    line-height: 1.25 !important;
+    min-width: 0 !important;
+  }
+  .report-bottom-bar, .camera-bottom-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .report-bottom-bar .mebi-btn, .camera-bottom-bar .mebi-btn {
+    width: 100% !important;
+  }
+  .report-conn-tab {
+    padding: 5px 8px !important;
+    gap: 6px !important;
+  }
+  .report-conn-title {
+    font-size: 11px !important;
+  }
+  .report-conn-sub {
+    font-size: 9.5px !important;
+  }
+  .report-quiz-title {
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+  }
+  .report-quiz-sub {
+    font-size: 10px !important;
+  }
+  .mebi-step-label {
+    font-size: 8.5px !important;
+    letter-spacing: -0.2px !important;
+    white-space: nowrap !important;
+  }
+  /* 🌟 UYGULA.DOCX GÖRSEL 3: Rapor kartı ve Johnstone denklem font boyutları */
+  .report-metrics-grid {
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+  .report-metric-tile {
+    padding: 6px 8px !important;
+    gap: 2px !important;
+    border-radius: 8px !important;
+  }
+  .metric-tile-header {
+    font-size: 9px !important;
+    gap: 4px !important;
+  }
+  .metric-tile-val {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+  }
+  .metric-tile-sub {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+  .chemical-eq-card {
+    padding: 8px 12px !important;
+    margin: 6px 0 !important;
+    border-radius: 10px !important;
+  }
+  .chemical-eq-title {
+    font-size: 9.5px !important;
+    margin-bottom: 3px !important;
+  }
+  .chemical-eq-body {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+  }
+  .chemical-net-ionic {
+    font-size: 10.5px !important;
+    margin-top: 6px !important;
+    padding-top: 6px !important;
+    line-height: 1.4 !important;
+  }
+  .report-tab-footer-prompt {
+    padding: 6px 10px !important;
+    margin-top: 6px !important;
+  }
+  .report-footer-hint {
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+  }
+  /* Değerlendirme Sorusu Seçenekleri (Item 11) */
+  .mebi-quiz-grid-2col {
+    gap: 5px !important;
+    margin: 6px 0 !important;
+  }
+  .mebi-quiz-choice {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    gap: 8px !important;
+    min-height: 32px !important;
+  }
+  .mebi-quiz-checkbox {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 10px !important;
+  }
+  .mebi-quiz-letter {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 10px !important;
+  }
+  .mebi-quiz-text {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+}
+
+/* Ayrıca mobil yatay ekranda (max-height: 600px) rapor ve soru fontlarını optimize et */
+@media (max-height: 600px) and (orientation: landscape) {
+  .report-metrics-grid {
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+  .report-metric-tile {
+    padding: 5px 8px !important;
+    gap: 2px !important;
+    border-radius: 8px !important;
+  }
+  .metric-tile-header {
+    font-size: 9px !important;
+  }
+  .metric-tile-val {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+  .metric-tile-sub {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+  .chemical-eq-card {
+    padding: 7px 10px !important;
+    margin: 5px 0 !important;
+    border-radius: 8px !important;
+  }
+  .chemical-eq-title {
+    font-size: 9px !important;
+    margin-bottom: 2px !important;
+  }
+  .chemical-eq-body {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+  .chemical-net-ionic {
+    font-size: 10px !important;
+    margin-top: 5px !important;
+    padding-top: 5px !important;
+    line-height: 1.35 !important;
+  }
+  .report-tab-footer-prompt {
+    padding: 5px 8px !important;
+    margin-top: 5px !important;
+  }
+  .report-footer-hint {
+    font-size: 9.5px !important;
+  }
+  .report-quiz-title {
+    font-size: 11.5px !important;
+    line-height: 1.3 !important;
+  }
+  .report-quiz-sub {
+    font-size: 9.5px !important;
+  }
+  .mebi-quiz-grid-2col {
+    gap: 5px !important;
+    margin: 5px 0 !important;
+  }
+  .mebi-quiz-choice {
+    padding: 5px 8px !important;
+    font-size: 10.5px !important;
+    gap: 7px !important;
+    min-height: 30px !important;
+  }
+  .mebi-quiz-checkbox {
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 9.5px !important;
+  }
+  .mebi-quiz-letter {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 9.5px !important;
+  }
+  .mebi-quiz-text {
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+  }
+}
+
+
+/* 🌟 Item 4 & 5 UI Enhancements */
+.mebi-btn-icon-only {
+  min-width: 34px !important;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+}
+.mebi-btn-icon-only .mebi-btn-badge {
+  margin: 0 !important;
+}
+.mebi-stepper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: relative !important;
+}
+.mebi-stepper-track {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  position: relative !important;
+  flex: 1 1 auto !important;
+}
+.mebi-stepper-inline-tools {
+  display: none;
+}
+/* 🌟 Item 5: Tanecik kartları kimyasal kimlik ve 3 ürünlü kartlar taşma önleme */
+.particle-subcard {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.particle-identity-compact.is-inline {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px 6px !important;
+  margin: 5px 0 2px 0 !important;
+  text-align: center !important;
+  white-space: normal !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 2px !important;
+}
+.particle-identity-compact.is-inline .particle-ionic-line {
+  display: inline !important;
+  font-size: clamp(10.5px, 1.2vw, 12px) !important;
+  font-weight: 800 !important;
+  color: var(--mebi-primary) !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+.particle-identity-compact.is-inline .particle-identity-sep {
+  display: inline !important;
+  color: var(--mebi-text-muted) !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  margin: 0 1px !important;
+  user-select: none;
+}
+.particle-identity-compact.is-inline .particle-chemical-name {
+  display: inline !important;
+  font-size: clamp(15px, 1.65vw, 17.5px) !important;
+  font-weight: 700 !important;
+  color: var(--mebi-text-main) !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+.particle-caption {
+  font-size: clamp(9.5px, 1.05vw, 11px) !important;
+  line-height: 1.35 !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+/* 🌟 UYGULA-4 MADDE 4: Aydınlık ve Karanlık Tema Toast Okunabilirlik ve Kontrast İyileştirmesi */
+.mebi-toast {
+  color: var(--mebi-text-main, #0f172a) !important;
+  background: var(--mebi-bg-surface, #ffffff) !important;
+  border: 1.5px solid var(--mebi-border, #e2e8f0) !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12), 0 2px 0 var(--mebi-base-card, #cbd5e1) !important;
+}
+
+.mebi-toast-title {
+  color: var(--mebi-text-main, #0f172a) !important;
+  font-weight: 800 !important;
+}
+
+.mebi-toast-desc {
+  color: var(--mebi-text-secondary, #334155) !important;
+  opacity: 1 !important;
+}
+
+.mebi-toast-close {
+  color: var(--mebi-text-secondary, #64748b) !important;
+}
+.mebi-toast-close:hover {
+  color: var(--mebi-text-main, #0f172a) !important;
+}
+
+.mebi-toast-circle-bg {
+  stroke: rgba(100, 116, 139, 0.2) !important;
+}
+
+.mebi-toast-circle-meter {
+  stroke: var(--mebi-primary, #0284c7) !important;
+}
+
+/* Toast tipleri ikon ve vurgu renkleri - Aydınlık Tema */
+.mebi-toast-settings .mebi-toast-icon,
+.mebi-toast-info .mebi-toast-icon {
+  background: rgba(2, 132, 199, 0.12) !important;
+  color: #0284c7 !important;
+}
+
+.mebi-toast-success .mebi-toast-icon {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #059669 !important;
+}
+
+.mebi-toast-warning .mebi-toast-icon {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #d97706 !important;
+}
+
+.mebi-toast-danger .mebi-toast-icon {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #dc2626 !important;
+}
+
+/* Karanlık Tema Toast Ayarları */
+[data-theme="dark"] .mebi-toast {
+  color: #f8fafc !important;
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .mebi-toast-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .mebi-toast-desc {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .mebi-toast-close {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .mebi-toast-close:hover {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .mebi-toast-circle-bg {
+  stroke: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .mebi-toast-circle-meter {
+  stroke: #38bdf8 !important;
+}
+
+[data-theme="dark"] .mebi-toast-settings .mebi-toast-icon,
+[data-theme="dark"] .mebi-toast-info .mebi-toast-icon {
+  background: rgba(56, 189, 248, 0.18) !important;
+  color: #38bdf8 !important;
+}
+
+/* ==========================================================================
+   MEBİ 3B LABORATUVAR YÜKLEME BİLDİRİM KARTI (Lab Loader Overlay)
+   ========================================================================== */
+.mebi-lab-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+  padding: 20px;
+}
+.mebi-lab-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.lab-loader-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--mebi-bg-surface, #ffffff);
+  border: 1px solid var(--mebi-border, rgba(0, 0, 0, 0.08));
+  border-radius: 20px;
+  padding: 28px 24px 22px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: labLoaderPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes labLoaderPop {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.lab-loader-spinner-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.lab-loader-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.12);
+  animation: labPulse 1.8s ease-in-out infinite;
+}
+@keyframes labPulse {
+  0%, 100% { transform: scale(0.92); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+.lab-loader-icon {
+  position: relative;
+  z-index: 1;
+  color: #2563eb;
+  animation: labAtomSpin 4s linear infinite;
+}
+@keyframes labAtomSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.lab-loader-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+.lab-loader-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--mebi-text-main, #0f172a);
+  margin: 0 0 6px 0;
+}
+.lab-loader-sub {
+  font-size: 13.5px;
+  color: var(--mebi-text-secondary, #64748b);
+  margin: 0 0 18px 0;
+  line-height: 1.45;
+}
+.lab-loader-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--mebi-bg-subtle, #f1f5f9);
+  overflow: hidden;
+  position: relative;
+}
+.lab-loader-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  animation: labLoaderProgress 1.4s ease-in-out infinite alternate;
+}
+@keyframes labLoaderProgress {
+  0% { left: 0%; width: 30%; }
+  100% { left: 65%; width: 35%; }
+}
+[data-theme="dark"] .lab-loader-card {
+  background: #1e242d;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .lab-loader-title {
+  color: #f8fafc;
+}
+[data-theme="dark"] .lab-loader-sub {
+  color: #94a3b8;
+}
+[data-theme="dark"] .lab-loader-track {
+  background: #2a333f;
+}
+
