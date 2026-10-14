@@ -4883,11 +4883,11 @@ html, body {
 .welcome-modal-card {
   background: #ffffff !important;
   background-image: none !important;
-  border-radius: 20px !important;
+  border-radius: 22px !important;
   box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
-  max-width: min(94vw, 750px) !important;
+  max-width: min(94vw, 860px) !important;
   width: 100% !important;
-  max-height: min(90vh, 520px) !important;
+  max-height: min(90vh, 590px) !important;
   display: flex !important;
   flex-direction: column !important;
   transform: scale(0.94);
@@ -4904,7 +4904,7 @@ html, body {
 
 /* Modal Başlık Çubuğu */
 .welcome-modal-header {
-  padding: 14px 20px !important;
+  padding: 16px 24px !important;
   border-bottom: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
@@ -4921,22 +4921,22 @@ html, body {
 }
 
 .welcome-modal-icon-badge {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 10px !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
   background: rgba(2, 132, 199, 0.1) !important;
   color: #0284c7 !important;
   border: 1px solid rgba(2, 132, 199, 0.18) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 18px !important;
+  font-size: 20px !important;
   box-shadow: none !important;
   flex-shrink: 0 !important;
 }
 
 .welcome-modal-title {
-  font-size: 16px !important;
+  font-size: 19px !important;
   font-weight: 800 !important;
   color: #0f172a !important;
   margin: 0 !important;
@@ -4955,11 +4955,11 @@ html, body {
   background: #f1f5f9 !important;
   border: none !important;
   color: #64748b !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 8px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
@@ -4975,24 +4975,24 @@ html, body {
 
 /* Modal Gövdesi */
 .welcome-modal-body {
-  padding: 16px 20px !important;
+  padding: 18px 24px !important;
   flex: 1 1 auto !important;
   min-height: 0 !important;
   overflow-y: auto !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 13px !important;
+  gap: 15px !important;
   background: #ffffff !important;
 }
 
 /* 5'li Sekme Çubuğu (Segmented Step Controller) */
 .welcome-tabs-track {
   display: flex !important;
-  gap: 5px !important;
+  gap: 6px !important;
   background: #f1f5f9 !important;
   border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  padding: 4px !important;
+  border-radius: 14px !important;
+  padding: 5px !important;
   overflow-x: auto !important;
   scrollbar-width: none !important;
   -webkit-overflow-scrolling: touch !important;
@@ -5005,10 +5005,10 @@ html, body {
 
 .welcome-tab-btn {
   flex: 1 1 0 !important;
-  min-width: 95px !important;
-  padding: 6px 10px !important;
-  border-radius: 8px !important;
-  font-size: 12px !important;
+  min-width: 105px !important;
+  padding: 7px 12px !important;
+  border-radius: 9px !important;
+  font-size: 13.5px !important;
   font-weight: 700 !important;
   border: none !important;
   background: transparent !important;
@@ -5016,7 +5016,7 @@ html, body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
+  gap: 7px !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
   white-space: nowrap !important;
@@ -5029,12 +5029,12 @@ html, body {
 }
 
 .welcome-tab-btn .tab-num {
-  width: 18px !important;
-  height: 18px !important;
+  width: 21px !important;
+  height: 21px !important;
   border-radius: 50% !important;
   background: #e2e8f0 !important;
   color: #475569 !important;
-  font-size: 10px !important;
+  font-size: 11.5px !important;
   font-weight: 900 !important;
   display: flex !important;
   align-items: center !important;
@@ -5057,12 +5057,12 @@ html, body {
 .welcome-step-card {
   display: none !important;
   align-items: center !important;
-  gap: 16px !important;
+  gap: 20px !important;
   background: #f8fafc !important;
   border: 1.5px solid #e2e8f0 !important;
-  border-radius: 14px !important;
-  padding: 14px 16px !important;
-  min-height: 154px !important;
+  border-radius: 16px !important;
+  padding: 16px 22px !important;
+  min-height: 172px !important;
   box-sizing: border-box !important;
   animation: welcomeCardIn 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
@@ -5077,10 +5077,10 @@ html, body {
 }
 
 .welcome-step-illus {
-  width: 105px !important;
-  height: 100px !important;
-  min-width: 105px !important;
-  border-radius: 12px !important;
+  width: 125px !important;
+  height: 118px !important;
+  min-width: 125px !important;
+  border-radius: 14px !important;
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
   display: flex !important;
@@ -5091,14 +5091,14 @@ html, body {
 }
 
 .welcome-illus-svg {
-  width: 88px !important;
-  height: 75px !important;
+  width: 104px !important;
+  height: 88px !important;
 }
 
 .welcome-step-text {
   display: flex !important;
   flex-direction: column !important;
-  gap: 5px !important;
+  gap: 7px !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
   text-align: left !important;
@@ -5107,14 +5107,14 @@ html, body {
 .welcome-step-heading {
   display: flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 8px !important;
 }
 
 .welcome-step-badge {
-  width: 20px !important;
-  height: 20px !important;
-  border-radius: 6px !important;
-  font-size: 11px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
   font-weight: 900 !important;
   color: #ffffff !important;
   display: inline-flex !important;
@@ -5130,7 +5130,7 @@ html, body {
 .welcome-step-badge.bg-purple { background: #8b5cf6 !important; }
 
 .welcome-step-title {
-  font-size: 14.5px !important;
+  font-size: 16.5px !important;
   font-weight: 800 !important;
   color: #0f172a !important;
   margin: 0 !important;
@@ -5138,8 +5138,8 @@ html, body {
 }
 
 .welcome-step-desc {
-  font-size: 12px !important;
-  line-height: 1.48 !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
   color: #334155 !important;
   margin: 0 !important;
 }
@@ -5150,14 +5150,14 @@ html, body {
 }
 
 .welcome-tip-box {
-  font-size: 11px !important;
-  line-height: 1.45 !important;
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
   color: #475569 !important;
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
-  border-radius: 8px !important;
-  padding: 6px 10px !important;
-  margin-top: 2px !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  margin-top: 3px !important;
 }
 
 .welcome-tip-box b {
@@ -5169,9 +5169,9 @@ html, body {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 10px !important;
+  gap: 12px !important;
   flex-wrap: wrap !important;
-  padding-top: 2px !important;
+  padding-top: 4px !important;
 }
 
 .welcome-johnstone-tag-wrap {
@@ -5182,7 +5182,7 @@ html, body {
 }
 
 .welcome-johnstone-label {
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 800 !important;
   color: #64748b !important;
   letter-spacing: 0.04em !important;
@@ -5192,10 +5192,10 @@ html, body {
 .welcome-johnstone-pill {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 5px !important;
-  font-size: 11px !important;
+  gap: 6px !important;
+  font-size: 12.5px !important;
   font-weight: 800 !important;
-  padding: 3px 10px !important;
+  padding: 5px 13px !important;
   border-radius: 999px !important;
   border: 1px solid transparent !important;
   transition: all 0.15s ease !important;
@@ -5238,8 +5238,8 @@ html, body {
 }
 
 .welcome-nav-btn {
-  border-radius: 8px !important;
-  font-size: 12px !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
   font-weight: 800 !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
@@ -5249,7 +5249,7 @@ html, body {
   background: #ffffff !important;
   border: 1.5px solid #cbd5e1 !important;
   color: #475569 !important;
-  padding: 5px 12px !important;
+  padding: 6px 14px !important;
 }
 
 .welcome-nav-prev:hover:not(:disabled) {
@@ -5264,7 +5264,7 @@ html, body {
 }
 
 .welcome-step-counter {
-  font-size: 12px !important;
+  font-size: 13px !important;
   font-weight: 800 !important;
   color: #64748b !important;
   padding: 0 4px !important;
@@ -5274,7 +5274,7 @@ html, body {
   background: #0284c7 !important;
   border: 1.5px solid #0369a1 !important;
   color: #ffffff !important;
-  padding: 5px 14px !important;
+  padding: 6px 16px !important;
   box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
 }
 
@@ -5284,7 +5284,7 @@ html, body {
 
 /* Modal Alt Çubuk (Footer) */
 .welcome-modal-footer {
-  padding: 12px 20px !important;
+  padding: 14px 24px !important;
   border-top: 1px solid #f1f5f9 !important;
   display: flex !important;
   align-items: center !important;
@@ -5298,8 +5298,8 @@ html, body {
 .welcome-modal-dont-show {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 7px !important;
-  font-size: 11.5px !important;
+  gap: 8px !important;
+  font-size: 12.5px !important;
   color: #475569 !important;
   font-weight: 600 !important;
   cursor: pointer !important;
@@ -5309,8 +5309,8 @@ html, body {
 .welcome-modal-dont-show input[type="checkbox"] {
   accent-color: #0284c7 !important;
   cursor: pointer !important;
-  width: 15px !important;
-  height: 15px !important;
+  width: 16px !important;
+  height: 16px !important;
 }
 
 .welcome-modal-buttons {
@@ -5323,9 +5323,9 @@ html, body {
   background: #ffffff !important;
   border: 1.5px solid #cbd5e1 !important;
   color: #334155 !important;
-  border-radius: 8px !important;
-  padding: 6px 16px !important;
-  font-size: 12px !important;
+  border-radius: 9px !important;
+  padding: 7px 18px !important;
+  font-size: 13px !important;
   font-weight: 800 !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
