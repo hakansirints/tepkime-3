@@ -202,7 +202,7 @@
       macroReactantsText: 'Renksiz berrak hidroklorik asit ile beyaz katı yemek sodası tozu tepkime için hazır bekler.',
       macroProductsText: 'Toz asitle birleştiğinde anında şiddetli köpürme ve yoğun CO₂ gaz fışkırması gerçekleşir, çözelti sıcaklığı 36.5°C\'ye yükselir.',
       microReactantsNote: 'HCl çözeltisindeki serbest H⁺ protonları katı bikarbonat (HCO₃⁻) yüzeyine hücum eder.',
-      microProductsNote: 'Proton transferiyle derhal doğrusal apolar CO₂ gazı ve kovalent H₂O molekülleri oluşur; Na⁺ ve Cl⁻ serbest solvatize kalır.'
+      microProductsNote: 'Proton transferiyle derhal doğrusal apolar CO₂ gazı ve kovalent H₂O molekülleri oluşur; Na⁺ ve Cl⁻ serbest hidratlanmış kalır.'
     },
 
     // 3. CaCl2 + NaHCO3
@@ -264,7 +264,7 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'Berrak renksiz gümüş nitrat çözeltisi ile beyaz katı bikarbonat tozu birleştirilmek üzere bekler.',
       macroProductsText: 'Maddeler karıştırıldığında soluk sarı-beyaz renkli Ag₂CO₃ çökeltisi ve hafif gaz kabarcıkları gözlenir.',
-      microReactantsNote: 'Sulu ortamda serbest Ag⁺ katyonları katı bikarbonat yüzeyiyle reaksiyona girer.',
+      microReactantsNote: 'Sulu ortamda serbest Ag⁺ katyonları katı bikarbonat yüzeyiyle tepkimeye girer.',
       microProductsNote: 'Ag⁺ ve karbonat anyonları suda çözünmeyen iyonik Ag₂CO₃ kristal kafesini örer.'
     },
 
@@ -411,7 +411,7 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'İki beherde de tamamen şeffaf, berrak ve renksiz iki tuz çözeltisi yer alır.',
       macroProductsText: 'İki berrak sıvı birleştiği mikrosaniyede çözelti göz alıcı parlak altın sarısı bir katı çökeltiye bürünür.',
-      microReactantsNote: 'KI çözeltisinde solvatize K⁺ ve I⁻ iyonları; kurşun nitratta ise Pb²⁺ ve NO₃⁻ iyonları yüzer.',
+      microReactantsNote: 'KI çözeltisinde hidratlanmış K⁺ ve I⁻ iyonları; kurşun nitratta ise Pb²⁺ ve NO₃⁻ iyonları yüzer.',
       microProductsNote: 'Pb²⁺ katyonları ile I⁻ anyonları bir araya gelerek suda çözünmeyen hekzagonal PbI₂ kristal kafesini kurar.'
     },
 
@@ -476,7 +476,7 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'İki berrak ve renksiz çözelti masada beklemektedir.',
       macroProductsText: 'Çözeltiler birleştiği anda beyaz bir PbCl₂ çökeltisi oluşur.',
-      microReactantsNote: 'Pb²⁺ ve Cl⁻ iyonları sulu ortamda serbest solvatize haldedir.',
+      microReactantsNote: 'Pb²⁺ ve Cl⁻ iyonları sulu ortamda serbest hidratlanmış haldedir.',
       microProductsNote: 'Pb²⁺ ve Cl⁻ iyonları çözünürlük sınırını aşarak katı beyaz PbCl₂ kristallerini kurar.'
     },
 
@@ -608,7 +608,7 @@
 
     // 22. CaCO3 + Cu(NO3)2
     'CaCO3|Cu(NO3)2': {
-      title: 'Kireçtaşı - Bakır Yüzey Reaksiyonu',
+      title: 'Kireçtaşı - Bakır Yüzey Tepkimesi',
       canonical: 'A — Çökelme tepkimesi ve B — Asit–baz tepkimesi',
       typeCategories: ["ppt","acidbase"],
       pedagogicalNote: "Cu²⁺ katyonları karbonat yüzeyinde çözünmeyen bazik bakır karbonat çökeleği oluşturur (Çökelme) ve hidroliz sonucu hafif CO₂ gazı çıkar (Asit–Baz).",
@@ -768,7 +768,7 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'İki renksiz, şeffaf tuz çözeltisi deney için hazırlanmıştır.',
       macroProductsText: 'Çözeltiler birleştiğinde derhal yoğun beyaz AgCl çökelmesi gerçekleşir.',
-      microReactantsNote: 'Ag⁺, NO₃⁻, Ca²⁺ ve Cl⁻ iyonları su molekülleri arasında solvatize haldedir.',
+      microReactantsNote: 'Ag⁺, NO₃⁻, Ca²⁺ ve Cl⁻ iyonları su molekülleri arasında hidratlanmış haldedir.',
       microProductsNote: 'Ag⁺ ve Cl⁻ iyonları elektrostatik çekimle katı AgCl kafesini kurarken, Ca²⁺ ve NO₃⁻ seyirci iyon olarak kalır.'
     },
 
@@ -952,7 +952,7 @@
       canonical: 'E — Bu koşullarda belirgin bir tepkime gözlenmez',
       typeCategory: 'none',
       typeCategories: ['none'],
-      pedagogicalNote: dry ? 'İki kuru katı fiziksel olarak karışır. Sulu ortam bulunmadığı için tanecikler solvatize değildir; başlangıçtaki katı yeni oluşan çökelti sayılmaz.' : 'Bu senaryo koşullarında belirgin kimyasal değişim gözlenmez. Çözünme veya mevcut katının dağılması, yeni çökelti oluşmasıyla aynı şey değildir.',
+      pedagogicalNote: dry ? 'İki kuru katı fiziksel olarak karışır. Sulu ortam bulunmadığı için tanecikler hidratlanmış değildir; başlangıçtaki katı yeni oluşan çökelti sayılmaz.' : 'Bu senaryo koşullarında belirgin kimyasal değişim gözlenmez. Çözünme veya mevcut katının dağılması, yeni çökelti oluşmasıyla aynı şey değildir.',
       eq: (r1 ? r1.f : 'Madde 1') + ' + ' + (r2 ? r2.f : 'Madde 2') + ' → Fiziksel Karışım (Belirgin Tepkime Yok)',
       netIonic: dry ? 'Bu kuru katı karışımı için net iyon denklemi yazılmaz.' : 'Bu koşullarda belirgin tepkime gözlenmez; net iyon denklemi yazılmaz.',
       spectators: 'Tüm tanecikler bağımsızdır (Fiziksel Karışım)',
@@ -1112,7 +1112,7 @@
         matchedCategories: matchedCats,
         missedCategories: missedCats,
         title: 'Gözden Geçiriniz',
-        explanation: 'İşaretlediğiniz <b>' + matchedNames + '</b> tespiti bu deney için geçerlidir; ancak işaretlediğiniz <b>' + invalidNames + '</b> süreci bu reaksiyonda yer almaz. Doğru sınıflandırma: <b>' + canonName + '</b>.' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : '')
+        explanation: 'İşaretlediğiniz <b>' + matchedNames + '</b> tespiti bu deney için geçerlidir; ancak işaretlediğiniz <b>' + invalidNames + '</b> süreci bu tepkimede yer almaz. Doğru sınıflandırma: <b>' + canonName + '</b>.' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : '')
       };
     }
 

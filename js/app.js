@@ -604,7 +604,7 @@
         '</div>' +
         '<div class="dock-live-box" style="margin-top:4px;">' +
           '<span class="sensor-pulse-dot dot-reacting"></span>' +
-          '<span>Reaksiyon devam ediyor...</span>' +
+          '<span>Tepkime devam ediyor...</span>' +
         '</div>' +
       '</div>';
     } else if (S.labStep === 'observed') {
@@ -688,7 +688,7 @@
 
         '<div class="lab-experiment-heading">' +
           '<div class="lab-unified-experiment-badge mebi-badge mebi-badge-cyan">' +
-            '<span class="lab-badge-label">DENEY MASASI & REAKSİYON DÜZENEĞİ</span>' +
+            '<span class="lab-badge-label">DENEY MASASI & TEPKİME DÜZENEĞİ</span>' +
             '<span class="lab-badge-sep">•</span>' +
             '<span class="lab-badge-title">' + esc(r1.f) + ' + ' + esc(r2.f) + ' Deneyi</span>' +
           '</div>' +
@@ -1246,7 +1246,7 @@
 
         // Tanecik Düzeyi Değerlendirmesi
         '<div class="camera-note-box">' +
-          '<b>Tanecik Düzeyi Değerlendirmesi:</b> ' + esc(rx.microReactantsNote || (r1.name + ' ve ' + r2.name + ' tanecikleri sulu ortamda serbest solvatize dağılmıştır.')) +
+          '<b>Tanecik Düzeyi Değerlendirmesi:</b> ' + esc(rx.microReactantsNote || (r1.name + ' ve ' + r2.name + ' tanecikleri sulu ortamda serbest hidratlanmış dağılmıştır.')) +
         '</div>' +
       '</div>';
     } else {
@@ -1396,7 +1396,7 @@
               title: esc(cleanSpecTitle) + ' (Çözeltideki İyonlar)',
               formula: esc(cleanSpecTitle),
               chemicalName: 'Seyirci iyonlar',
-              caption: 'Çökelmeye veya gaza katılmayan serbest iyonlar çözeltide bağımsız solvatize hareket eder.',
+              caption: 'Çökelmeye veya gaza katılmayan serbest iyonlar çözeltide bağımsız hidratlanmış hareket eder.',
               ionic: esc(cleanSpecTitle) + ' (Serbest İyonlar)'
             });
           } else if (!hasPpt && !hasGas && !isComplex && !hasWater) {
@@ -1435,7 +1435,7 @@
 
         // Tanecik Düzeyi Değerlendirmesi
         '<div class="camera-note-box" style="border-left-color:var(--mebi-teal);">' +
-          '<b>Tanecik Düzeyi Değerlendirmesi:</b> ' + esc(rx.microProductsNote || 'Süreç sonrasındaki mikroskobik tanecik düzeni.') +
+          '<b>Tanecik Düzeyi Değerlendirmesi:</b> ' + esc(rx.microProductsNote || 'Süreç sonrasındaki üç boyutlu tanecik modeli düzeni.') +
         '</div>' +
       '</div>';
     }
@@ -1490,7 +1490,7 @@
     var bodyHtml = '';
     if (totalDiscovered === 0) {
       bodyHtml = '<div style="text-align:center;padding:40px 20px;color:var(--mebi-text-secondary);">' +
-        '<p style="font-size:16px;margin-bottom:18px;">Henüz tamamlanmış bir tepkime kartınız bulunmuyor. Madde havuzundan reaktif seçerek ilk deneyinizi gerçekleştirin!</p>' +
+        '<p style="font-size:16px;margin-bottom:18px;">Henüz tamamlanmış bir tepkime kartınız bulunmuyor. Madde havuzundan tepken seçerek ilk deneyinizi gerçekleştirin!</p>' +
         '<div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">' +
           resumeBtnFooter +
           '<button class="mebi-btn mebi-btn-secondary" data-action="goPool">' +
@@ -2172,221 +2172,7 @@
         window.MebiUI.openDrawer('Periyodik Tablo Atom Renkleri (CPK Standardı)', contentHtml);
       }
     },
-    zoomParticle: function(which) {
-      if (window.MebiAudio) window.MebiAudio.playClick();
-      var r1 = window.MebiData.getReagent(S.selectedSlot1);
-      var r2 = window.MebiData.getReagent(S.selectedSlot2);
-      var rx = S.activeReaction || window.MebiData.getReaction(S.selectedSlot1, S.selectedSlot2);
-      if (!rx || !r1 || !r2) return;
-      var currentTab = S.cameraTab || 'reactants';
-      var isPhysicalMix = (rx && (rx.typeCategory === 'none' || (rx.typeCategories && rx.typeCategories.indexOf('none') > -1) || rx.title === 'Fiziksel Karışım (Kimyasal Tepkime Yok)' || rx.type === 'Fiziksel Karışım'));
-
-      var modalData = {
-        title: '',
-        badge: '',
-        badgeClass: '',
-        modelKey: which,
-        svg: '',
-        desc: '',
-        ions: []
-      };
-
-      if (currentTab === 'reactants') {
-        var reactant = (which === 'r2') ? r2 : r1;
-        modalData.title = reactant.name + ' (' + reactant.f + ')';
-        modalData.badge = reactant.solid ? 'Katı Kristal' : 'Sulu Çözelti';
-        modalData.badgeClass = reactant.solid ? 'badge-solid' : 'badge-aqueous';
-        modalData.svg = window.MebiSVG.renderGenericReactantParticle(reactant);
-        if (reactant.solid) {
-          modalData.desc = reactant.name + ' katı halde düzenli 3 boyutlu iyonik veya metalik kristal örgü yapısındadır. Tanecikler elektrostatik veya metalik bağlarla sıkıca bağlıdır ve ortamda serbest hareket edemez; yalnızca titreşim hareketi yapar.';
-          if (reactant.id === 'Cu') {
-            modalData.ions = [{ label: 'Cu Katısı', desc: 'Metalik kristal örgü' }];
-          } else if (reactant.id === 'MnO2') {
-            modalData.ions = [{ label: 'Mn⁴⁺ ve O²⁻', desc: 'İyonik kristal kafes' }];
-          } else if (reactant.id === 'Zn') {
-            modalData.ions = [{ label: 'Zn Katısı', desc: 'Metalik kristal örgü' }];
-          } else {
-            if (reactant.id === 'CaCO3') {
-              modalData.ions = [{ label: 'Ca²⁺ ve CO₃²⁻', desc: 'İyonik kristal örgü kafesi' }, { label: 'CaCO₃ Katısı', desc: 'Suda çözünmeyen katı kristal' }];
-            } else if (reactant.id === 'Na2CO3') {
-              modalData.ions = [{ label: '2Na⁺ ve CO₃²⁻', desc: 'İyonik kristal örgü kafesi' }, { label: 'Na₂CO₃ Katısı', desc: 'Beyaz katı kristal' }];
-            } else if (reactant.id === 'NaHCO3') {
-              modalData.ions = [{ label: 'Na⁺ ve HCO₃⁻', desc: 'İyonik kristal örgü kafesi' }, { label: 'NaHCO₃ Katısı', desc: 'Yemek sodası beyaz katı kristal' }];
-            } else {
-              modalData.ions = [{ label: reactant.f + ' Katısı', desc: 'Kristal örgü kafesi' }];
-            }
-          }
-        } else if (reactant.id === 'H2O2' || reactant.id === 'NH3') {
-          modalData.desc = reactant.name + ' sulu çözeltide moleküler halde dağılır ve serbestçe hareket eder.';
-          modalData.ions = [
-            { label: reactant.f + ' Molekülü', desc: 'Kovalent bağlı nötr tanecik' },
-            { label: reactant.f, desc: 'Moleküler kimyasal gösterim' }
-          ];
-        } else {
-          modalData.desc = reactant.name + ' suda katyon ve anyonlarına ayrışır. İyonlar çözeltide birbirinden bağımsız hareket eder; yükleri modelin altındaki kimyasal gösterimde belirtilir.';
-          if (reactant.id === 'HCl') {
-            modalData.ions = [{ label: 'H₃O⁺ / H⁺', desc: 'Hidronyum katyonu' }, { label: 'Cl⁻', desc: 'Klorür anyonu' }];
-          } else if (reactant.id === 'NaOH') {
-            modalData.ions = [{ label: 'Na⁺', desc: 'Sodyum katyonu' }, { label: 'OH⁻', desc: 'Hidroksit anyonu' }];
-          } else if (reactant.id === 'AgNO3') {
-            modalData.ions = [{ label: 'Ag⁺', desc: 'Gümüş katyonu' }, { label: 'NO₃⁻', desc: 'Nitrat anyonu' }];
-          } else if (reactant.id === 'NaCl') {
-            modalData.ions = [{ label: 'Na⁺', desc: 'Sodyum katyonu' }, { label: 'Cl⁻', desc: 'Klorür anyonu' }];
-          } else if (reactant.id === 'BaCl2') {
-            modalData.ions = [{ label: 'Ba²⁺', desc: 'Baryum katyonu' }, { label: 'Cl⁻', desc: 'Klorür anyonları' }];
-          } else if (reactant.id === 'Na2SO4') {
-            modalData.ions = [{ label: 'Na⁺', desc: 'Sodyum katyonları' }, { label: 'SO₄²⁻', desc: 'Sülfat anyonu' }];
-          } else if (reactant.id === 'KI') {
-            modalData.ions = [{ label: 'K⁺', desc: 'Potasyum katyonu' }, { label: 'I⁻', desc: 'İyodür anyonu' }];
-          } else if (reactant.id === 'Pb(NO3)2' || reactant.id === 'PbNO32') {
-            modalData.ions = [{ label: 'Pb²⁺', desc: 'Kurşun(II) katyonu' }, { label: 'NO₃⁻', desc: 'Nitrat anyonları' }];
-          } else if (reactant.id === 'CuSO4') {
-            modalData.ions = [{ label: 'Cu²⁺', desc: 'Bakır(II) katyonu' }, { label: 'SO₄²⁻', desc: 'Sülfat anyonu' }];
-          } else if (reactant.id === 'Cu(NO3)2' || reactant.id === 'CuNO32') {
-            modalData.ions = [{ label: 'Cu²⁺', desc: 'Bakır(II) katyonu' }, { label: 'NO₃⁻', desc: 'Nitrat anyonları' }];
-          } else if (reactant.id === 'KNO3') {
-            modalData.ions = [{ label: 'K⁺', desc: 'Potasyum katyonu' }, { label: 'NO₃⁻', desc: 'Nitrat anyonu' }];
-          } else if (reactant.id === 'Na2CO3') {
-            modalData.ions = [{ label: 'Na⁺', desc: 'Sodyum katyonları' }, { label: 'CO₃²⁻', desc: 'Karbonat anyonu' }];
-          } else {
-            modalData.ions = [{ label: 'Katyon (+)', desc: 'Solvatize iyon' }, { label: 'Anyon (-)', desc: 'Solvatize iyon' }];
-          }
-        }
-      } else {
-        // PRODUCTS TAB
-        if (isPhysicalMix) {
-          var reactant = (which === 'p2' || which === 'r2') ? r2 : r1;
-          modalData.title = reactant.name + ' (' + reactant.f + ')';
-          modalData.badge = 'Fiziksel Karışım';
-          modalData.badgeClass = 'badge-physical';
-          modalData.svg = window.MebiSVG.renderGenericProductParticle((which === 'p2' || which === 'r2') ? 'reactant2' : 'reactant1', rx, r1, r2);
-          modalData.desc = 'Fiziksel karışım gerçekleştiğinde herhangi bir kimyasal bağ kopması veya yeni bağ oluşumu gerçekleşmez. Tanecikler kimliklerini korur ve çözeltide bağımsız olarak dağılır.';
-          modalData.ions = [
-            { label: reactant.f, desc: 'Kimyasal değişime uğramayan orijinal tanecik' },
-            { label: 'H₂O', desc: 'Çözücü ortamı' }
-          ];
-        } else {
-          var hasPpt = (rx.obs && rx.obs.indexOf('precipitate') > -1);
-          var hasGas = (rx.obs && rx.obs.indexOf('gas') > -1);
-          var isComplex = (rx.typeCategories && rx.typeCategories.indexOf('complex') > -1) || (rx.typeCategory === 'complex');
-          var isHclNaoh = (r1.id === 'HCl' && r2.id === 'NaOH') || (r1.id === 'NaOH' && r2.id === 'HCl');
-          var isO2Gas = (r1.id === 'H2O2' || r2.id === 'H2O2');
-          var isCl2Gas = (r1.id === 'H2O2' && r2.id === 'HCl') || (r1.id === 'HCl' && r2.id === 'H2O2');
-
-          var isFirstCard = (which === 'p1' || which === 'r1');
-
-          if (hasPpt) {
-            if (isFirstCard) {
-              modalData.title = (rx.mainProductSymbol || 'Katı Çökelti') + ' - Çökelti Kristal Kafesi';
-              modalData.badge = 'Katı Çökelti';
-              modalData.badgeClass = 'badge-solid';
-              modalData.svg = window.MebiSVG.renderGenericProductParticle(rx.mainProductSymbol || 'precipitate', rx, r1, r2);
-              modalData.desc = 'Tepkimeye giren zıt yüklü iyonlar bir araya gelerek suda çözünmeyen düzenli 3B kristal kafes örgüsü oluşturur. Yerçekimi etkisiyle beherin tabanına çöker.';
-              modalData.ions = [
-                { label: rx.mainProductSymbol || 'Katı Faz', desc: 'Düzenli 3B kristal örgü' },
-                { label: 'İyonik Bağlar', desc: 'Güçlü elektrostatik çekim kuvveti' }
-              ];
-            } else {
-              if (hasGas) {
-                modalData.title = (isO2Gas ? 'O₂' : 'CO₂') + ' - Gaz Molekülleri';
-                modalData.badge = 'Açığa Çıkan Gaz';
-                modalData.badgeClass = 'badge-gas';
-                modalData.svg = window.MebiSVG.renderGenericProductParticle(isO2Gas ? 'O2' : 'CO2', rx, r1, r2);
-                modalData.desc = 'Kimyasal tepkime sonucunda serbest kalan gaz molekülleri yüksek kinetik enerjiye sahiptir ve çözeltiden ayrılarak atmosfere karışır.';
-                modalData.ions = [
-                  { label: isO2Gas ? 'O₂ Gazı' : 'CO₂ Gazı', desc: 'Serbest gaz fazı' },
-                  { label: 'Kinetik Enerji', desc: 'Çözeltiden faz ayrılması' }
-                ];
-              } else {
-                modalData.title = (rx.spectators || 'Seyirci İyonlar') + ' - Sulu Çözelti';
-                modalData.badge = 'Sulu Çözelti';
-                modalData.badgeClass = 'badge-aqueous';
-                modalData.svg = window.MebiSVG.renderGenericProductParticle('spectators', rx, r1, r2);
-                modalData.desc = 'Net çökelme tepkimesine katılmayan seyirci iyonlar çözeltide birbirinden bağımsız hareket etmeye devam eder.';
-                modalData.ions = [
-                  { label: rx.spectators || 'Seyirci İyonlar', desc: 'Çözeltide serbest iyonlar' },
-                  { label: 'İyon Yükleri', desc: 'Kimyasal gösterimde belirtilir' }
-                ];
-              }
-            }
-          } else if (hasGas) {
-            if (isFirstCard) {
-              var gasName = isO2Gas ? 'O₂ (Oksijen)' : (isCl2Gas ? 'Cl₂ (Klor)' : 'CO₂ (Karbondioksit)');
-              modalData.title = gasName + ' - Gaz Molekülleri';
-              modalData.badge = 'Açığa Çıkan Gaz';
-              modalData.badgeClass = 'badge-gas';
-              modalData.svg = window.MebiSVG.renderGenericProductParticle(isO2Gas ? 'O2' : (isCl2Gas ? 'Cl2' : 'CO2'), rx, r1, r2);
-              modalData.desc = 'Tepkime sonucu açığa çıkan gaz molekülleri çözelti içerisinde kabarcıklar oluşturarak atmosfere yükselir.';
-              modalData.ions = [
-                { label: gasName, desc: 'Kovalent bağlı serbest gaz molekülleri' },
-                { label: 'Kabarcık Dinamiği', desc: 'Yüksek kinetik enerji ve gaz fazı' }
-              ];
-            } else {
-              modalData.title = (rx.spectators || 'Çözünmüş İyonlar') + ' - Sulu Çözelti';
-              modalData.badge = 'Sulu Çözelti';
-              modalData.badgeClass = 'badge-aqueous';
-              modalData.svg = window.MebiSVG.renderGenericProductParticle('spectators', rx, r1, r2);
-              modalData.desc = 'Gaz oluşumu sonrasında çözeltide kalan iyonlar su molekülleri tarafından sarılmış halde serbestçe dolaşır.';
-              modalData.ions = [
-                { label: rx.spectators || 'Çözünmüş İyonlar', desc: 'Solvatize iyonlar' },
-                { label: 'H₂O', desc: 'Sıvı çözücü ortamı' }
-              ];
-            }
-          } else if (isComplex) {
-            if (isFirstCard) {
-              modalData.title = (rx.mainProductSymbol || '[Cu(NH₃)₄]²⁺') + ' - Koordinasyon Kompleksi';
-              modalData.badge = 'Koordinasyon Kompleksi';
-              modalData.badgeClass = 'badge-complex';
-              modalData.svg = window.MebiSVG.renderGenericProductParticle('CuComplex', rx, r1, r2);
-              modalData.desc = 'Cu²⁺ merkez metal katyonu çevresine 4 adet NH₃ ligandı koordine kovalent bağlarla bağlanarak karakteristik koyu mavi tetraamminbakır(II) kompleks katyonunu oluşturur.';
-              modalData.ions = [
-                { label: 'Cu²⁺', desc: 'Merkez atom (Elektron çifti alıcısı / Lewis asidi)' },
-                { label: '4 × NH₃', desc: 'Ligandlar (Elektron çifti vericisi / Lewis bazı)' }
-              ];
-            } else {
-              modalData.title = (rx.spectators || 'NO₃⁻ Seyirci İyonları') + ' - Sulu Çözelti';
-              modalData.badge = 'Sulu Çözelti';
-              modalData.badgeClass = 'badge-aqueous';
-              modalData.svg = window.MebiSVG.renderGenericProductParticle('spectators', rx, r1, r2);
-              modalData.desc = 'Kompleks oluşum tepkimesine katılmayan nitrat iyonları çözeltide serbest olarak bulunur.';
-              modalData.ions = [
-                { label: 'NO₃⁻ Anyonları', desc: 'Seyirci iyonlar' },
-                { label: 'H₂O', desc: 'Hidratasyon kılıfı' }
-              ];
-            }
-          } else {
-            // Nötrleşme
-            if (isFirstCard) {
-              modalData.title = 'H₂O - Nötrleşme Suyu Molekülleri';
-              modalData.badge = 'Nötrleşme Suyu';
-              modalData.badgeClass = 'badge-aqueous';
-              modalData.svg = window.MebiSVG.renderGenericProductParticle('H2O', rx, r1, r2);
-              modalData.desc = 'Asitten gelen H⁺ (veya H₃O⁺) iyonları ile bazdan gelen OH⁻ iyonları birleşerek kararlı kovalent H₂O moleküllerini oluşturur (Nötrleşme net iyon tepkimesi: H⁺ + OH⁻ → H₂O).';
-              modalData.ions = [
-                { label: 'H₂O Molekülleri', desc: 'Kovalent bağlı nötr moleküller' },
-                { label: 'Hidrojen Bağları', desc: 'Moleküller arası dinamik ağ' }
-              ];
-            } else {
-              modalData.title = (isHclNaoh ? 'Na⁺ ve Cl⁻' : (rx.spectators || 'Çözünmüş İyonlar')) + ' - Sulu Çözelti';
-              modalData.badge = 'Çözünmüş Tuz';
-              modalData.badgeClass = 'badge-aqueous';
-              modalData.svg = window.MebiSVG.renderGenericProductParticle('spectators', rx, r1, r2);
-              modalData.desc = 'Nötrleşme tepkimesi sonucu oluşan tuz (örneğin NaCl) suda yüksek çözünürlüğe sahip olduğu için katı kristal oluşturmaz; çözeltide serbest iyonlar halinde kalır.';
-              modalData.ions = [
-                { label: isHclNaoh ? 'Na⁺ ve Cl⁻' : 'Tuz İyonları', desc: 'Çözeltide serbest iyonlar' },
-                { label: isHclNaoh ? 'Na⁺ + Cl⁻' : (rx.spectators || 'Tuz iyonları'), desc: 'Yükleriyle kimyasal gösterim' }
-              ];
-            }
-          }
-        }
-      }
-
-      var sourceParticleHost = document.querySelector('.particle-3d-host[data-particle-view="' + which + '"]');
-      modalData.modelType = sourceParticleHost ? (sourceParticleHost.getAttribute('data-particle-type') || '') : '';
-      if (window.MebiUI && window.MebiUI.openParticleModal) {
-        window.MebiUI.openParticleModal(modalData);
-      }
-    },
+    zoomParticle: function() {},
     clearCollection: function() {
       function doClear() {
         if (window.MebiAudio) window.MebiAudio.playClick();
