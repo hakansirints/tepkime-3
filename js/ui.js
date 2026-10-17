@@ -389,9 +389,13 @@
     for (var t = 0; t < tabs.length; t++) {
       var tab = tabs[t];
       var s = parseInt(tab.getAttribute('data-step'), 10);
+      tab.id = 'welcomeTab' + s;
+      tab.setAttribute('aria-controls', 'welcomeStep' + s);
+      tab.tabIndex = s === currentWelcomeStep ? 0 : -1;
       if (s === currentWelcomeStep) {
         tab.classList.add('tab-active');
         tab.setAttribute('aria-selected', 'true');
+        if (document.getElementById('welcomeModalOverlay').classList.contains('is-active')) tab.scrollIntoView({block:'nearest',inline:'nearest'});
       } else {
         tab.classList.remove('tab-active');
         tab.setAttribute('aria-selected', 'false');
@@ -401,6 +405,7 @@
     for (var i = 1; i <= 5; i++) {
       var panel = document.getElementById('welcomeStep' + i);
       if (panel) {
+        panel.setAttribute('aria-labelledby', 'welcomeTab' + i);
         if (i === currentWelcomeStep) {
           panel.classList.add('is-active');
         } else {
@@ -445,6 +450,7 @@
     }
 
     setWelcomeStep(1);
+    document.querySelector('.welcome-tabs-track').scrollLeft = 0;
     isWelcomeOpened = true;
     overlay.classList.add('is-active');
     overlay.setAttribute('aria-hidden', 'false');
@@ -492,6 +498,13 @@
     var tabBtns = document.querySelectorAll('.welcome-tab-btn');
     for (var b = 0; b < tabBtns.length; b++) {
       (function(btn) {
+        btn.addEventListener('keydown', function(event) {
+          if (['ArrowLeft','ArrowRight','Home','End'].indexOf(event.key) === -1) return;
+          event.preventDefault();
+          var next = event.key === 'Home' ? 1 : event.key === 'End' ? 5 : (currentWelcomeStep + (event.key === 'ArrowLeft' ? 3 : 5)) % 5 + 1;
+          setWelcomeStep(next);
+          document.getElementById('welcomeTab' + next).focus();
+        });
         btn.addEventListener('click', function() {
           var s = parseInt(btn.getAttribute('data-step'), 10);
           if (s) {

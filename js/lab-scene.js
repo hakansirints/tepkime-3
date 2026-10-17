@@ -2,6 +2,8 @@ import * as THREE from 'three';
 window.THREE = THREE;
 globalThis.THREE = THREE;
 import { OrbitControls } from './vendor/three/OrbitControls.js';
+import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js';
+import { createPowderMotion } from './powder-motion.js';
 
 function dismissLabLoader() {
   const loader = document.getElementById('mebiLabLoader');
@@ -139,17 +141,6 @@ function initialize() {
     return mesh(new THREE.CylinderGeometry(radius, radius, height, 40), material, parent, x, y, z);
   }
 
-  function canvasTexture(width, height, draw) {
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    draw(canvas.getContext('2d'), width, height);
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    return texture;
-  }
-
   // Room geometry adapted from 3b-lab/sicak-sinif-laboratuvari.
   const room = new THREE.Group(); scene.add(room);
   const selected = 'C';
@@ -212,14 +203,10 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     tableSurface.material.color.set(color);
     renderer.shadowMap.needsUpdate = true;
   }
-  const glassMaterial = new THREE.MeshPhysicalMaterial({
-    color: '#ffffff', metalness: 0, roughness: 0.08,
-    transparent: true, opacity: 0.14, transmission: 0.88, thickness: 0.02,
-    side: THREE.DoubleSide, depthWrite: false, envMapIntensity: 1.5
-  });
-  // Preserve the 67:92 low-form proportions, enlarge for readable classroom use.
+  const createBeaker = createBeakerFactory(renderer, scene);
+  // Keep the existing display height, positions, contents and experiment timing.
   const beakerScale = 0.42 / 1.1;
-  const beakerRadius = (0.067 / 0.092) * 1.1 / 2;
+  const beakerRadius = BEAKER_RADIUS;
   const main = createBeaker(beakerRadius, 1.1);
   main.group.scale.setScalar(beakerScale);
   main.group.name = 'experiment-beaker-1';
@@ -229,6 +216,8 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   secondary.group.name = 'experiment-beaker-2';
   const secondaryHome = new THREE.Vector3(0.15, tableY, 0.48);
   secondary.group.position.copy(secondaryHome);
+  main.powderMotion = createPowderMotion(main);
+  secondary.powderMotion = createPowderMotion(secondary);
 
   function createBenchNameplate(x, slot) {
     const group = new THREE.Group();
@@ -267,76 +256,23 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   const secondaryNameplate = createBenchNameplate(secondaryHome.x, 2);
 
 
-  function createBeaker(radius, height) {
-    const group = new THREE.Group();
-    scene.add(group);
-    const points = [[0, 0.02], [radius - 0.05, 0.02], [radius, 0.07], [radius, height],
-      [radius - 0.022, height], [radius - 0.022, 0.075], [0, 0.075]];
-    mesh(new THREE.LatheGeometry(points.map(p => new THREE.Vector2(...p)), 64), glassMaterial, group);
-    const edgeMaterial = new THREE.MeshStandardMaterial({ color: '#d4e6e7', roughness: 0.22, transparent: true, opacity: 0.32, metalness: 0.1 });
-    for (const y of [0.07, height]) {
-      const rim = mesh(new THREE.TorusGeometry(radius - 0.011, 0.012, 8, 64), edgeMaterial, group, 0, y, 0);
-      rim.rotation.x = Math.PI / 2;
-    }
-    const marks = canvasTexture(256, 512, (ctx) => {
-      ctx.clearRect(0, 0, 256, 512);
-      ctx.strokeStyle = '#385e66';
-      ctx.fillStyle = '#385e66';
-      ctx.lineWidth = 3;
-      ctx.font = 'bold 25px sans-serif';
-      for (let i = 0; i < 5; i++) {
-        const y = 80 + i * 70;
-        ctx.beginPath(); ctx.moveTo(18, y); ctx.lineTo(82, y); ctx.stroke();
-        ctx.fillText(String(250 - i * 50), 95, y + 7);
-      }
-      ctx.font = '21px sans-serif';
-      ctx.fillText('BORO 3.3', 24, 460);
-    });
-    mesh(new THREE.CylinderGeometry(radius + 0.002, radius + 0.002, height * 0.82, 32, 1, true, -0.52, 1.08),
-      new THREE.MeshBasicMaterial({ map: marks, transparent: true, side: THREE.DoubleSide, depthWrite: false }), group, 0, height * 0.52, 0);
-    const liquidMaterial = new THREE.MeshPhysicalMaterial({
-      color: '#a7d6e0', transparent: true, opacity: 0.58,
-      roughness: 0.21, metalness: 0, side: THREE.DoubleSide, depthWrite: false, envMapIntensity: 0.45
-    });
-    const liquidGeometry = new THREE.CylinderGeometry(radius - 0.027, radius - 0.027, 1, 64);
-    const liquid = mesh(liquidGeometry, liquidMaterial, group);
-    liquid.name = 'solution';
-    const liquidBaseY = Array.from(liquidGeometry.attributes.position.array).filter((value, index) => index % 3 === 1);
-    const surface = mesh(new THREE.CircleGeometry(radius - 0.026, 48), liquidMaterial, group);
-    surface.rotation.x = -Math.PI / 2;
-    const powder = cylinder(radius - 0.035, 1, standard('#ffffff', 0.95), group);
-    powder.name = 'powder';
-    const sediment = cylinder(radius - 0.033, 1, standard('#ffffff', 0.92), group);
-    sediment.name = 'precipitate';
-    sediment.visible = false;
-    const grains = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.020, 0), standard('#ffffff', 0.95), 60);
-    grains.name = 'solid-grains';
-    const dummy = new THREE.Object3D();
-    for (let i = 0; i < 60; i++) {
-      const angle = i * 2.39996;
-      const r = Math.sqrt((i + 0.5) / 60) * (radius - 0.075);
-      dummy.position.set(Math.cos(angle) * r, 0.088 + 0.022 * Math.sin(i * 1.7), Math.sin(angle) * r);
-      dummy.updateMatrix();
-      grains.setMatrixAt(i, dummy.matrix);
-    }
-    group.add(grains);
-    return { group, radius, height, liquid, liquidBaseY, surface, powder, sediment, grains, level: 0.4 };
-  }
-
   // Modern Dijital Daldırma Termometresi (Beherin kenarına monte, 2. görsel ile birebir uyumlu)
   const probeX = main.group.position.x - 0.082;
   const probeZ = main.group.position.z - 0.035;
+  const thermometer = new THREE.Group();
+  thermometer.name = 'experiment-thermometer';
+  scene.add(thermometer);
   // 1. Metalik Daldırma Probu (Paslanmaz çelik çubuk - beherin içine uzanır)
-  cylinder(0.0055, 0.46, materials.metal, scene, probeX, tableY + 0.24, probeZ);
-  mesh(new THREE.SphereGeometry(0.0055, 10, 8), materials.metal, scene, probeX, tableY + 0.012, probeZ);
+  cylinder(0.0055, 0.46, materials.metal, thermometer, probeX, tableY + 0.24, probeZ);
+  mesh(new THREE.SphereGeometry(0.0055, 10, 8), materials.metal, thermometer, probeX, tableY + 0.012, probeZ);
   // 2. Yaka Boğaz Halkası (Collar Ring - Beherin üst ağız hizasında)
-  const collarRing = mesh(new THREE.TorusGeometry(0.016, 0.005, 8, 24), materials.dark, scene, probeX, tableY + 0.455, probeZ);
+  const collarRing = mesh(new THREE.TorusGeometry(0.016, 0.005, 8, 24), materials.dark, thermometer, probeX, tableY + 0.455, probeZ);
   collarRing.rotation.x = Math.PI / 2;
   // 3. Dijital Termometre Gövdesi (Beher kenarında ileriye bakan koyu gövde - %40 küçültülmüş)
   const thermoHead = new THREE.Group();
   thermoHead.scale.setScalar(0.60);
   thermoHead.position.set(probeX, tableY + 0.51, probeZ);
-  scene.add(thermoHead);
+  thermometer.add(thermoHead);
   box(0.24, 0.15, 0.035, materials.dark, thermoHead, 0, 0, 0);
   // Yüksek Çözünürlüklü Dijital LCD Ekran
   const displayCanvas = document.createElement('canvas');
@@ -384,7 +320,8 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     scene.add(grains); grains.visible = false;
     return { flow, grains, vessel, started: -Infinity, id: null };
   });
-  const pourGrains = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.0054, 0), standard('#ffffff', 0.95), 70);
+  const powderStreamCount = 180;
+  const pourGrains = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.0035, 0), standard('#ffffff', 0.95), powderStreamCount);
   scene.add(pourGrains); pourGrains.visible = false;
   const impactGrains = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.0045, 0), standard('#ffffff', 0.95), 24);
   scene.add(impactGrains); impactGrains.visible = false;
@@ -415,10 +352,28 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   const projection = new THREE.Vector3();
   const clock = new THREE.Clock();
   let state = null;
+  let particleLayer = null;
+  let particleLoading = null;
+  let particleLoadError = false;
+  function ensureParticleLayer() {
+    if (particleLayer || particleLoading || particleLoadError) return;
+    particleLoading = import('./beaker-particles.js?v=1.2').then(module => {
+      particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature});
+      particleLayer.sync(state);resize();renderFrame();
+    }).catch(error => {
+      particleLoadError = true;
+      console.error('Tanecik görünümü yüklenemedi.',error);
+      const status = document.getElementById('particleInspectionPhase');
+      if (status) status.textContent='Tanecik görünümü açılamadı. Kartına dönüp yeniden deneyebilirsin.';
+    }).finally(() => {particleLoading=null;});
+  }
   let dispatch = null;
   let lastPair = '';
   let lastStep = '';
-  let pouringStarted = 0;
+  let motionRun = 0;
+  let motionAt = performance.now();
+  let completionQueued = false;
+  let previousFlow = 0;
   let reactionStarted = 0;
   let temperature = 22;
   let drag = null;
@@ -432,7 +387,6 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let overlay = null;
   let dragButton = null;
   let handGuide = null;
-  let pourTarget = null;
   let thermo = null;
   let mainLabel = null;
   let secondaryLabel = null;
@@ -483,7 +437,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     const dock = document.getElementById('benchDock');
     const bench = document.getElementById('labBenchContainer');
     const tools = document.querySelector('.lab-camera-tools');
-    const left = document.querySelector('.lab-reagent-panel');
+    const left = document.querySelector('.lab-live-card, .lab-reagent-panel');
     const predictionStage = state && (state.screen === 'pool' || (state.screen === 'lab' && state.labStep === 'predict'));
     if (left && !left.classList.contains('is-collapsed')) {
       const heading = left.querySelector('.lab-panel-heading');
@@ -507,8 +461,12 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     }
     const portrait = w < 600 && h > w;
     const presetFov = viewFov[activeView] || 40;
-    if (state && (state.screen === 'lab' || state.screen === 'pool') && dock && !portrait) {
-      camera.setViewOffset(w, h, (dock.offsetWidth - (left ? left.offsetWidth : 0)) / 2, h < 650 ? -12 : -20, w, h);
+    if (state && state.screen === 'lab' && !portrait) {
+      // Keep the same apparatus framing with full, collapsed and floating forms.
+      const app = document.getElementById('app');
+      const reserved = app ? parseFloat(getComputedStyle(app).getPropertyValue('--right-panel')) : 0;
+      const width = reserved || (h < 650 ? 220 : w <= 1100 ? 250 : 400);
+      camera.setViewOffset(w, h, width / 2, h < 650 ? -12 : -20, w, h);
       camera.fov = presetFov;
     } else {
       camera.clearViewOffset();
@@ -535,11 +493,15 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     const wasInLab = state && (state.screen === 'lab' || state.screen === 'pool');
     state = nextState;
     dispatch = nextDispatch;
+    if (!state.particleInspection) particleLoadError=false;
+    if (particleLayer) particleLayer.sync(state);
+    if (state.particleInspection) ensureParticleLayer();
     setLaboratoryLighting(state.labLighting || 'light');
     setTableColor(state.tableColor || '#3d4547');
-    if (drag && (state.screen !== 'lab' || state.labStep !== 'ready')) {
-      if (drag.capture.hasPointerCapture(drag.pointerId)) drag.capture.releasePointerCapture(drag.pointerId);
-      drag = null;
+    const experiment = window.MebiExperiment.get(state);
+    if (drag && (state.screen !== 'lab' || state.labStep !== 'ready' || experiment.run !== motionRun || experiment.safetyOpen || experiment.mode !== 'manual')) {
+      const oldDrag = drag; drag = null;
+      if (oldDrag.capture.hasPointerCapture(oldDrag.pointerId)) oldDrag.capture.releasePointerCapture(oldDrag.pointerId);
     }
     const inLab = state.screen === 'lab' || state.screen === 'pool';
     mainNameplate.group.visible = false;
@@ -547,15 +509,16 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     document.body.dataset.labScreen = state.screen;
     const predictionStage = state.screen === 'pool' || (state.screen === 'lab' && state.labStep === 'predict');
     document.body.dataset.predictionStage = String(predictionStage);
-    host.style.pointerEvents = inLab ? 'auto' : 'none';
-    controls.enabled = inLab;
+    if (state.screen !== 'lab' && experiment.mode !== 'idle') window.MebiExperiment.park(state);
+    host.inert = experiment.safetyOpen;
+    host.style.pointerEvents = inLab && !experiment.safetyOpen ? 'auto' : 'none';
+    controls.enabled = inLab && experiment.mode === 'idle' && !experiment.safetyOpen;
     overlay = document.querySelector('.bench-stage');
     mainLabel = document.getElementById('mainVessel');
     secondaryLabel = document.getElementById('dragReagentWrap');
     thermo = document.getElementById('digitalThermoWrap'); if (thermo) thermo.style.display = 'none';
     dragButton = null;
     handGuide = null;
-    pourTarget = null;
     if (overlay && thermo) overlay.appendChild(thermo);
     if (inLab) {
       document.querySelectorAll('[data-lab-view]').forEach(button => {
@@ -575,8 +538,9 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
         dragButton = document.createElement('button');
         dragButton.className = 'lab-beaker-target';
         dragButton.type = 'button';
-        dragButton.setAttribute('aria-label', 'Beheri Dök');
+        dragButton.setAttribute('aria-label', 'İkinci beheri sola sürükleyerek dök');
         dragButton.addEventListener('pointerdown', event => beginDrag(event, true));
+        dragButton.addEventListener('lostpointercapture', event => { if (drag) endDrag(event); });
         dragButton.addEventListener('click', event => {
           if (event.detail === 0 && state.labStep === 'ready') dispatch('triggerPour');
         });
@@ -604,7 +568,8 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       if (id !== filling.id) { filling.id = id; filling.started = performance.now(); }
     });
     const pair = state.selectedSlot1 + '|' + state.selectedSlot2;
-    if (pair !== lastPair) {
+    if (pair !== lastPair || motionRun !== experiment.run) {
+      motionRun = experiment.run; motionAt = performance.now(); previousFlow = 0;
       lastPair = pair;
       main.group.position.set(-0.4, tableY, 0.48);
       secondary.group.position.copy(secondaryHome);
@@ -616,7 +581,6 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       }
     }
     if (state.labStep !== lastStep) {
-      if (state.labStep === 'pouring') pouringStarted = performance.now();
       if (state.labStep === 'reacting') reactionStarted = performance.now();
       if (state.labStep === 'predict' || state.labStep === 'ready') {
         secondary.group.position.copy(secondaryHome);
@@ -641,80 +605,45 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
 
   function beginDrag(event, force = false) {
     if (!state || state.screen !== 'lab' || state.labStep !== 'ready' || event.button > 0) return;
+    const experiment = window.MebiExperiment.get(state);
+    if (experiment.mode !== 'idle' || experiment.transfer >= 1) return;
     pointerRay(event);
     if (!force && !raycaster.intersectObject(secondary.group, true).length) return;
-    event.preventDefault();
-    event.stopPropagation();
-    cameraTransition = null;
-    controls.enabled = false;
-    const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), secondary.group.position);
-    const hit = raycaster.ray.intersectPlane(plane, new THREE.Vector3());
-    if (!hit) return;
-    drag = { plane, offset: secondary.group.position.clone().sub(hit), startX: event.clientX, startY: event.clientY,
-      pointerId: event.pointerId, capture: event.currentTarget, ready: false };
+    event.preventDefault(); event.stopImmediatePropagation();
+    if (!experiment.safetyAccepted) { dispatch('requestManualPour'); return; }
+    if (!window.MebiExperiment.startManual(state)) return;
+    cameraTransition = null; controls.enabled = false;
+    const from = screenPoint(secondaryHome), to = screenPoint(main.group.position);
+    drag = { startX:event.clientX, pointerId:event.pointerId, capture:event.currentTarget,
+      travel:Math.max(110, Math.min(300, Math.abs(from.x - to.x) * 1.05)) };
     drag.capture.setPointerCapture(event.pointerId);
-    if (pourTarget) pourTarget.classList.add('is-dragging');
     if (window.MebiAudio) window.MebiAudio.playClick();
   }
 
   function dragMove(event) {
     if (!drag || event.pointerId !== drag.pointerId) return;
-    pointerRay(event);
-    const hit = raycaster.ray.intersectPlane(drag.plane, new THREE.Vector3());
-    if (hit) {
-      secondary.group.position.copy(hit.add(drag.offset));
-      secondary.group.position.x = THREE.MathUtils.clamp(secondary.group.position.x, -2.6, 2.2);
-      secondary.group.position.y = THREE.MathUtils.clamp(secondary.group.position.y, tableY, tableY + 2);
-      const target = screenPoint(pourTargetPoint());
-      const spout = screenPoint(pourSpoutPoint());
-      drag.ready = isPourReady(spout, target);
-      secondary.group.rotation.z += ((drag.ready ? 0.28 : 0) - secondary.group.rotation.z) * 0.24;
-      if (pourTarget) pourTarget.classList.toggle('is-ready', drag.ready);
-    }
+    // Scrub the original automatic timeline. Rewinding changes the vessel pose,
+    // while already transferred matter stays in the receiving beaker.
+    window.MebiExperiment.scrub(state, (drag.startX - event.clientX) / drag.travel * 0.80);
   }
 
   function endDrag(event) {
     if (!drag || event.pointerId !== drag.pointerId) return;
-    const activeDrag = drag;
-    drag = null;
-    if (activeDrag.capture.hasPointerCapture(event.pointerId)) activeDrag.capture.releasePointerCapture(event.pointerId);
-    if (pourTarget) pourTarget.classList.remove('is-dragging', 'is-ready');
-    controls.enabled = state.screen === 'lab';
-    const target = screenPoint(pourTargetPoint());
-    const spout = screenPoint(pourSpoutPoint());
-    const releasedOnTarget = isPourReady(spout, target);
-    if (event.type !== 'pointercancel' && (activeDrag.ready || releasedOnTarget)) {
-      if (state.labStep === 'ready') dispatch('triggerPour');
-    } else {
-      secondary.group.position.copy(secondaryHome);
-      secondary.group.rotation.z = 0;
-    }
+    const active = drag; drag = null;
+    if (active.capture.hasPointerCapture(event.pointerId)) active.capture.releasePointerCapture(event.pointerId);
+    window.MebiExperiment.release(state);
+    controls.enabled = false;
   }
 
   renderer.domElement.addEventListener('pointerdown', event => beginDrag(event), true);
   window.addEventListener('pointermove', dragMove);
   window.addEventListener('pointerup', endDrag);
   window.addEventListener('pointercancel', endDrag);
+  window.addEventListener('blur', () => { if (drag) endDrag({ pointerId:drag.pointerId }); });
 
   function screenPoint(point) {
     projection.copy(point).project(camera);
     return { x: (projection.x + 1) * window.innerWidth / 2, y: (1 - projection.y) * window.innerHeight / 2 };
-  }
-
-  function pourTargetPoint() {
-    return main.group.position.clone().add(new THREE.Vector3(0, main.height * beakerScale * 0.88, 0));
-  }
-
-  function isPourReady(spout, target) {
-    const dx = Math.abs(spout.x - target.x);
-    const dy = spout.y - target.y;
-    // The active zone extends farther below the receiving beaker mouth so an
-    // upward drag can engage naturally before the spout reaches the exact rim.
-    return dx < 104 && dy > -62 && dy < 138;
-  }
-
-  function pourSpoutPoint() {
-    return secondary.group.localToWorld(new THREE.Vector3(-secondary.radius * 0.98, secondary.height * 0.98, 0));
   }
 
   function place(element, point, dy = 0) {
@@ -742,12 +671,11 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       Object.assign(dragButton.style, { left: (base.x - width / 2) + 'px', top: (top.y - 8) + 'px',
         width: width + 'px', height: Math.max(50, base.y - top.y + 18) + 'px' });
       place(handGuide, secondary.group.position.clone().add(new THREE.Vector3(0, secondary.height * beakerScale, 0)), -18);
-      if (handGuide) handGuide.style.visibility = drag ? 'hidden' : 'visible';
+      const moving = window.MebiExperiment.get(state).mode !== 'idle';
+      dragButton.style.visibility = moving && !drag ? 'hidden' : 'visible';
+      if (handGuide) handGuide.style.visibility = moving || state.experiment.transfer >= 1 ? 'hidden' : 'visible';
     }
-    if (pourTarget) {
-      const mouth = screenPoint(pourTargetPoint());
-      Object.assign(pourTarget.style, { left: mouth.x + 'px', top: mouth.y + 'px' });
-    }
+
   }
 
   function setVesselContents(vessel, liquid, powder, color, opacity, angle = 0) {
@@ -755,12 +683,24 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     vessel.surface.visible = liquid > 0.005 && angle < 0.05;
     vessel.powder.visible = vessel.grains.visible = powder > 0.005;
     const positions = vessel.liquid.geometry.attributes.position;
-    const floor = 0.065;
+    const floor = vessel.floor + 0.002;
     const slope = Math.tan(angle);
+    let plane = liquid;
+    if (angle > 0.01 && liquid > 0) {
+      const radius = vessel.innerRadius - 0.002, height = vessel.rimHeight - floor - 0.018;
+      const samples = vessel.volumeSamples || (vessel.volumeSamples = Array.from({length:64}, (_, i) => Math.sqrt((i + .5) / 64) * Math.cos(i * 2.399963) * radius));
+      let low = -radius * Math.abs(slope), high = height + radius * Math.abs(slope);
+      for (let i = 0; i < 17; i++) {
+        const mid = (low + high) / 2;
+        const average = samples.reduce((sum, x) => sum + THREE.MathUtils.clamp(mid - x * slope, 0, height), 0) / samples.length;
+        if (average < liquid) low = mid; else high = mid;
+      }
+      plane = (low + high) / 2;
+    }
     for (let vertex = 0; vertex < positions.count; vertex++) {
       const baseY = vessel.liquidBaseY[vertex];
       const y = baseY > 0.45
-        ? floor + THREE.MathUtils.clamp(liquid - positions.getX(vertex) * slope, 0.002, vessel.height - floor - 0.018)
+        ? floor + THREE.MathUtils.clamp(plane - positions.getX(vertex) * slope, 0.002, vessel.rimHeight - floor - 0.018)
         : floor;
       positions.setY(vertex, y);
     }
@@ -769,12 +709,9 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     vessel.liquid.geometry.computeBoundingSphere();
     vessel.liquid.position.y = 0;
     vessel.liquid.scale.y = 1;
-    vessel.surface.position.y = 0.066 + liquid;
+    vessel.surface.position.y = floor + liquid;
     vessel.surface.rotation.z = -angle;
-    vessel.powder.scale.y = Math.max(0.001, powder * 0.35);
-    vessel.powder.position.y = 0.065 + powder * 0.175;
-    vessel.grains.position.y = Math.max(0, powder * 0.28);
-    vessel.grains.visible = powder > 0.015;
+    vessel.powderMotion.update(powder, angle);
     vessel.liquid.material.color.set(color);
     vessel.liquid.material.opacity = opacity;
     vessel.surface.material.color.set(color);
@@ -806,27 +743,44 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     const rx = state && state.activeReaction;
     const step = state ? state.labStep : 'predict';
     const reacting = !!rx && (step === 'reacting' || step === 'observed');
-    const pouring = step === 'pouring';
-    const progress = pouring ? THREE.MathUtils.clamp((performance.now() - pouringStarted) / (reducedMotion.matches ? 1 : 5000), 0, 1) : (reacting ? 1 : 0);
-    const transfer = pouring ? THREE.MathUtils.clamp((progress - 0.22) / 0.58, 0, 1) : (reacting ? 1 : 0);
+    const experiment = state ? window.MebiExperiment.get(state) : null;
+    const now = performance.now(), dt = Math.min(.10, Math.max(0, (now - motionAt) / 1000)); motionAt = now;
+    if (experiment && state.screen === 'lab' && (step === 'ready' || step === 'pouring')) {
+      const complete = window.MebiExperiment.advance(state, document.hidden ? 0 : dt, reducedMotion.matches);
+      if (experiment.flow > 0 && previousFlow === 0 && experiment.mode === 'manual' && window.MebiAudio) window.MebiAudio.playPour();
+      previousFlow = experiment.flow;
+      if (experiment.mode === 'idle' && !experiment.safetyOpen) controls.enabled = true;
+      window.MebiExperiment.paint(state);
+      if (complete && !completionQueued) {
+        completionQueued = true;
+        const run = experiment.run;
+        setTimeout(() => {
+          completionQueued = false;
+          if (!state.experiment || state.experiment.run !== run) return;
+          if (state.screen === 'lab') dispatch('finishPour');
+          else state.experiment.completionNotified = false;
+        }, 0);
+      }
+    }
+    const pouring = !!experiment && experiment.mode !== 'idle' && state.screen === 'lab';
+    const progress = pouring ? experiment.path : 0;
+    const transfer = experiment ? experiment.transfer : (reacting ? 1 : 0);
     const reactionProgress = reacting ? THREE.MathUtils.clamp((performance.now() - reactionStarted) / 1200, 0, 1) : 0;
     const fill1 = updateFilling(main, r1, 0, time);
     const fill2 = updateFilling(secondary, r2, 1, time);
-    updateContents(main, r1, 0.42 * fill1);
-    const easePour = p => 0.5 - Math.cos(p * Math.PI) / 2;
-    const lift = easePour(THREE.MathUtils.clamp(progress / 0.22, 0, 1));
-    const returnPhase = easePour(THREE.MathUtils.clamp((progress - 0.80) / 0.20, 0, 1));
-    const pourAngle = !pouring ? 0 : progress < 0.22 ? lift * 0.80
-      : progress < 0.80 ? THREE.MathUtils.lerp(0.80, 1.32, easePour(transfer))
-      : 1.32 * (1 - returnPhase);
-    updateContents(secondary, r2, 0.52 * fill2 * (1 - transfer), pourAngle);
-    if (pouring && r2 && r2.solid) secondary.grains.visible = false;
+    const mlDepth = (vessel, ml) => ml * Math.pow(vessel.height / 6.68, 3) / (Math.PI * Math.pow(vessel.innerRadius - .002, 2));
+    const amount = window.MebiExperiment.defaults.solutionMl;
+    updateContents(main, r1, (r1 && r1.solid ? .42 : mlDepth(main, amount)) * fill1);
+    const pose = window.MebiExperiment.sample(progress, r2 && r2.solid);
+    const lift = pose.lift, returnPhase = pose.returning, pourAngle = pouring ? pose.angle : 0;
+    updateContents(secondary, r2, (r2 && r2.solid ? .52 : mlDepth(secondary, amount)) * fill2 * (1 - transfer), pourAngle);
     const mix = window.MebiChemistry.mixture(r1, r2, rx, transfer, reactionProgress);
+    if (state && r1 && r2) mix.liquid = mlDepth(main, window.MebiExperiment.quantities(state).volume);
     if (transfer > 0) {
       setVesselContents(main, mix.liquid, mix.powder, mix.color, mix.opacity);
       main.liquid.material.color.lerp(new THREE.Color(mix.targetColor), reactionProgress);
     }
-    const transferring = pouring && progress > 0.22 && progress < 0.80 && r2;
+    const transferring = pouring && experiment.flow > 0 && transfer < 1 && r2;
     streamMesh.visible = !!(transferring && !r2.solid);
     pourGrains.visible = !!(transferring && r2.solid);
     impactGrains.visible = pourGrains.visible;
@@ -836,7 +790,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     main.surface.rotation.set(-Math.PI / 2, 0, 0);
     if (pouring && r2) {
       secondary.group.rotation.z = pourAngle;
-      const spoutLocal = new THREE.Vector3(-secondary.radius, secondary.height, 0);
+      const spoutLocal = secondary.spoutPoint.clone();
       const spoutOffset = spoutLocal.clone().multiplyScalar(beakerScale)
         .applyAxisAngle(new THREE.Vector3(0, 0, 1), pourAngle);
       const restSpout = secondaryHome.clone().add(spoutLocal.clone().multiplyScalar(beakerScale));
@@ -861,11 +815,11 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       // Beher 1 içindeki anlık sıvı/katı yüzeyi (Dökme akışı yüzeye çarpar ve sıvı doldukça yükselir)
       let localSurfaceY = 0.07;
       if (mix && mix.liquid > 0.005) {
-        localSurfaceY = 0.066 + mix.liquid;
+        localSurfaceY = main.floor + .002 + mix.liquid;
       } else if (mix && mix.powder > 0.005) {
         localSurfaceY = 0.065 + (mix.powder * 0.35);
       } else if (r1 && !r1.solid) {
-        localSurfaceY = 0.066 + (0.42 * fill1);
+        localSurfaceY = main.floor + .002 + mlDepth(main, amount) * fill1;
       } else if (r1 && r1.solid) {
         localSurfaceY = 0.065 + (0.42 * fill1 * 0.35);
       }
@@ -892,7 +846,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
         streamMesh.geometry.computeVertexNormals();
         streamMesh.geometry.computeBoundingSphere();
       }
-      const active = !r2.solid && progress > 0.22 && progress < 0.84;
+      const active = !r2.solid && transferring;
       splashRings.forEach((ring, index) => {
         ring.visible = active;
         if (!active) return;
@@ -902,7 +856,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
         ring.material.opacity = (1 - phase) * 0.32;
       });
       pourDrops.forEach((drop, index) => {
-        drop.visible = !r2.solid && progress > 0.765 && progress < 0.83;
+        drop.visible = !r2.solid && transferring && progress > 0.765;
         if (!drop.visible) return;
         const t = THREE.MathUtils.clamp((progress - 0.765 - index * 0.009) / 0.035, 0, 1);
         drop.position.copy(targetSpout).lerp(end, t * t);
@@ -911,11 +865,13 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       });
       if (active) main.surface.rotation.set(-Math.PI / 2 + 0.006 * Math.sin(progress * 95),
         0, 0.008 * Math.cos(progress * 80));
-      for (let i = 0; i < 70; i++) {
-        const fall = (time * 2.2 + i / 70) % 1;
-        dummy.position.copy(start).lerp(end, fall * fall);
-        dummy.position.x += Math.sin(i * 5.1 + time * 4) * 0.006 * fall;
-        dummy.position.z += Math.cos(i * 3.3) * 0.005;
+      const fallingGrains = Math.round(35 + (powderStreamCount - 35) * Math.min(1, experiment.flow / .5));
+      pourGrains.count = fallingGrains;
+      for (let i = 0; i < fallingGrains; i++) {
+        const fall = (time * (2.6 + i % 5 * .13) + i / fallingGrains) % 1;
+        dummy.position.set(THREE.MathUtils.lerp(start.x, end.x, fall),THREE.MathUtils.lerp(start.y, end.y, fall * fall),THREE.MathUtils.lerp(start.z,end.z,fall));
+        dummy.position.x += Math.sin(i * 5.1 + time * 4) * (0.002 + .007 * fall);
+        dummy.position.z += Math.cos(i * 3.3) * (0.002 + .005 * fall);
         dummy.rotation.set(time * 3 + i, time * 2 + i * 0.4, i);
         dummy.scale.setScalar(0.55 + i % 4 * 0.18); dummy.updateMatrix(); pourGrains.setMatrixAt(i, dummy.matrix);
       }
@@ -947,7 +903,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     gasSurfaceRings.forEach(ring => { ring.visible = gas; });
     foam.visible = false; // No detergent is present: show bubbles, not stable soap foam.
     flakes.visible = main.sediment.visible = precipitate;
-    const liquidHeight = 0.065 + (progress > 0 ? mix.liquid : (r1 && !r1.solid ? 0.42 : 0));
+    const liquidHeight = main.floor + .002 + mix.liquid;
     if (gas) {
       foam.position.y = liquidHeight + 0.006;
       for (let i = 0; i < bubbleCount; i++) {
@@ -1012,10 +968,19 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       if (t === 1) cameraTransition = null;
     }
     controls.update();
-    camera.position.clamp(cameraBounds.min, cameraBounds.max);
+    const cameraFloor = state && state.particleInspection ? tableY + .008 : cameraBounds.min.y;
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, cameraBounds.min.x, cameraBounds.max.x);
+    camera.position.y = THREE.MathUtils.clamp(camera.position.y, cameraFloor, cameraBounds.max.y);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, cameraBounds.min.z, cameraBounds.max.z);
     camera.lookAt(controls.target);
     camera.updateMatrixWorld();
+    const recordedState = state;
+    thermometer.visible = !(recordedState && recordedState.particleInspection && recordedState.particleInspection.micro);
+    if (particleLayer) state = particleLayer.displayState(recordedState);
+    const displayState = state;
     updateExperiment(time);
+    state = recordedState;
+    if (particleLayer) particleLayer.update(recordedState,displayState);
     renderer.render(scene, camera);
     updateOverlays();
   }
@@ -1055,7 +1020,13 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   document.addEventListener('visibilitychange', resume);
   window.LabScene = {
     available: true,
+    handlesTransfer: true,
+    // Read-only scene values also allow the shared trajectory to be verified.
+    getTransferPose: () => ({ path:state && state.experiment ? state.experiment.path : 0, angle:secondary.group.rotation.z, position:secondary.group.position.toArray(), home:secondaryHome.toArray(), screen:screenPoint(secondary.group.position.clone().add(new THREE.Vector3(0,.20,0))), powder:secondary.powderMotion.summary, powderFlow:pourGrains.visible, spout:secondary.group.localToWorld(secondary.spoutPoint.clone()).toArray() }),
     sync,
+    refreshLayout: resize,
+    getCameraState: () => ({position:camera.position.toArray(),target:controls.target.toArray(),projection:camera.projectionMatrix.toArray(),near:camera.near,minDistance:controls.minDistance,zoomToCursor:controls.zoomToCursor,thermometerVisible:thermometer.visible}),
+    getParticleState: () => particleLayer && particleLayer.enabled ? particleLayer.getSummary() : null,
     setTemperature,
     setView,
     setLighting: setLaboratoryLighting,

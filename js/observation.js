@@ -1,0 +1,181 @@
+/* Student observations belong to an attempt, independently of model outcomes. */
+(function(window) {
+  'use strict';
+  var STORAGE_KEY = 'tepkime_arenasi_observations_v1';
+  var serial = 0;
+  var choices = [{ value:'yes', label:'Gözledim' }, { value:'no', label:'Gözlemedim' }, { value:'unsure', label:'Emin Değilim' }];
+  function items() { return window.MebiPrediction.items; }
+  function copy(value) { return JSON.parse(JSON.stringify(value)); }
+  function esc(value) { return String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function empty() { var answers = {}; items().forEach(function(item) { answers[item.key] = null; }); return answers; }
+  function reset(state) {
+    state.observation = { attemptId:window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : Date.now() + '-observation-' + (++serial),
+      answers:empty(), note:'', record:null, tab:'observe', labVisible:false, reflection:'', savedReflection:'', reflectionSaved:false, message:'', storageError:false };
+    return state.observation;
+  }
+  function validRecord(record) {
+    return record && record.version === 1 && typeof record.id === 'string' && typeof record.predictionId === 'string' &&
+      typeof record.createdAt === 'string' && isFinite(Date.parse(record.createdAt)) && Array.isArray(record.pair) && record.pair.length === 2 &&
+      record.pair.every(function(id) { return !!window.MebiData.getReagent(id); }) &&
+      record.answers && items().every(function(item) { return /^(yes|no|unsure)$/.test(record.answers[item.key]); }) &&
+      typeof record.note === 'string' && record.note.trim().length > 0 && record.note.length <= 400 &&
+      record.prediction && record.prediction.id === record.predictionId && record.prediction.answers &&
+      items().every(function(item) { var a = record.prediction.answers[item.key]; return a && /^(yes|no|unsure)$/.test(a.choice) && typeof a.reason === 'string'; }) &&
+      record.temperature && typeof record.temperature.initial === 'number' && isFinite(record.temperature.initial) &&
+      typeof record.temperature.final === 'number' && isFinite(record.temperature.final);
+  }
+  function readEntries() {
+    var entries = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
+    if (!Array.isArray(entries)) throw new Error('Invalid observation records');
+    return entries.filter(function(entry) { return entry && validRecord(entry.record); });
+  }
+  function applyEntry(observation, entry) {
+    observation.record = copy(entry.record); observation.answers = copy(entry.record.answers); observation.note = entry.record.note;
+    observation.reflection = typeof entry.reflection === 'string' ? entry.reflection.slice(0,400) : '';
+    observation.savedReflection = observation.reflection; observation.reflectionSaved = !!entry.reflectionUpdatedAt;
+  }
+  function get(state) {
+    var observation = state.observation || reset(state);
+    // A restored navigation snapshot cannot replace an already saved first record.
+    if (!observation.record) {
+      try { var entry = readEntries().find(function(entry) { return entry.record.id === observation.attemptId; }); if (entry) applyEntry(observation, entry); } catch (error) {}
+    }
+    return observation;
+  }
+  function canObserve(state) {
+    return state.screen === 'lab' && state.labStep === 'observed' && state.poured && state.experiment && state.experiment.transfer >= 1 &&
+      state.predictionRecord && state.predictionRecord.startedAt && state.activeReaction;
+  }
+  function editable(state) { return !!canObserve(state) && !get(state).record; }
+  function complete(state) { var o = get(state); return items().filter(function(item) { return /^(yes|no|unsure)$/.test(o.answers[item.key]); }).length; }
+  function setChoice(state, value) {
+    if (!editable(state)) return false;
+    var parts = String(value).split(':');
+    if (!items().some(function(item) { return item.key === parts[0]; }) || !/^(yes|no|unsure)$/.test(parts[1])) return false;
+    var o = get(state); o.answers[parts[0]] = parts[1]; o.message = ''; return true;
+  }
+  function setNote(state, value) { if (!editable(state)) return false; var o = get(state); o.note = String(value).slice(0,400); o.message = ''; return true; }
+  function writeEntry(state, reflectionOnly) {
+    var o = get(state);
+    try {
+      var entries = readEntries(), index = entries.findIndex(function(entry) { return entry.record.id === o.record.id; });
+      var entry = index < 0 ? { record:copy(o.record), reflection:'', reflectionUpdatedAt:null } : entries[index];
+      if (reflectionOnly) { entry.reflection = o.reflection.trim(); entry.reflectionUpdatedAt = new Date().toISOString(); }
+      // Only the optional reflection may change after the first observation save.
+      if (index < 0) entries.push(entry); else entries[index] = entry;
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); o.storageError = false;
+    } catch (error) { o.storageError = true; }
+  }
+  function save(state) {
+    if (!editable(state)) return false;
+    var o = get(state);
+    if (complete(state) !== items().length) { o.message = 'Her belirti için bir gözlem seçeneği belirle. Emin Değilim geçerli bir yanıttır.'; return false; }
+    if (!o.note.trim()) { o.message = 'Gördüğün bulguyu anlatan kısa bir gözlem notu ekle.'; return false; }
+    if (o.answers.tempRise === 'yes' && o.answers.tempFall === 'yes') { o.message = 'Son sıcaklık ilk sıcaklıktan hem yüksek hem düşük olamaz. Sıcaklık gözlemlerini gözden geçir.'; return false; }
+    var temperature = { initial:Number(state.activeReaction.tempInit), final:Number(state.currentTemp) };
+    if (!isFinite(temperature.initial) || !isFinite(temperature.final)) { o.message = 'Sıcaklık verisi henüz hazır değil.'; return false; }
+    o.record = { version:1, id:o.attemptId, predictionId:state.predictionRecord.id, pair:[state.selectedSlot1,state.selectedSlot2],
+      createdAt:new Date().toISOString(), answers:copy(o.answers), note:o.note.trim(), temperature:temperature,
+      quantities:copy(window.MebiExperiment.quantities(state)), conditions:copy(window.MebiExperiment.defaults), prediction:copy(state.predictionRecord) };
+    o.note = o.record.note; o.tab = 'compare'; o.message = ''; writeEntry(state, false); return true;
+  }
+  function setTab(state, tab) { if (!canObserve(state) || (tab !== 'observe' && tab !== 'compare') || (tab === 'compare' && !get(state).record)) return false; get(state).tab = tab; get(state).message = ''; return true; }
+  function showLab(state, visible) { if (!canObserve(state)) return false; get(state).labVisible = !!visible; return true; }
+  function setReflection(state, value) { if (!canObserve(state) || !get(state).record) return false; var o = get(state); o.reflection = String(value).slice(0,400); o.reflectionSaved = false; o.message = ''; return true; }
+  function saveReflection(state) {
+    if (!canObserve(state) || !get(state).record) return false;
+    var o = get(state); if (!o.reflection.trim()) { o.message = 'Not eklemek istersen düşünceni yaz; bu alanı boş bırakarak da devam edebilirsin.'; return false; }
+    o.reflection = o.reflection.trim(); o.savedReflection = o.reflection; o.reflectionSaved = true; o.message = ''; writeEntry(state, true); return true;
+  }
+  function number(value) { return Number(value).toLocaleString('tr-TR', { minimumFractionDigits:1, maximumFractionDigits:1 }); }
+  function autoFillForTesting(state) {
+    if (!canObserve(state)) return false;
+    var o = get(state);
+    if (o.record) {
+      if (o.tab !== 'compare') return false;
+      var changed = [], confirmed = [], uncertain = [];
+      items().forEach(function(item) {
+        var predicted = o.record.prediction.answers[item.key].choice, observed = o.record.answers[item.key];
+        if (predicted === 'unsure' || observed === 'unsure') uncertain.push(item.label.toLocaleLowerCase('tr-TR'));
+        else (predicted === observed ? confirmed : changed).push(item.label.toLocaleLowerCase('tr-TR'));
+      });
+      return setReflection(state, (changed.length ? 'Gözlem kaydımda ' + changed.join(', ') + ' ile ilgili bulgular tahminimden farklıydı; bu tahminlerimi kaydettiğim verilere göre yeniden değerlendiriyorum. ' : '') +
+        (confirmed.length ? confirmed.join(', ') + ' ile ilgili tahminlerim gözlem kaydımla uyumlu. ' : '') +
+        (uncertain.length ? uncertain.join(', ') + ' konusunda karara varmak için ek gözleme ihtiyacım var.' : ''));
+    }
+    var actual = window.MebiPrediction.outcomes(state.activeReaction);
+    var initial = Number(state.activeReaction.tempInit), current = Number(state.currentTemp);
+    if (!isFinite(initial) || !isFinite(current)) return false;
+    actual.tempRise = current > initial; actual.tempFall = current < initial;
+    items().forEach(function(item) { o.answers[item.key] = actual[item.key] ? 'yes' : 'no'; });
+    var observations = [actual.gas ? 'Kabarcık oluştu.' : 'Kabarcık gözlemedim.',
+      actual.precipitate ? 'Çökelti oluştu.' : 'Çökelti gözlemedim.',
+      actual.color ? 'Karışımın rengi değişti.' : 'Renk değişimi gözlemedim.',
+      actual.tempRise || actual.tempFall ? 'Sıcaklık ' + number(initial) + ' °C’den ' + number(current) + ' °C’ye ' + (actual.tempRise ? 'yükseldi.' : 'düştü.') : 'Sıcaklık ' + number(current) + ' °C’de sabit kaldı.'];
+    o.note = observations.join(' '); o.message = ''; return true;
+  }
+  function temperatureHTML(state) {
+    var o = get(state), t = o.record ? o.record.temperature : { initial:state.activeReaction.tempInit, final:state.currentTemp };
+    return '<div class="observation-temperature" aria-label="Sanal deney sıcaklık verileri"><span>İlk: <strong>' + number(t.initial) + ' °C</strong></span><span>Son: <strong>' + number(t.final) + ' °C</strong></span><span>ΔT: <strong>' + number(t.final - t.initial) + ' °C</strong></span></div><p class="observation-model-note">Sıcaklıklar sanal deney modeline aittir.</p>';
+  }
+  function observationLabel(value) { return value === 'yes' ? 'Gözledim' : value === 'no' ? 'Gözlemedim' : 'Emin Değilim'; }
+  function comparisonHTML(state) {
+    var o = get(state), record = o.record;
+    return '<div class="observation-compare-layout"><div><p class="observation-saved">' + window.MebiSVG.icon('check') + 'Gözlemin kaydedildi.</p><div class="observation-comparison-head"><span>Belirti</span><span>İlk Tahminim</span><span>Gözlemim</span></div>' + items().map(function(item) {
+      var prediction = record.prediction.answers[item.key], answer = record.answers[item.key];
+      var result = prediction.choice === 'unsure' ? 'İlk tahminimde kararsızdım' : answer === 'unsure' ? 'Gözlemimden emin değilim' : prediction.choice === answer ? 'Tahminimle uyumlu' : 'Tahminimden farklı';
+      var predictionLabel = prediction.choice === 'yes' ? 'Evet' : prediction.choice === 'no' ? 'Hayır' : 'Kararsızdım';
+      return '<div class="observation-comparison-row"><div class="observation-comparison-values"><strong>' + item.label + '</strong><span>' + predictionLabel + '</span><span>' + observationLabel(answer) + '</span></div><p>' + result + '</p><details class="observation-reason"><summary>İlk gerekçem</summary><div>' + esc(prediction.reason) + '</div></details></div>';
+    }).join('') + '</div><div class="observation-notes">' + temperatureHTML(state) + '<div class="observation-saved-note"><strong>Kaydettiğim Gözlem</strong><blockquote>' + esc(record.note) + '</blockquote></div>' +
+      '<label class="observation-label" for="observationReflection">Tahminimde Ne Değişti? <span>(İsteğe bağlı)</span></label><textarea id="observationReflection" class="observation-textarea" rows="2" maxlength="400" data-observation-control="reflection" placeholder="Hangi tahmininle gözlemin farklıydı? Hangi bulguya dayandın?">' + esc(o.reflection) + '</textarea>' +
+      '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm observation-reflect" data-action="saveObservationReflection" data-observation-control="save-reflection">Karşılaştırma Notumu Kaydet</button><p class="observation-saved" id="observationReflectionStatus" role="status">' + (o.reflectionSaved ? 'Karşılaştırma notun kaydedildi.' : '') + '</p></div></div>';
+  }
+  function formHTML(state) {
+    var o = get(state), locked = !!o.record;
+    return '<div class="observation-form-layout"><div class="observation-signs">' + items().map(function(item) {
+      return '<fieldset class="observation-row"><legend>' + item.label + '</legend><div class="observation-options">' + choices.map(function(choice) {
+        return '<button type="button" data-action="setObservationChoice" data-arg="' + item.key + ':' + choice.value + '" data-observation-control="' + item.key + '-' + choice.value + '" aria-pressed="' + (o.answers[item.key] === choice.value) + '"' + (locked ? ' disabled' : '') + '>' + choice.label + '</button>';
+      }).join('') + '</div></fieldset>';
+    }).join('') + '</div><div class="observation-notes">' + temperatureHTML(state) + '<label class="observation-label" for="observationNote">Gözlem Notum</label><textarea class="observation-textarea" id="observationNote" data-observation-control="note" rows="5" maxlength="400" placeholder="Karışımın görünüşünde, sıcaklığında veya kabarcıklarda ne gözledin?"' + (locked ? ' readonly' : '') + '>' + esc(o.note) + '</textarea>' +
+      '<div class="observation-note-meta"><span>Gördüğün bulguyu kendi cümlenle yaz.</span><span id="observationNoteCount">' + o.note.length + ' / 400</span></div>' +
+      (locked ? '<p class="observation-model-note">İlk gözlem kaydın korunur. Yeni kayıt için deneyi yeniden başlatabilirsin.</p>' : '') + '</div></div>';
+  }
+  function pairHTML(state) {
+    return '<div class="prediction-pair" aria-label="Deneyde karıştırılan maddeler">' + [state.selectedSlot1,state.selectedSlot2].map(function(id, index) {
+      var reagent = window.MebiData.getReagent(id), kind = reagent.solid ? 'powder' : reagent.id === 'Cu(NO3)2' ? 'blue' : 'clear';
+      return (index ? '<span aria-hidden="true">+</span>' : '') + '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=3" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz · 1,00 g' : 'suda · 40 mL') + '</small></span></div>';
+    }).join('') + '</div>';
+  }
+  function deskHTML(state) {
+    return '<aside class="bench-dock" id="benchDock"><header class="dock-header"><span class="dock-badge">3. Deney · Gözlem</span><h3 class="dock-title">Karışımı İncele</h3><p class="dock-subtext">Deney masasında karışımı yeniden inceleyebilirsin. Gözlem ve karşılaştırma işlemleri ana gözlem kartındadır.</p></header>' + window.MebiExperiment.cardHTML(state) + (window.MebiParticleInspection ? window.MebiParticleInspection.entryHTML(state) : '') + '<button type="button" class="mebi-btn mebi-btn-primary dock-btn-full" data-action="openObservationCard">Gözlem Kartına Dön →</button>' + window.MebiExperiment.actionsHTML() + '</aside>';
+  }
+  function render(state) {
+    var o = get(state), comparing = o.tab === 'compare' && o.record;
+    return '<section class="prediction-card observation-card' + (o.record ? ' is-recorded' : '') + '" id="observationCard" aria-labelledby="observationTitle"><header><div class="prediction-heading arena-stage-heading"><span class="prediction-eyebrow">' + window.MebiSVG.icon('beakerIc') + ' 3. Deney</span><h1 id="observationTitle">' + (comparing ? 'Tahminim ve Gözlemim' : 'Gözlemini Kaydet') + '</h1></div><p class="prediction-intro">' + (comparing ? 'İlk tahminin ile kendi gözlem kaydını karşılaştır.' : 'Karıştırma sonrası gördüklerini işaretle ve kısa bir not ekle.') + '</p></header>' + pairHTML(state) +
+      '<div class="observation-tabs" role="tablist" aria-label="Gözlem ve karşılaştırma"><button type="button" role="tab" id="observationTabObserve" aria-controls="observationPanel" aria-selected="' + !comparing + '" data-action="setObservationTab" data-arg="observe" data-observation-control="tab-observe">Gözlemim</button><button type="button" role="tab" id="observationTabCompare" aria-controls="observationPanel" aria-selected="' + !!comparing + '" data-action="setObservationTab" data-arg="compare" data-observation-control="tab-compare"' + (!o.record ? ' disabled' : '') + '>Karşılaştır</button></div>' +
+      '<div id="observationPanel" class="prediction-content" role="tabpanel" aria-labelledby="' + (comparing ? 'observationTabCompare' : 'observationTabObserve') + '">' + (comparing ? comparisonHTML(state) : formHTML(state)) + (o.record ? '<div class="observation-record-actions"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="restartExperiment">Deneyi Yeniden Başlat</button>' + (comparing ? '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="autoFillObservationForTesting">Test İçin Otomatik Doldur</button>' : '') + '</div>' : '') + '</div>' +
+      '<p class="observation-message" id="observationMessage" role="alert">' + esc(o.message) + '</p><footer class="prediction-footer observation-footer"><div><strong id="observationCompletion" role="status">' + (o.record ? '3B Beherlerde Tanecikleri İncele' : complete(state) + ' / 5 belirti seçildi') + '</strong><p>' + (o.storageError ? 'Bu oturumda kaydedildi; tarayıcıda kalıcı kayıt yapılamadı.' : o.record ? 'Gözlemin kaydedildi. Başlangıcı ve tepkimeyi inceleyebilirsin.' : 'Emin Değilim geçerli bir yanıttır.') + '</p></div><div class="prediction-actions">' + (o.record ? '' : '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="restartExperiment">Deneyi Yeniden Başlat</button>') +
+      (!o.record ? '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="autoFillObservationForTesting">Test İçin Otomatik Doldur</button>' : '') +
+      (o.record ? (window.MebiParticleInspection ? window.MebiParticleInspection.buttons(null) : '') + '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="toCard">Açıkla aşamasına geç →</button>' : '<button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="saveObservation" data-observation-control="save">Gözlemimi Kaydet ' + window.MebiSVG.icon('check') + '</button>') + '</div></footer></section>';
+  }
+  function wireInputs(state) {
+    var note = document.getElementById('observationNote'), reflection = document.getElementById('observationReflection');
+    if (note) note.addEventListener('input', function() { if (setNote(state, note.value)) { document.getElementById('observationNoteCount').textContent = get(state).note.length + ' / 400'; document.getElementById('observationMessage').textContent = ''; } });
+    if (reflection) reflection.addEventListener('input', function() { if (setReflection(state, reflection.value)) { document.getElementById('observationReflectionStatus').textContent = ''; document.getElementById('observationMessage').textContent = ''; } });
+    document.querySelectorAll('.observation-tabs [role="tab"]').forEach(function(button) {
+      button.addEventListener('keydown', function(event) {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'Home' && event.key !== 'End') return;
+        event.preventDefault(); var next = document.getElementById(button.id === 'observationTabObserve' ? 'observationTabCompare' : 'observationTabObserve');
+        if (event.key === 'Home') next = document.getElementById('observationTabObserve');
+        if (event.key === 'End') next = document.getElementById('observationTabCompare');
+        if (next && !next.disabled) {
+          var id = next.id; next.click();
+          var replacement = document.getElementById(id);
+          if (replacement) replacement.focus({ preventScroll:true });
+        }
+      });
+    });
+  }
+  window.MebiObservation = { reset:reset, get:get, editable:editable, complete:complete, setChoice:setChoice, setNote:setNote, save:save,
+    setTab:setTab, showLab:showLab, setReflection:setReflection, saveReflection:saveReflection, autoFillForTesting:autoFillForTesting, render:render, deskHTML:deskHTML, wireInputs:wireInputs };
+})(window);

@@ -16,9 +16,16 @@
   <!-- MEBİ Tasarım Sistemi ve Proje CSS Dosyaları -->
   <link rel="stylesheet" href="css/mebi-theme.css?v=5.0">
   <link rel="stylesheet" href="css/mebi-components.css?v=5.0">
-  <link rel="stylesheet" href="css/arena.css?v=7.2">
-  <link rel="stylesheet" href="css/lab-world.css?v=5.1">
+  <link rel="stylesheet" href="css/arena.css?v=7.4">
+  <link rel="stylesheet" href="css/lab-world.css?v=5.2">
   <link rel="stylesheet" href="css/mebi-liquid-glass.css?v=2.0">
+  <link rel="stylesheet" href="css/reagent-gallery.css?v=1.6">
+  <link rel="stylesheet" href="css/prediction.css?v=1.3">
+  <link rel="stylesheet" href="css/experiment.css?v=1.4">
+  <link rel="stylesheet" href="css/observation.css?v=1.2">
+  <link rel="stylesheet" href="css/floating-cards.css?v=1.3">
+  <link rel="stylesheet" href="css/stage-controls.css?v=1.1">
+  <link rel="stylesheet" href="css/beaker-particles.css?v=1.3">
   <script type="importmap">
     { "imports": { "three": "./js/vendor/three/three.module.js" } }
   </script>
@@ -179,28 +186,27 @@
 
       <!-- Modal Gövdesi (Body - Öneri 3: Minimalist Etkileşimli Sekmeli Kart) -->
       <div class="welcome-modal-body" id="welcomeModalBody">
-        
         <!-- 5'li Sekme Çubuğu (Segmented Step Controller) -->
         <div class="welcome-tabs-track" role="tablist" aria-label="Rehber Adımları">
           <button type="button" class="welcome-tab-btn tab-active" data-step="1" role="tab" aria-selected="true">
             <span class="tab-num">1</span>
-            <span class="tab-text">Maddeler</span>
+            <span class="tab-text">Maddeleri seç</span>
           </button>
           <button type="button" class="welcome-tab-btn" data-step="2" role="tab" aria-selected="false">
             <span class="tab-num">2</span>
-            <span class="tab-text">Tahmin</span>
+            <span class="tab-text">Tahmin et ve gerekçelendir</span>
           </button>
           <button type="button" class="welcome-tab-btn" data-step="3" role="tab" aria-selected="false">
             <span class="tab-num">3</span>
-            <span class="tab-text">Dök & Karıştır</span>
+            <span class="tab-text">Karıştır</span>
           </button>
           <button type="button" class="welcome-tab-btn" data-step="4" role="tab" aria-selected="false">
             <span class="tab-num">4</span>
-            <span class="tab-text">Gözlem</span>
+            <span class="tab-text">Gözle ve açıkla</span>
           </button>
           <button type="button" class="welcome-tab-btn" data-step="5" role="tab" aria-selected="false">
             <span class="tab-num">5</span>
-            <span class="tab-text">3B Tanecik</span>
+            <span class="tab-text">Tanecik düzeyinde açıkla</span>
           </button>
         </div>
 
@@ -219,14 +225,9 @@
           <div class="welcome-step-text">
             <div class="welcome-step-heading">
               <span class="welcome-step-badge bg-sky">1</span>
-              <h4 class="welcome-step-title">Maddeleri Seç ve Beherlere Yerleştir</h4>
+              <h4 class="welcome-step-title">Maddeleri seç</h4>
             </div>
-            <p class="welcome-step-desc">
-              Soldaki madde panelinde yer alan <b>12 farklı kimyasal tepken</b> arasından denemek istediğin iki tanesini seç. İlk seçim 1. behere (sabit), ikinci seçim ise 2. behere (hareketli) doldurulur.
-            </p>
-            <div class="welcome-tip-box">
-              💡 <b>Öğretmen İpucu:</b> Asit ile baz içeren uygun çözeltileri karşılaştırarak nötralleşmeyi; uygun iyonları içeren sulu çözeltileri karıştırarak çökelme oluşumunu araştırabilirsin.
-            </div>
+            <p class="welcome-step-desc">İncelemek istediğin iki maddeyi seç. Adlarını, formüllerini ve fiziksel hâllerini kontrol et.</p>
           </div>
         </div>
 
@@ -247,14 +248,9 @@
           <div class="welcome-step-text">
             <div class="welcome-step-heading">
               <span class="welcome-step-badge bg-amber">2</span>
-              <h4 class="welcome-step-title">Tepkime Belirtilerini Tahmin Et</h4>
+              <h4 class="welcome-step-title">Tahmin et ve gerekçelendir</h4>
             </div>
-            <p class="welcome-step-desc">
-              Karıştırma sonrasında gaz kabarcığı, çökelti, renk değişimi veya sıcaklıkta artış/azalış gözlenip gözlenmeyeceğini tahmin et. Gözlemin tek başına tepkimeyi kanıtlayıp kanıtlamadığını tartış.
-            </p>
-            <div class="welcome-tip-box">
-              💡 <b>Öğretmen İpucu:</b> Bir gözleme dayalı tahmin oluştur ve tahminini bilimsel gerekçeyle açıkla. Deneyden elde ettiğin verilerle tahminini karşılaştır.
-            </div>
+            <p class="welcome-step-desc">Maddeler karıştırıldığında ne gözlenebileceğini tahmin et. Gerekçeni yaz. Her karışımda kimyasal tepkime oluşmayabileceğini unutma.</p>
           </div>
         </div>
 
@@ -272,14 +268,9 @@
           <div class="welcome-step-text">
             <div class="welcome-step-heading">
               <span class="welcome-step-badge bg-cyan">3</span>
-              <h4 class="welcome-step-title">Beheri Dök ve Karışımı Başlat</h4>
+              <h4 class="welcome-step-title">Karıştır</h4>
             </div>
-            <p class="welcome-step-desc">
-              Sağdaki 2. beheri farenle tutup 1. beherin ağzına sürükleyip bırak veya alt çubuktaki <b>"Beheri Dök"</b> butonuna tıkla. Sıvı pürüzsüzce akarken tepkime başlar.
-            </p>
-            <div class="welcome-tip-box">
-              💡 <b>Öğretmen İpucu:</b> Dokunmatik cihazlarda beheri tek tıkla dökebilir veya parmağınla gerçek bir laboratuvardaymış gibi eğebilirsin.
-            </div>
+            <p class="welcome-step-desc">İkinci beherdeki maddeyi birinci behere aktar. Karışımı ve sıcaklık göstergesini izle.</p>
           </div>
         </div>
 
@@ -298,14 +289,9 @@
           <div class="welcome-step-text">
             <div class="welcome-step-heading">
               <span class="welcome-step-badge bg-emerald">4</span>
-              <h4 class="welcome-step-title">Belirtileri İzle ve Raporu Doldur</h4>
+              <h4 class="welcome-step-title">Gözle ve açıkla</h4>
             </div>
-            <p class="welcome-step-desc">
-              Sıcaklık göstergesindeki değişimi izle. Uygun koşullarda sıcaklık artışı çevreye ısı verilmesiyle, azalışı çevreden ısı alınmasıyla ilişkili olabilir. Başlangıç maddeleri, gözlem bulguları ve tanecik modelini birlikte kullanarak tepkimeyi sınıflandır. Sınıflandırmanı kanıtlarla gerekçelendir
-            </p>
-            <div class="welcome-tip-box">
-              💡 <b>Öğretmen İpucu:</b> Tahminin gözleminle uyuşmasa da rapora geçebilir, kanıta dayalı açıklama yazabilir ve tahminini yeniden değerlendirebilirsin.
-            </div>
+            <p class="welcome-step-desc">Renk, kabarcık, çökelti ve sıcaklık değişimiyle ilgili verilerini kaydet. Gözlem ve yorumlarını ayır. Tahminini kanıtlara göre yeniden değerlendir.</p>
           </div>
         </div>
 
@@ -325,14 +311,9 @@
           <div class="welcome-step-text">
             <div class="welcome-step-heading">
               <span class="welcome-step-badge bg-purple">5</span>
-              <h4 class="welcome-step-title">Üç Boyutlu Tanecik Kamerasında Atomları İncele</h4>
+              <h4 class="welcome-step-title">Tanecik düzeyinde açıkla</h4>
             </div>
-            <p class="welcome-step-desc">
-              Sulu çözeltideki iyonların su molekülleriyle çevrelenmesini (hidratlanma) ve iyonik çökeltilerin kristal örgüsünü üç boyutlu model üzerinde incele.
-            </p>
-            <div class="welcome-tip-box">
-              💡 <b>Öğretmen İpucu:</b> Kimyasal olayı gözlem düzeyinde, tanecik düzeyinde ve kimyasal sembollerle açıklayarak üç gösterim biçimi arasında ilişki kur.
-            </div>
+            <p class="welcome-step-desc">Tepkimeye girenler ve ürünler modellerini karşılaştır. Atom türü ve sayısının, iyonik gösterimlerde toplam yükün korunup korunmadığını incele.</p>
           </div>
         </div>
 
@@ -404,11 +385,16 @@
   <!-- Modüler JavaScript Dosyaları -->
   <script src="js/audio.js?v=5.0"></script>
   <script src="js/data.js?v=6.0"></script>
-  <script src="js/svg-models.js?v=6.1"></script>
-  <script src="js/ui.js?v=5.0"></script>
+  <script src="js/svg-models.js?v=6.2"></script>
+  <script src="js/ui.js?v=5.2"></script>
   <script src="js/chemistry-visuals.js?v=2.0"></script>
-  <script src="js/app.js?v=8.5"></script>
-  <script type="module" src="js/lab-scene.js?v=5.2"></script>
+  <script src="js/prediction.js?v=1.8"></script>
+  <script src="js/experiment.js?v=1.5"></script>
+  <script src="js/observation.js?v=1.6"></script>
+  <script src="js/particle-inspection.js?v=1.1"></script>
+  <script src="js/floating-cards.js?v=1.5"></script>
+  <script src="js/app.js?v=10.4"></script>
+  <script type="module" src="js/lab-scene.js?v=6.0"></script>
   <script type="module" src="js/particle-scene.js?v=3.1"></script>
   <script>
     setTimeout(function() {

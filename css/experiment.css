@@ -1,0 +1,628 @@
+/* Live quantities share the right experiment dock; the laboratory stays visible. */
+.lab-3d-active #app[data-screen="lab"] .lab-experiment-heading { left:50%!important; right:auto!important; transform:translateX(-50%)!important; width:max-content!important; max-width:calc(100% - 32px); }
+.lab-3d-active #app[data-screen="lab"] .lab-unified-experiment-badge { white-space:normal; flex-wrap:wrap; text-align:center; }
+.lab-3d-active #app[data-screen="lab"] .bench-dock { top:calc(var(--lab-top) + 48px)!important; }
+.experiment-live-heading { display:flex; gap:9px; align-items:center; margin-bottom:12px; }
+.experiment-live-heading > span:first-child { display:grid; place-items:center; width:32px; height:32px; flex-shrink:0; border-radius:10px; background:var(--mebi-primary-50,#eff6ff); color:var(--mebi-primary,#2563eb); }
+.experiment-live-heading svg { width:20px; height:20px; }
+.experiment-live-heading h2 { margin:0; font-size:13px; font-weight:800; line-height:1.35; }
+.experiment-live-heading small { display:block; color:var(--mebi-text-secondary); font-size:10px; margin-top:3px; }
+.experiment-live-dot { width:7px; height:7px; margin-left:auto; border-radius:50%; background:var(--mebi-primary,#2563eb); flex-shrink:0; }
+.experiment-live-data { flex:none; min-width:0; display:flex; flex-direction:column; }
+.experiment-live-heading { order:0; }
+.experiment-temperature { order:1; }
+.experiment-live-grid { order:2; }
+.experiment-model-inline { order:3; }
+.experiment-live-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.experiment-amount-meter { height:7px; margin-top:6px; overflow:hidden; border-radius:999px; background:var(--mebi-bg-sunken); }
+.experiment-amount-fill { display:block; height:100%; border-radius:inherit; background:#2563eb; transition:width .10s linear; }
+.experiment-meter-scale { display:block; color:var(--mebi-text-secondary); font-size:10px; margin-top:3px; font-variant-numeric:tabular-nums; }
+.experiment-live-grid .experiment-reading { align-items:flex-start; flex-wrap:wrap; }
+.experiment-live-grid .experiment-reading strong { color:var(--mebi-primary); }
+.experiment-live-grid .experiment-vessel-title strong { overflow-wrap:anywhere; }
+.experiment-vessel { min-width:0; padding:10px 0; border-top:1px solid var(--mebi-border); }
+.experiment-vessel-title { display:flex; align-items:center; gap:7px; margin-bottom:6px; font-size:12px; }
+.experiment-vessel-title b { display:grid; place-items:center; width:20px; height:20px; background:var(--mebi-bg-subtle); border-radius:50%; font-size:10px; }
+.experiment-reading { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:3px 0; font-size:11px; }
+.experiment-reading > span { color:var(--mebi-text-secondary); }
+.experiment-reading strong { font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.experiment-reading[data-main] strong { color:var(--mebi-primary,#2563eb); }
+.experiment-temperature { padding:8px 0; border-top:1px solid var(--mebi-border); }
+.experiment-temperature-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.experiment-temperature-heading .experiment-reading { flex:1; }
+.experiment-temperature-heading > span { font-size:10px; color:var(--mebi-text-secondary); white-space:nowrap; }
+.experiment-temperature .experiment-amount-fill { background:var(--mebi-danger,#ef4444); }
+.experiment-temperature-change { display:flex; justify-content:space-between; gap:8px; color:var(--mebi-text-secondary); font-size:10px; margin-top:4px; font-variant-numeric:tabular-nums; }
+.experiment-thermometer { position:relative; height:76px; margin:2px 8px 0 0; color:var(--mebi-text-secondary); }
+.experiment-thermometer-body { position:absolute; left:24px; right:0; top:0; bottom:0; }
+.experiment-thermometer-track { position:absolute; top:33px; left:0; right:0; height:12px; border-radius:0 999px 999px 0; background:var(--mebi-bg-sunken); box-shadow:inset 0 0 0 2px var(--mebi-border); overflow:hidden; }
+.experiment-thermometer-track .experiment-amount-fill { position:absolute; top:3px; height:6px; border-radius:0 999px 999px 0; transition:left .1s linear,width .1s linear; }
+.experiment-thermometer-bulb { position:absolute; top:26px; left:0; width:26px; height:26px; border-radius:50%; background:var(--mebi-danger); box-shadow:inset 0 0 0 3px var(--mebi-bg-surface-solid),0 0 0 1px var(--mebi-border); z-index:1; }
+.experiment-thermometer-bulb::after { content:""; position:absolute; top:7px; left:7px; width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.65); }
+.experiment-thermometer-zero { position:absolute; top:59px; left:1px; font-size:9px; }
+.experiment-thermometer-start,.experiment-thermometer-current { position:absolute; top:0; bottom:0; width:0; }
+.experiment-thermometer-start { left:var(--temperature-start); }
+.experiment-thermometer-current { left:var(--temperature-current); }
+.experiment-thermometer-start i { position:absolute; top:27px; left:-1px; width:2px; height:23px; background:var(--mebi-text-secondary); opacity:.65; z-index:2; }
+.experiment-thermometer-current i { position:absolute; top:35px; left:-3px; width:7px; height:8px; border-radius:50%; background:var(--mebi-danger); z-index:2; }
+.experiment-thermometer-start > span,.experiment-thermometer-current > span { position:absolute; width:80px; left:-40px; text-align:center; font-size:9px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.experiment-thermometer-start > span { top:7px; }
+.experiment-thermometer-current > span { top:59px; color:var(--mebi-text-main); font-weight:700; }
+.experiment-model-inline { padding-top:8px; border-top:1px solid var(--mebi-border); }
+.experiment-concentration-caption { color:var(--mebi-text-secondary); font-size:10px; margin:0 0 4px; }
+.experiment-concentrations { display:flex; flex-wrap:wrap; gap:3px 12px; }
+.experiment-concentrations .experiment-reading { justify-content:flex-start; gap:5px; font-size:10px; padding:1px 0; }
+.experiment-concentrations .experiment-reading strong { font-size:10px; }
+.experiment-source-concentration .experiment-reading { gap:4px; font-size:10px; }
+.experiment-source-concentration .experiment-reading strong { font-size:10px; }
+.experiment-model-conditions { margin:6px 0 0; font-size:10px; line-height:1.5; color:var(--mebi-text-secondary); }
+.experiment-model-note { margin:4px 0 0; font-size:10px; line-height:1.5; color:var(--mebi-text-secondary); }
+.experiment-live-actions { display:flex; align-items:center; gap:8px; margin-top:4px; flex:none; }
+.experiment-live-actions .mebi-btn { flex:1; justify-content:center; gap:5px; min-height:34px; font-size:11px; }
+.experiment-live-actions svg { width:14px; height:14px; }
+.experiment-change { flex:1; display:flex; justify-content:center; align-items:center; gap:5px; border:0; background:none; color:var(--mebi-text-secondary); font:inherit; font-size:10px; min-height:28px; cursor:pointer; }
+.experiment-transfer-status { margin:7px 0 0; color:var(--mebi-primary,#2563eb); font-size:11px; line-height:1.4; min-height:30px; }
+/* ==========================================================================
+   GÜVENLİ SANAL DENEY UYARISI — ANDROID FLAT MATERIAL DESIGN (YATAY GENİŞ KART)
+   ========================================================================== */
+.experiment-safety-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.experiment-safety-card {
+  width: min(860px, 100%);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  color: var(--mebi-text-main, #0f172a);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+[data-theme="dark"] .experiment-safety-card {
+  background: #1e1f22;
+  border-color: #313338;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+}
+
+/* Header */
+.experiment-safety-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 18px;
+  border-bottom: 1px solid #eef2f6;
+  flex-wrap: wrap;
+}
+
+[data-theme="dark"] .experiment-safety-header {
+  border-bottom-color: #2b2d31;
+}
+
+.experiment-safety-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.experiment-safety-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fff3e0;
+  color: #e65100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.experiment-safety-header-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+[data-theme="dark"] .experiment-safety-header-icon {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.experiment-safety-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.experiment-safety-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.experiment-safety-badges .mebi-badge-sunken {
+  font-size: 10px;
+  padding: 2px 8px;
+  gap: 4px;
+  border-radius: 6px;
+  background: #fff8e1;
+  color: #b45309;
+  box-shadow: none;
+  border: 0;
+}
+
+[data-theme="dark"] .experiment-safety-badges .mebi-badge-sunken {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
+}
+
+.experiment-safety-badges .mebi-badge-sunken svg {
+  width: 11px;
+  height: 11px;
+  color: currentColor;
+}
+
+.experiment-safety-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+}
+
+.experiment-safety-progress-pill.is-complete {
+  background: #e0f2f1;
+  color: #00695c;
+}
+
+[data-theme="dark"] .experiment-safety-progress-pill {
+  background: #2b2d31;
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .experiment-safety-progress-pill.is-complete {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+.experiment-safety-card h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--mebi-text-main, #0f172a);
+  font-weight: 800;
+  letter-spacing: -0.1px;
+}
+
+/* Tümünü Onayla (Flat Material Tonal Chip Button) */
+.experiment-safety-check-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  box-shadow: none;
+  color: #334155;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  flex-shrink: 0;
+}
+
+.experiment-safety-check-all svg {
+  width: 14px;
+  height: 14px;
+}
+
+.experiment-safety-check-all:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.experiment-safety-check-all.is-all-checked {
+  background: #e0f2f1;
+  border-color: #80cbc4;
+  color: #00695c;
+}
+
+[data-theme="dark"] .experiment-safety-check-all {
+  background: #2b2d31;
+  border-color: #3f4147;
+  color: #d4d4d8;
+}
+
+[data-theme="dark"] .experiment-safety-check-all:hover {
+  background: #35373c;
+}
+
+[data-theme="dark"] .experiment-safety-check-all.is-all-checked {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #34d399;
+}
+
+/* 4 Güvenlik Kuralı — Yatay 2 Sütunlu Düz Materyal Grid */
+.experiment-safety-content {
+  padding: 12px 18px 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.experiment-safety-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.experiment-safety-row:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.experiment-safety-row:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 1px;
+}
+
+.experiment-safety-row.is-checked {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+[data-theme="dark"] .experiment-safety-row {
+  background: #26282c;
+  border-color: #33363c;
+}
+
+[data-theme="dark"] .experiment-safety-row:hover {
+  background: #2d3035;
+  border-color: #454950;
+}
+
+[data-theme="dark"] .experiment-safety-row.is-checked {
+  background: rgba(16, 185, 129, 0.11);
+  border-color: rgba(52, 211, 153, 0.38);
+}
+
+/* Uyarı İşareti İle Uyumlu Düz Materyal İkon Kutusu */
+.experiment-safety-icon-badge {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fff3e0;
+  border: 0;
+  box-shadow: none;
+  color: #e65100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.experiment-safety-icon-badge > svg {
+  width: 20px;
+  height: 20px;
+}
+
+.experiment-safety-warn-corner {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #e65100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.experiment-safety-warn-corner svg {
+  width: 9.5px;
+  height: 9.5px;
+}
+
+[data-theme="dark"] .experiment-safety-icon-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .experiment-safety-warn-corner {
+  background: #1e1f22;
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+}
+
+.experiment-safety-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.experiment-safety-row-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.experiment-safety-row-title strong {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--mebi-text-main, #0f172a);
+}
+
+.experiment-safety-status-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #fff3e0;
+  color: #c2410c;
+}
+
+.experiment-safety-row.is-checked .experiment-safety-status-tag {
+  background: #d1fae5;
+  color: #047857;
+}
+
+[data-theme="dark"] .experiment-safety-status-tag {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .experiment-safety-row.is-checked .experiment-safety-status-tag {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.experiment-safety-row p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.38;
+  color: var(--mebi-text-secondary, #475569);
+}
+
+/* Android Material Flat Checkbox */
+.experiment-safety-check-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: transparent;
+  border: 2px solid #94a3b8;
+  box-shadow: none;
+  color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.experiment-safety-check-box svg {
+  width: 14px;
+  height: 14px;
+}
+
+.experiment-safety-row.is-checked .experiment-safety-check-box {
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .experiment-safety-check-box {
+  border-color: #64748b;
+}
+
+[data-theme="dark"] .experiment-safety-row.is-checked .experiment-safety-check-box {
+  background: #10b981;
+  border-color: #10b981;
+  color: #09090b;
+}
+
+/* Sanal Laboratuvar Hatırlatma Kutusu */
+.experiment-safety-note {
+  margin: 0 18px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #92400e;
+}
+
+.experiment-safety-note-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.experiment-safety-note-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.experiment-safety-note p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.38;
+}
+
+[data-theme="dark"] .experiment-safety-note {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fde68a;
+}
+
+[data-theme="dark"] .experiment-safety-note-icon {
+  color: #fbbf24;
+}
+
+/* Footer: Bir Daha Gösterme & Düz Materyal Onay Butonu */
+.experiment-safety-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px 13px;
+  margin-top: 8px;
+  border-top: 1px solid #eef2f6;
+  background: #f8fafc;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  flex-wrap: wrap;
+}
+
+[data-theme="dark"] .experiment-safety-footer {
+  background: #18191c;
+  border-top-color: #2b2d31;
+}
+
+/* Android Material 3 Flat Filled Button */
+.experiment-safety-accept {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 0;
+  box-shadow: none;
+  background: #0d9488;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+.experiment-safety-accept:hover:not(:disabled) {
+  background: #0f766e;
+}
+
+.experiment-safety-accept svg {
+  width: 17px;
+  height: 17px;
+}
+
+.experiment-safety-accept:disabled,
+.experiment-safety-accept.is-disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .experiment-safety-accept:disabled,
+[data-theme="dark"] .experiment-safety-accept.is-disabled {
+  background: #2b2d31;
+  color: #71717a;
+}
+
+@media(max-width:1100px) {
+ .experiment-live-grid { gap:10px; }
+ .experiment-live-grid .experiment-reading { display:block; }
+ .experiment-live-grid .experiment-reading strong { display:block; }
+ .experiment-live-heading h2 { font-size:12px; }
+ .experiment-live-heading small { font-size:9px; }
+}
+@media(max-height:680px) and (orientation:landscape) {
+ .lab-3d-active #app[data-screen="lab"] .bench-dock { top:calc(var(--lab-top) + 38px)!important; max-height:calc(100dvh - var(--lab-top) - 48px)!important; }
+ .experiment-live-heading { gap:6px; margin-bottom:6px; }
+ .experiment-live-heading h2 { font-size:11px; }
+ .experiment-live-heading small { font-size:9px; }
+ .experiment-live-heading > span:first-child { width:24px; height:24px; }
+ .experiment-live-heading svg { width:16px; height:16px; }
+ .experiment-vessel { padding:6px 0; }
+ .experiment-vessel-title { margin-bottom:3px; font-size:11px; }
+ .experiment-reading { font-size:9px; padding:2px 0; }
+ .experiment-reading strong { font-size:10px; }
+ .experiment-concentration-caption,.experiment-model-note { font-size:9px; }
+ .experiment-live-actions { margin-top:7px; gap:4px; }
+ .experiment-live-actions .mebi-btn { font-size:9px; min-height:29px; padding:4px 6px; }
+ .experiment-meter-scale { font-size:9px; margin-top:2px; }
+ .experiment-transfer-status { min-height:0; margin-top:4px; font-size:10px; }
+ .experiment-safety-backdrop { padding:6px 10px; }
+ .experiment-safety-card { width:min(860px,100%); max-height:calc(100dvh - 12px); border-radius:14px; }
+ .experiment-safety-header { padding:8px 14px; gap:8px; }
+ .experiment-safety-header-icon { width:32px; height:32px; border-radius:8px; }
+ .experiment-safety-header-icon svg { width:18px; height:18px; }
+ .experiment-safety-card h2 { font-size:14px; }
+ .experiment-safety-content { padding:6px 14px; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+ .experiment-safety-row { padding:6px 9px; gap:8px; border-radius:10px; }
+ .experiment-safety-icon-badge { width:30px; height:30px; border-radius:8px; }
+ .experiment-safety-icon-badge > svg { width:16px; height:16px; }
+ .experiment-safety-row-title strong { font-size:11.5px; }
+ .experiment-safety-row p { font-size:10.5px; line-height:1.28; }
+ .experiment-safety-check-box { width:19px; height:19px; border-radius:5px; }
+ .experiment-safety-note { margin:0 14px; padding:5px 10px; }
+ .experiment-safety-note p { font-size:10px; line-height:1.28; }
+ .experiment-safety-footer { padding:6px 14px 8px; margin-top:4px; gap:8px; }
+ .experiment-safety-accept { min-height:34px; padding:6px 12px; font-size:11.5px; }
+}
+@media(prefers-reduced-motion:reduce) { .experiment-amount-fill { transition:none; } }
+@media(max-width:600px) and (orientation:portrait) {
+ .experiment-safety-backdrop { padding:10px; }
+ .experiment-safety-card { max-height:calc(100dvh - 20px); border-radius:16px; }
+ .experiment-safety-card h2 { font-size:15px; }
+ .experiment-safety-content { grid-template-columns:1fr; padding:8px 12px; gap:6px; }
+ .experiment-safety-row { gap:8px; padding:8px 10px; }
+ .experiment-safety-header { padding:10px 12px; }
+ .experiment-safety-note { margin-inline:12px; padding:6px 10px; }
+ .experiment-safety-footer { padding:8px 12px 12px; flex-direction:column; align-items:stretch; gap:8px; }
+ .experiment-safety-accept { width:100%; }
+}
+/* Keep the purpose and exit controls visible while long reminders scroll. */
+.experiment-safety-card { overflow:hidden; border:0; background:var(--mebi-bg-surface-solid); box-shadow:0 6px 0 var(--mebi-base-card),var(--mebi-shadow-lg); }
+.experiment-safety-header,.experiment-safety-note,.experiment-safety-footer { flex:none; }
+.experiment-safety-content { overflow:auto; min-height:0; overscroll-behavior:contain; }
+.experiment-safety-intro { margin:5px 0 0; max-width:560px; color:var(--mebi-text-secondary); font-size:11px; line-height:1.45; }
+.experiment-safety-row { border:0; box-shadow:0 2px 0 var(--mebi-base-card); }
+.experiment-safety-footer > .mebi-btn { min-width:0; min-height:36px; white-space:normal; }
+@media(max-height:650px) and (orientation:landscape) {
+  .experiment-safety-intro { font-size:10px; line-height:1.3; }
+  .experiment-safety-footer { gap:6px; }
+}

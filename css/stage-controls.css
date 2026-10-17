@@ -1,0 +1,24 @@
+/* Previous stages can be reviewed without changing original student records. */
+#app button.mebi-step-item { border:0; background:transparent; padding:0; color:inherit; font:inherit; cursor:pointer; min-width:0; }
+#app button.mebi-step-item:disabled { opacity:1; cursor:default; }
+#app button.mebi-step-item:not(:disabled):hover .mebi-step-node { box-shadow:0 0 0 3px var(--mebi-primary-light),0 2px 0 var(--mebi-base-card); }
+#app button.mebi-step-item:focus-visible,.mebi-stage-toggle:focus-visible { outline:2px solid var(--mebi-border-focus); outline-offset:3px; border-radius:8px; }
+.mebi-stage-toggle { display:grid; place-items:center; flex:none; width:28px; height:28px; margin-left:8px; padding:5px; border:0; border-radius:7px; color:var(--mebi-text-secondary); background:var(--mebi-bg-subtle); cursor:pointer; }
+.mebi-stage-toggle svg { width:17px; height:17px; }
+.mebi-stage-toggle:not(.is-compact) svg { transform:rotate(180deg); }
+#app .mebi-top-shell.is-header-compact > .mebi-topbar { display:none !important; }
+#app .mebi-top-shell.is-header-compact > .mebi-stepper { border-top:0; border-radius:12px; }
+#app .is-header-compact .mebi-stepper-inline-tools { display:flex; align-items:center; gap:5px; margin-left:8px; }
+#app .is-header-expanded .mebi-stepper-inline-tools { display:none !important; }
+#app .is-header-compact .mebi-stepper-inline-tools .mebi-btn { min-width:30px; width:30px; min-height:30px; height:30px; padding:0; }
+.prediction-review .prediction-content { overflow:auto; }
+@media(max-height:650px) and (orientation:landscape) {
+  body.mebi-mobile-landscape #app .mebi-top-shell.has-stage.is-header-expanded { height:auto !important; min-height:0 !important; background:var(--mebi-bg-surface) !important; border-radius:12px; }
+  body.mebi-mobile-landscape #app .has-stage.is-header-expanded > .mebi-topbar { display:flex !important; min-height:42px; height:42px; padding:4px 10px; }
+  body.mebi-mobile-landscape #app .has-stage.is-header-expanded > .mebi-stepper { position:relative !important; inset:auto !important; height:38px !important; }
+  body.mebi-mobile-landscape #app .mebi-top-shell.has-stage.is-header-expanded .mebi-stepper-inline-tools { display:none !important; }
+  body.mebi-mobile-landscape #app:has(.is-header-expanded) .prediction-card { margin-top:8px; height:calc(100dvh - 108px); max-height:calc(100dvh - 108px); }
+  body.mebi-mobile-landscape #app:has(.is-header-expanded) .reagent-gallery { margin-top:8px; max-height:calc(100dvh - 108px); }
+  .mebi-stage-toggle { width:28px; height:28px; margin-left:5px; padding:4px; }
+}
+@media(prefers-reduced-motion:no-preference) { .mebi-stage-toggle { transition:background-color .2s; } }

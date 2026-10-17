@@ -8,6 +8,9 @@ ornek.html
 Thumbs.db
 .DS_Store
 
+# Yerel proje yedekleri (GitHub'a dahil edilmez)
+yedekler/
+
 # Geçici araçlar ve test scriptleri
 node_modules/
 package.json

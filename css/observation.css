@@ -1,0 +1,67 @@
+/* Observation shares the prediction card, with room inspection available separately. */
+.observation-card #observationPanel { overscroll-behavior:contain; }
+.observation-card .observation-tabs { flex:none; }
+.observation-form-layout,.observation-compare-layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:14px; align-items:start; }
+.observation-notes { min-width:0; border-left:1px solid var(--mebi-border); padding-left:14px; }
+.observation-card .observation-textarea { min-height:100px; }
+.observation-card .observation-temperature { margin-top:0; }
+.observation-tabs { display:flex; align-self:flex-start; gap:4px; padding:4px; background:var(--mebi-bg-sunken); box-shadow:var(--mebi-base-sunken-shadow); border-radius:var(--mebi-radius-full); }
+.observation-tabs button { min-width:0; min-height:34px; padding:7px 18px; border:0; border-radius:var(--mebi-radius-full); font:inherit; font-size:12px; font-weight:700; color:var(--mebi-text-secondary); background:transparent; cursor:pointer; }
+.observation-tabs button[aria-selected="true"] { background:var(--mebi-bg-surface-solid); color:var(--mebi-primary); box-shadow:0 2px 0 var(--mebi-base-card); }
+.observation-tabs button:disabled { opacity:.5; cursor:default; }
+.observation-row { border:0; border-bottom:1px solid var(--mebi-border); margin:0 0 3px; padding:0 0 3px; min-width:0; }
+.observation-row legend { padding:0; margin-bottom:2px; color:var(--mebi-text-main); font-size:12px; font-weight:700; line-height:1.25; }
+.observation-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; }
+.observation-options button { min-width:0; min-height:34px; border:0; border-radius:var(--mebi-radius-full); background:var(--mebi-bg-subtle); box-shadow:0 2px 0 var(--mebi-base-card); color:var(--mebi-text-secondary); font:inherit; font-size:11px; padding:6px 8px; cursor:pointer; line-height:1.3; transition:background-color 150ms ease,box-shadow 150ms ease; }
+.observation-options button:hover:not(:disabled) { background:var(--mebi-bg-sunken); }
+.observation-options button[aria-pressed="true"] { background:var(--mebi-base-card); color:var(--mebi-text-main); box-shadow:0 2px 0 var(--mebi-base-card-hover); font-weight:700; }
+.observation-options button:disabled { cursor:default; }
+.observation-temperature { display:flex; align-items:center; justify-content:space-between; gap:5px; flex-wrap:wrap; font-size:11px; color:var(--mebi-text-secondary); margin:10px 0 3px; }
+.observation-temperature strong { color:var(--mebi-text-main); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.observation-model-note { color:var(--mebi-text-secondary); font-size:10px; margin:0 0 8px; line-height:1.4; }
+.observation-label { display:block; margin:10px 0 5px; font-size:12px; font-weight:700; }
+.observation-label span { font-weight:400; }
+.observation-textarea { display:block; width:100%; min-height:65px; resize:vertical; border:0; border-radius:var(--mebi-radius-sm); padding:8px 10px; background:var(--mebi-bg-sunken); box-shadow:var(--mebi-base-sunken-shadow); color:var(--mebi-text-main); font:inherit; font-size:12px; line-height:1.45; }
+.observation-textarea:focus-visible,.observation-options button:focus-visible,.observation-tabs button:focus-visible { outline:2px solid var(--mebi-border-focus); outline-offset:2px; }
+.observation-note-meta { display:flex; justify-content:space-between; gap:8px; color:var(--mebi-text-secondary); font-size:10px; margin-top:4px; }
+.observation-note-meta span:last-child { white-space:nowrap; }
+.observation-message { font-size:12px; color:var(--mebi-danger-taban); line-height:1.5; margin:0; }
+.observation-message:empty { display:none; }
+.observation-footer { flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+.observation-footer .prediction-actions { flex-wrap:wrap; }
+.observation-saved { display:flex; align-items:center; gap:5px; color:var(--mebi-primary); font-size:11px; margin:0 0 9px; }
+.observation-saved:empty { display:none; }
+.observation-saved svg { width:15px; height:15px; flex-shrink:0; }
+.observation-comparison-head,.observation-comparison-values { display:grid; grid-template-columns:1.35fr 1fr 1fr; gap:7px; align-items:start; font-size:11px; overflow-wrap:anywhere; }
+.observation-comparison-head { color:var(--mebi-text-secondary); border-bottom:1px solid var(--mebi-border); padding-bottom:7px; }
+.observation-comparison-row { padding:8px 0; border-bottom:1px solid var(--mebi-border); }
+.observation-comparison-row p { font-size:11px; color:var(--mebi-primary); margin:3px 0 0; }
+.observation-reason { font-size:11px; color:var(--mebi-text-secondary); margin-top:3px; }
+.observation-reason summary { cursor:pointer; color:var(--mebi-primary); padding:2px 0; }
+.observation-reason div { padding:5px 0; overflow-wrap:anywhere; }
+.observation-saved-note { margin:10px 0; font-size:12px; }
+.observation-saved-note blockquote { color:var(--mebi-text-secondary); margin:5px 0 0; padding-left:9px; border-left:3px solid var(--mebi-border); white-space:pre-wrap; overflow-wrap:anywhere; }
+.observation-reflect { width:100%; justify-content:center; white-space:normal; margin:9px 0 7px; }
+[data-theme="dark"] .observation-card :is(.observation-tabs button[aria-selected="true"],.observation-saved,.observation-comparison-row p,.observation-reason summary) { color:var(--mebi-text-main); }
+@media(max-width:1100px),(max-height:760px) {
+  .observation-options button { font-size:10px; }
+  .observation-row legend,.observation-label { font-size:11px; }
+  .observation-comparison-head,.observation-comparison-values { grid-template-columns:1.2fr 1fr 1fr; gap:4px; font-size:10px; }
+}
+@media(max-width:800px) {
+  .observation-form-layout,.observation-compare-layout { grid-template-columns:1fr; gap:16px; }
+  .observation-notes { border-left:0; padding-left:0; }
+  .observation-footer .prediction-actions { width:100%; }
+  .observation-footer .prediction-actions .mebi-btn { flex:1; white-space:normal; }
+}
+@media(pointer:coarse) {
+  .observation-options button,.observation-tabs button { min-height:44px; }
+  .observation-textarea { font-size:16px; }
+}
+@media(max-height:650px) and (orientation:landscape) {
+  .observation-footer { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px; }
+  .observation-footer > div:first-child strong { font-size:10px; }
+  .observation-footer > div:first-child p { display:none; }
+  .observation-footer .prediction-actions { width:auto; gap:6px; }
+  .observation-footer .prediction-actions .mebi-btn { flex:none; font-size:9px; padding:6px 10px; }
+}

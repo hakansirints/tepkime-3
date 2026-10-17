@@ -1,0 +1,21 @@
+{
+  "model": "js/beaker-model.js",
+  "modelSha256": "015984614a117d071c8ebc2f10e3b7346f8deeaad99a7b05d2afc7a0b6983369",
+  "solutionMl": 40,
+  "width": 640,
+  "height": 440,
+  "assets": [
+    {
+      "file": "powder.webp",
+      "bytes": 15774
+    },
+    {
+      "file": "clear.webp",
+      "bytes": 12422
+    },
+    {
+      "file": "blue.webp",
+      "bytes": 13636
+    }
+  ]
+}

@@ -10,6 +10,9 @@
   /* ----------------- 1. UYGULAMA DURUMU (APPLICATION STATE) ----------------- */
   var S = {
     screen: 'menu',
+    headerCollapsed: null,
+    stageReview: null,
+    particleInspection: null,
     isFilling: false,
     reagentPanelCollapsed: false,
     labSettingsOpen: false,
@@ -22,7 +25,7 @@
     selectedSlot2: null,
     activeReaction: null,
     prediction: [],
-    labStep: 'predict', // predict | ready | pouring | reacting | observed
+    labStep: 'predict', // predict | predictionSaved | ready | pouring | reacting | observed
     poured: false,
     currentTemp: 22.0,
     manualTypeInput: '',
@@ -42,7 +45,23 @@
     S.tableColor = localStorage.getItem('three-faces-table-color') || '#3d4547';
   } catch (e) {}
 
+  window.MebiPrediction.reset(S);
+  window.MebiExperiment.reset(S, false);
+  window.MebiObservation.reset(S);
   var HISTORY = [];
+  var headerAutoCompact = window.innerHeight < 650 || window.innerWidth < 760;
+  var headerViewport = {width:window.innerWidth,height:window.innerHeight};
+  function headerIsCompact() { return S.headerCollapsed == null ? headerAutoCompact : S.headerCollapsed; }
+  function fitStageHeader() {
+    var shell = document.querySelector('.mebi-top-shell.has-stage.is-header-expanded');
+    if (!shell) return;
+    var bar = shell.querySelector('.mebi-topbar');
+    var card = document.querySelector('.prediction-card:not(.is-minimized):not(.is-collapsed):not([data-floating-ghost])');
+    var content = card && card.querySelector('.prediction-content');
+    var crowded = !!(bar && bar.clientWidth && bar.scrollWidth > bar.clientWidth + 1);
+    if (content && content.getBoundingClientRect().height > 0 && content.getBoundingClientRect().height < 48) crowded = true;
+    if (crowded) { headerAutoCompact = true; S.headerCollapsed = null; render(false); }
+  }
   var fillToken = 0;
   function highlightSettingsGearOnce() {
     try {
@@ -64,7 +83,10 @@
   function enterPredictionScreen() {
     if (!S.selectedSlot1 || !S.selectedSlot2) return false;
     S.activeReaction = window.MebiData.getReaction(S.selectedSlot1, S.selectedSlot2);
-    S.prediction = [];
+    S.particleInspection = null;
+    window.MebiPrediction.reset(S);
+    window.MebiExperiment.reset(S, false);
+    window.MebiObservation.reset(S);
     S.labStep = 'predict';
     S.poured = false;
     S.currentTemp = S.activeReaction.tempInit;
@@ -91,7 +113,6 @@
     setTimeout(function() {
       if (token !== fillToken) return;
       S.isFilling = false;
-      if (S.screen === 'pool' && S.selectedSlot1 && S.selectedSlot2) enterPredictionScreen();
       render(false);
     }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 30 : 800);
   }
@@ -117,16 +138,6 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-  }
-
-  function sameSet(a, b) {
-    if (!a || !b || a.length !== b.length) return false;
-    var s = a.slice().sort();
-    var t = b.slice().sort();
-    for (var i = 0; i < s.length; i++) {
-      if (s[i] !== t[i]) return false;
-    }
-    return true;
   }
 
   /* ----------------- 2. TOPBAR VE STEPPER HTML ----------------- */
@@ -182,7 +193,8 @@
           '<span class="mebi-btn-badge">' + window.MebiSVG.icon('helpCircle') + '</span>' +
         '</button>';
 
-      var html = '<div class="mebi-top-shell' + (stage ? ' has-stage' : '') + '"><div class="mebi-topbar">' +
+      var compact = headerIsCompact();
+      var html = '<div class="mebi-top-shell' + (stage ? ' has-stage' : '') + (compact && stage ? ' is-header-compact' : ' is-header-expanded') + '"><div class="mebi-topbar" id="stageMainHeader">' +
         '<div class="mebi-brand" data-action="goMenu">' +
           '<div class="mebi-brand-icon">' + window.MebiSVG.icon('shield') + '</div>' +
           '<span>TEPKİME ARENASI</span>' +
@@ -208,14 +220,16 @@
 
   function stepperHTML(step, toolsHTML) {
     var steps = [
-      { key: 'predict', label: '1. TAHMİN' },
-      { key: 'reacting', label: '2. DENEY' },
-      { key: 'observed', label: '3. GÖZLEM' },
-      { key: 'card', label: '4. RAPOR & SORU' },
-      { key: 'micro', label: '5. TANECİK KAMERASI' }
+      { key: 'pool', label: '1. Seç' },
+      { key: 'predict', label: '2. Tahmin' },
+      { key: 'reacting', label: '3. Deney' },
+      { key: 'card', label: '4. Açıkla' },
+      { key: 'micro', label: '5. Model' }
     ];
-    var order = { predict: 0, ready: 1, pouring: 1, reacting: 1, observed: 2, card: 3, micro: 4 };
-    var idx = order[step] || 0;
+    var order = { pool: 0, predict: 1, predictionSaved: 1, ready: 2, pouring: 2, reacting: 2, observed: 2, card: 3, micro: 4 };
+    var available = stageIndex(), busy = stageNavigationBusy();
+    var compact = headerIsCompact();
+    var idx = S.stageReview ? order[S.stageReview] : (order[step] || 0);
     var pctLine = (idx / (steps.length - 1)) * 100;
 
     var html = '<div class="mebi-stepper">' +
@@ -229,18 +243,34 @@
       var isActive = i === idx;
       var itemCls = isDone ? 'is-done' : (isActive ? 'is-active' : '');
 
-      html += '<div class="mebi-step-item ' + itemCls + '">' +
+      var enabled = i <= available && !busy;
+      html += '<button type="button" class="mebi-step-item ' + itemCls + '" data-action="navigateStage" data-arg="' + i + '" title="' + (enabled ? steps[i].label + ' aşamasını aç' : busy ? 'Aktarım ve gözlem bekleme süresi bitince aşamalar açılır' : 'Önce önceki aşamaları tamamla') + '"' + (enabled ? '' : ' disabled') + (isActive ? ' aria-current="step"' : '') + '>' +
         '<div class="mebi-step-node">' +
           (isDone ? window.MebiSVG.icon('check') : (i + 1)) +
         '</div>' +
         '<div class="mebi-step-label">' + steps[i].label + '</div>' +
-      '</div>';
+      '</button>';
     }
 
     html += '</div>' +
       (toolsHTML ? '<div class="mebi-stepper-inline-tools">' + toolsHTML + '</div>' : '') +
+      '<button type="button" class="mebi-stage-toggle' + (compact ? ' is-compact' : '') + '" data-action="toggleStageHeader" aria-controls="stageMainHeader" aria-expanded="' + !compact + '" title="' + (compact ? 'Başlığı yeniden göster' : 'Yalnızca aşamaları göster') + '" aria-label="' + (compact ? 'Başlığı yeniden göster' : 'Yalnızca aşamaları göster') + '">' + window.MebiSVG.icon('down') + '</button>' +
     '</div>';
     return html;
+  }
+  function stageIndex() {
+    if (S.screen === 'collection') return S.resumeScreen === 'micro' ? 4 : S.resumeScreen === 'card' ? 3 : S.resumeScreen === 'lab' ? 2 : 0;
+    return S.screen === 'micro' ? 4 : S.screen === 'card' ? 3 : S.screen === 'lab' ? (/^(predict|predictionSaved)$/.test(S.labStep) ? 1 : 2) : 0;
+  }
+  function stageNavigationBusy() {
+    return !!(S.experiment && (S.experiment.mode !== 'idle' || S.experiment.safetyOpen)) || /^(pouring|reacting)$/.test(S.labStep);
+  }
+  function stageReviewHTML() {
+    if (S.stageReview === 'pool') {
+      var html = reagentGalleryHTML().replace(/data-action="clickReagent"/g,'disabled data-action="clickReagent"').replace(/id="poolSearchInput"/,'disabled id="poolSearchInput"').replace(/data-action="setFilter"/g,'disabled data-action="setFilter"');
+      return topbarHTML(true,'pool') + html.replace(/<div class="gallery-actions">[\s\S]*?<\/div><\/footer>/,'<div class="gallery-actions"><button class="gallery-clear" data-action="changeReactants">Yeni Maddeler Seç</button><button class="gallery-continue" data-action="closeStageReview">Kaldığım Aşamaya Dön</button></div></footer>');
+    }
+    return topbarHTML(true,'predict') + window.MebiPrediction.reviewHTML(S);
   }
 
   /* ----------------- 3. EKRANLAR (SCREENS) ----------------- */
@@ -354,7 +384,7 @@
     var compactSelection = selectionComplete && S.reagentPanelCollapsed;
     var q = window.MebiData.foldTR(S.searchQuery);
     var cards = window.MebiData.REAGENTS.filter(function(r) {
-      if (compactSelection && r.id !== S.selectedSlot1 && r.id !== S.selectedSlot2) return false;
+      if (compactSelection) return r.id === S.selectedSlot1 || r.id === S.selectedSlot2;
       return (S.categoryFilter === 'all' || r.category === S.categoryFilter) &&
         (compactSelection || !q || window.MebiData.foldTR(r.name + ' ' + r.f).indexOf(q) !== -1);
     }).map(function(r) {
@@ -387,6 +417,47 @@
 
   function labSettingsHTML() { return ''; }
 
+  function reagentGalleryHTML() {
+    var q = window.MebiData.foldTR(S.searchQuery);
+    var cards = window.MebiData.REAGENTS.filter(function(r) {
+      return (S.categoryFilter === 'all' || r.category === S.categoryFilter) &&
+        (!q || window.MebiData.foldTR(r.id + ' ' + r.name + ' ' + r.f).indexOf(q) !== -1);
+    }).map(function(r) {
+      var slot = S.selectedSlot1 === r.id ? 1 : (S.selectedSlot2 === r.id ? 2 : 0);
+      var appearance = r.solid ? 'powder' : (r.id === 'Cu(NO3)2' ? 'blue' : 'clear');
+      var description = r.solid ? 'Beyaz katı toz' : (appearance === 'blue' ? 'Mavi sulu çözelti' : 'Renksiz sulu çözelti');
+      return '<button type="button" class="reagent-gallery-card' + (slot ? ' is-selected' : '') +
+        '" data-action="clickReagent" data-arg="' + esc(r.id) + '" aria-pressed="' + !!slot +
+        '" aria-label="' + esc(r.f + ', ' + r.name + ', ' + description + (slot ? ', ' + slot + '. beher seçildi' : '')) + '">' +
+        '<span class="reagent-card-visual is-' + appearance + '">' +
+          '<img src="image/reagents/' + appearance + '.webp?v=3" width="640" height="440" alt="" decoding="async" draggable="false">' +
+        '</span><span class="reagent-card-caption">' + (slot ? '<span class="reagent-card-selection">✓ ' + slot + '. beher</span>' : '') + '<strong>' + esc(r.f) + '</strong><span>' + esc(r.name) +
+        ' <small>' + (r.solid ? '(katı toz)' : '(suda)') + '</small></span></span></button>';
+    }).join('');
+    var count = (S.selectedSlot1 ? 1 : 0) + (S.selectedSlot2 ? 1 : 0);
+    var slots = [S.selectedSlot1, S.selectedSlot2].map(function(id, index) {
+      var r = window.MebiData.getReagent(id);
+      return '<span class="gallery-selected-slot' + (r ? ' is-filled' : '') + '"><b>' + (index + 1) + '. beher</b><span>' +
+        (r ? esc(r.f) : 'Madde seçilmedi') + '</span></span>';
+    }).join('');
+    return '<section class="reagent-gallery" aria-labelledby="reagentGalleryTitle">' +
+      '<div class="reagent-gallery-toolbar"><header class="reagent-gallery-heading arena-stage-heading"><span class="gallery-heading-icon" aria-hidden="true">' + window.MebiSVG.icon('beakerIc') +
+      '<span class="gallery-heading-check">' + window.MebiSVG.icon('check') + '</span></span>' +
+      '<span id="reagentGalleryTitle" class="reagent-gallery-eyebrow">1. Seç · Maddelerini Seç</span></header>' +
+      '<div class="reagent-gallery-tools"><label class="gallery-search"><span class="sr-only">Madde ara</span>' +
+      '<input id="poolSearchInput" type="search" placeholder="Ad veya formül ara" value="' + esc(S.searchQuery).replace(/"/g, '&quot;') + '"></label>' +
+      '<div class="gallery-filters" role="group" aria-label="Madde kategorisi">' +
+      [['all','Tümü'],['acid','Asit'],['base','Baz'],['salt','Tuz']].map(function(f) {
+        return '<button type="button" data-action="setFilter" data-arg="' + f[0] + '" aria-pressed="' + (S.categoryFilter === f[0]) + '">' + f[1] + '</button>';
+      }).join('') + '</div></div></div>' +
+      '<div class="reagent-gallery-grid" aria-label="Madde kartları">' + (cards || '<p class="gallery-empty">Bu aramada madde bulunamadı.</p>') + '</div>' +
+      '<footer class="reagent-gallery-footer"><div class="gallery-selected-slots" aria-label="Seçilen maddeler">' + slots + '</div>' +
+      '<span class="gallery-selection-status" role="status" aria-live="polite">' + count + ' / 2 madde seçildi</span>' +
+      '<div class="gallery-actions"><button type="button" class="gallery-test" data-action="randomReactivePairForTesting">Test İçin Rastgele Seç</button><button type="button" class="gallery-clear" data-action="resetPool"' + (!count ? ' disabled' : '') + '>Temizle</button>' +
+      '<button type="button" class="gallery-continue" data-action="startExperiment"' + (count !== 2 || S.isFilling ? ' disabled' : '') +
+      '>Tahmin aşamasına geç <span aria-hidden="true">→</span></button></div></footer></section>';
+  }
+
   function selectionLabelHTML(id, slot, elementId) {
     var r = window.MebiData.getReagent(id);
     return '<div class="' + (slot === 1 ? 'vessel-main-wrap' : 'vessel-drag-wrap') + '" id="' + elementId + '">' +
@@ -395,20 +466,19 @@
   }
 
   function screenPool() {
-    var ready = S.selectedSlot1 && S.selectedSlot2 && !S.isFilling;
-    return topbarHTML(true, 'predict') + '<div class="mebi-card lab-workspace">' + reagentPanelHTML() +
-      '<div class="lab-bench" id="labBenchContainer"><div class="bench-stage">' +
-      selectionLabelHTML(S.selectedSlot1, 1, 'mainVessel') + selectionLabelHTML(S.selectedSlot2, 2, 'dragReagentWrap') + '</div>' +
-      '<aside class="bench-dock" id="benchDock"><div class="dock-header"><span class="dock-badge">DENEYE HAZIRLIK</span>' +
-      '<h3 class="dock-title">Karttan behere</h3><p class="dock-subtext">Soldaki kartlardan iki farklı madde seç. Katılar toz, sulu çözeltiler sıvı olarak beherlere aktarılır.</p></div>' +
-      '<div class="lab-selection-status" role="status" aria-live="polite">' + (S.isFilling ? 'Madde behere dolduruluyor…' : (ready ? 'İki beher hazır. Değişimleri tahmin edebilirsin.' : 'İki madde seçerek deneyi hazırla.')) + '</div>' +
-      '</aside>' +
-      '<div class="lab-camera-tools" role="toolbar" aria-label="Laboratuvar görünümü"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-lab-view="reset" ' + ((!S.selectedSlot1 || !S.selectedSlot2) ? 'disabled' : '') + '>Beherler</button>' +
-      '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-lab-view="general">Oda</button></div>' +
-      labSettingsHTML() + '</div></div>';
+    return topbarHTML(true, 'pool') + reagentGalleryHTML();
   }
 
   function screenLab() {
+    if (S.particleInspection && window.MebiParticleInspection.eligible(S)) {
+      return topbarHTML(true, 'observed') + window.MebiParticleInspection.panelHTML(S) + '<div class="lab-camera-tools" role="toolbar" aria-label="Laboratuvar görünümü"><button type="button" class="mebi-btn-icon mebi-btn-secondary" data-lab-view="close" aria-label="Düzeneğe yaklaş">' + window.MebiSVG.icon('eye') + '</button><button type="button" class="mebi-btn-icon mebi-btn-secondary" data-lab-view="reset" aria-label="Görünümü sıfırla">' + window.MebiSVG.icon('reset') + '</button></div>';
+    }
+    if (S.labStep === 'predict' || S.labStep === 'predictionSaved') {
+      return topbarHTML(true, S.labStep) + window.MebiPrediction.render(S);
+    }
+    if (S.labStep === 'observed' && !window.MebiObservation.get(S).labVisible) {
+      return topbarHTML(true, 'observed') + window.MebiObservation.render(S);
+    }
     var r1 = window.MebiData.getReagent(S.selectedSlot1);
     var r2 = window.MebiData.getReagent(S.selectedSlot2);
     var rx = S.activeReaction || window.MebiData.getReaction(S.selectedSlot1, S.selectedSlot2);
@@ -495,10 +565,10 @@
     }
 
     // Durum ve Sensör Barı Metinleri (Yönerge standartları)
-    var statusTitle = '1. Aşama: Olası Değişimleri Tahmin Edin';
+    var statusTitle = '2. Aşama: Olası Değişimleri Tahmin Edin';
     var dotClass = '';
     if (S.labStep === 'ready') {
-      statusTitle = '2. Aşama: Beheri Dökün veya Sürükleyin';
+      statusTitle = '3. Aşama: Beheri Dökün veya Sürükleyin';
     } else if (S.labStep === 'pouring') {
       statusTitle = 'Maddeler Karıştırılıyor...';
       dotClass = 'dot-reacting';
@@ -515,69 +585,23 @@
 
     // Deney Masası Sağ Kontrol ve Gözlem Dock'u (Frosted Glass Panel)
     var dockHTML = '';
-    var isNoneSelected = (S.prediction.indexOf('none') > -1);
 
-    if (S.labStep === 'predict') {
+    if (S.labStep === 'ready') {
       dockHTML = '<div class="bench-dock" id="benchDock">' +
         '<div class="dock-header">' +
-          '<span class="dock-badge">1. AŞAMA: TAHMİN</span>' +
-          '<h3 class="dock-title">Olası Değişimleri Belirle</h3>' +
-          '<p class="dock-subtext">Bu iki madde karıştırıldığında hangi gözlenebilir değişimlerin gerçekleşebileceğini tahmin ediniz:</p>' +
-        '</div>' +
-        '<div class="dock-obs-grid">' +
-          window.MebiData.OBS.map(function(o) {
-            var sel = S.prediction.indexOf(o.key) > -1;
-            var isPassive = (isNoneSelected && o.key !== 'none');
-            var cls = 'dock-obs-chip' + (sel ? ' is-selected' : '') + (isPassive ? ' is-dimmed' : '');
-            return '<button type="button" class="' + cls + '" data-action="toggleObs" data-arg="' + o.key + '">' +
-              '<span class="dock-chip-left">' +
-                '<span class="dock-chip-icon">' + window.MebiSVG.icon(o.key) + '</span>' +
-                '<span class="dock-chip-label">' + esc(o.label) + '</span>' +
-              '</span>' +
-              '<span class="dock-chip-check">' + (sel ? '✓' : '') + '</span>' +
-            '</button>';
-          }).join('') +
-        '</div>' +
-        '<div class="dock-actions">' +
-          '<button class="mebi-btn mebi-btn-primary dock-btn-full" data-action="savePrediction" ' + (S.prediction.length === 0 ? 'disabled' : '') + '>' +
-            '<span class="mebi-btn-badge">' + window.MebiSVG.icon('check') + '</span>' +
-            '<span>Tahminimi Onayla</span>' +
-          '</button>' +
-        '</div>' +
-      '</div>';
-    } else if (S.labStep === 'ready') {
-      dockHTML = '<div class="bench-dock" id="benchDock">' +
-        '<div class="dock-header">' +
-          '<span class="dock-badge mebi-badge-cyan">2. AŞAMA: KARIŞTIRMA</span>' +
+          '<span class="dock-badge mebi-badge-cyan">3. AŞAMA: DENEY</span>' +
           '<h3 class="dock-title">Beheri Dökün veya Sürükleyin</h3>' +
-          '<p class="dock-subtext">Kaydedilen olası değişim tahminleriniz listelenmiştir. Maddeleri karıştırmak için sağdaki beheri dökünüz:</p>' +
+          '<p class="dock-subtext">Sağdaki beheri dökerek karışımı başlat. Aktarılan ve kalan miktarları mavi çubuklardan izle.</p>' +
+          '<p class="experiment-transfer-status" id="experimentTransferStatus" role="status" aria-live="polite"></p>' +
         '</div>' +
-        '<div class="dock-obs-grid">' +
-          window.MebiData.OBS.map(function(o) {
-            var sel = S.prediction.indexOf(o.key) > -1;
-            var cls = 'dock-obs-chip is-locked' + (sel ? ' is-selected' : ' feedback-neutral');
-            return '<div class="' + cls + '">' +
-              '<span class="dock-chip-left">' +
-                '<span class="dock-chip-icon">' + window.MebiSVG.icon(o.key) + '</span>' +
-                '<span class="dock-chip-label">' + esc(o.label) + '</span>' +
-              '</span>' +
-              (sel
-                ? '<span class="dock-chip-status status-pred">Tahmininiz</span>'
-                : '<span class="dock-chip-status status-neutral">Seçilmedi</span>'
-              ) +
-            '</div>';
-          }).join('') +
-        '</div>' +
+        window.MebiExperiment.cardHTML(S) +
         '<div class="dock-actions">' +
           '<button class="mebi-btn mebi-btn-primary dock-btn-full" data-action="triggerPour">' +
             '<span class="mebi-btn-badge">' + window.MebiSVG.icon('flaskIc') + '</span>' +
             '<span>Beheri Dök</span>' +
           '</button>' +
-          '<button class="mebi-btn mebi-btn-secondary mebi-btn-sm dock-btn-full" data-action="redoPrediction">' +
-            '<span class="mebi-btn-badge">' + window.MebiSVG.icon('undo') + '</span>' +
-            '<span>Tahmini Değiştir</span>' +
-          '</button>' +
-        '</div>' +
+
+        '</div>' + window.MebiExperiment.actionsHTML() +
       '</div>';
     } else if (S.labStep === 'pouring' || S.labStep === 'reacting') {
       dockHTML = '<div class="bench-dock" id="benchDock">' +
@@ -586,106 +610,18 @@
           '<h3 class="dock-title">Maddeler Karıştırılıyor...</h3>' +
           '<p class="dock-subtext">Kap içerisindeki renk, gaz, çökelti ve sıcaklık değişimlerini izleyiniz.</p>' +
         '</div>' +
-        '<div class="dock-obs-grid">' +
-          window.MebiData.OBS.map(function(o) {
-            var sel = S.prediction.indexOf(o.key) > -1;
-            var cls = 'dock-obs-chip is-locked' + (sel ? ' is-selected' : ' feedback-neutral');
-            return '<div class="' + cls + '">' +
-              '<span class="dock-chip-left">' +
-                '<span class="dock-chip-icon">' + window.MebiSVG.icon(o.key) + '</span>' +
-                '<span class="dock-chip-label">' + esc(o.label) + '</span>' +
-              '</span>' +
-              (sel
-                ? '<span class="dock-chip-status status-pred">Tahmininiz</span>'
-                : '<span class="dock-chip-status status-neutral">Seçilmedi</span>'
-              ) +
-            '</div>';
-          }).join('') +
-        '</div>' +
+        window.MebiExperiment.cardHTML(S) +
         '<div class="dock-live-box" style="margin-top:4px;">' +
           '<span class="sensor-pulse-dot dot-reacting"></span>' +
           '<span>Tepkime devam ediyor...</span>' +
-        '</div>' +
+        '</div>' + window.MebiExperiment.actionsHTML() +
       '</div>';
     } else if (S.labStep === 'observed') {
-      var exact = sameSet(S.prediction, rx.obs);
-      var hasNone = rx.obs.indexOf('none') > -1;
-
-      var feedbackItemsHTML = window.MebiData.OBS.map(function(o) {
-        var isPred = S.prediction.indexOf(o.key) > -1;
-        var isReal = rx.obs.indexOf(o.key) > -1;
-
-        var cls = 'dock-obs-chip is-locked';
-        var badgeHTML = '';
-
-        if (isPred && isReal) {
-          cls += ' feedback-correct';
-          badgeHTML = '<span class="dock-chip-status status-correct">✓ Doğru Tahmin</span>';
-        } else if (isPred && !isReal) {
-          cls += ' feedback-wrong';
-          badgeHTML = '<span class="dock-chip-status status-wrong">✕ Gerçekleşmedi</span>';
-        } else if (!isPred && isReal) {
-          cls += ' feedback-missed';
-          badgeHTML = '<span class="dock-chip-status status-missed">! Gözden Kaçtı</span>';
-        } else {
-          cls += ' feedback-neutral';
-          badgeHTML = '<span class="dock-chip-status status-neutral">Gözlenmedi</span>';
-        }
-
-        return '<div class="' + cls + '">' +
-          '<span class="dock-chip-left">' +
-            '<span class="dock-chip-icon">' + window.MebiSVG.icon(o.key) + '</span>' +
-            '<span class="dock-chip-label">' + esc(o.label) + '</span>' +
-          '</span>' +
-          badgeHTML +
-        '</div>';
-      }).join('');
-
-      dockHTML = '<div class="bench-dock" id="benchDock">' +
-        '<div class="dock-header">' +
-          '<span class="dock-badge ' + (exact ? 'mebi-badge-success' : 'mebi-badge-indigo') + '">' +
-            (exact ? 'TAM İSABET • DOĞRU TAHMİN' : 'DENEY SONUÇLANDI') +
-          '</span>' +
-          '<h3 class="dock-title">' + (exact ? 'Tebrikler! Mükemmel Tahmin' : 'Tahmin & Sonuç Analizi') + '</h3>' +
-          '<p class="dock-subtext">' +
-            (exact
-              ? 'Tüm olası değişimleri eksiksiz ve doğru tahmin ettiniz.'
-              : 'Gerçekleşen kanıtlar ve tahminleriniz aşağıda eşleştirildi:'
-            ) +
-          '</p>' +
-        '</div>' +
-        '<div class="dock-obs-grid">' +
-          feedbackItemsHTML +
-        '</div>' +
-        (rx.hasTempRise
-          ? '<div class="dock-result-temp" style="font-size:11px;color:var(--mebi-danger);font-weight:700;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(239,68,68,0.12);">' +
-              window.MebiSVG.icon('temp') +
-              '<span>Ekzotermik (' + S.currentTemp.toFixed(1) + '°C - Sıcaklık Artışı)</span>' +
-            '</div>'
-          : '<div class="dock-result-temp" style="font-size:11px;color:var(--mebi-info);font-weight:700;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(139,92,246,0.12);">' +
-              window.MebiSVG.icon('temp') +
-              '<span>' + S.currentTemp.toFixed(1) + '°C · ΔT: ' + (S.currentTemp - rx.tempInit).toFixed(1) + '°C</span>' +
-            '</div>'
-        ) +
-        '<div class="dock-actions" style="display:flex;flex-direction:column;gap:6px;">' +
-          (exact
-            ? '<button class="mebi-btn mebi-btn-primary dock-btn-full" data-action="toCard">' +
-                '<span class="mebi-btn-badge">' + window.MebiSVG.icon('flaskOutline') + '</span>' +
-                '<span>Rapor Aşamasına Geç →</span>' +
-              '</button>'
-            : '<button class="mebi-btn mebi-btn-primary dock-btn-full" data-action="redoPrediction">' +
-                '<span class="mebi-btn-badge">' + window.MebiSVG.icon('undo') + '</span>' +
-                '<span>Tahmini Tekrarla</span>' +
-              '</button>'
-          ) +
-        '</div>' +
-      '</div>';
+      dockHTML = window.MebiObservation.deskHTML(S);
     }
 
     var html = topbarHTML(true, S.labStep) +
       '<div class="mebi-card lab-workspace">' +
-        reagentPanelHTML() +
-
         '<div class="lab-experiment-heading">' +
           '<div class="lab-unified-experiment-badge mebi-badge mebi-badge-cyan">' +
             '<span class="lab-badge-label">DENEY MASASI & TEPKİME DÜZENEĞİ</span>' +
@@ -744,7 +680,7 @@
               // Dökülecek Beher
               '<div class="vessel-drag-wrap' + (S.labStep === 'pouring' ? ' pouring' : '') + '" id="dragReagentWrap">' +
                 '<div class="drag-beaker' + (S.labStep === 'pouring' ? ' pouring' : '') + '" id="dragBeaker">' +
-                  (S.labStep === 'ready' ? '<div class="hand-guide-pill">' + window.MebiSVG.icon('handIc') + 'Tutup Ağız Hizasına Sürükle</div>' : '') +
+                  (S.labStep === 'ready' ? '<div class="hand-guide-pill">' + window.MebiSVG.icon('handIc') + 'Sola Sürükle: Dök · Sağa Sürükle: Geri Al</div>' : '') +
                   (isR2Solid
                     ? '<div class="drag-powder" style="height:' + (isPoured ? '0%' : '60%') + ';"></div>'
                     : '<div class="drag-liquid" style="background:' + (r2.id === 'Cu(NO3)2' ? '#0284c7' : 'rgba(232, 244, 253, 0.55)') + ';height:' + (isPoured ? '0%' : '65%') + ';"></div>'
@@ -763,7 +699,7 @@
           '</div>' +
         '</div>';
 
-    html += '</div>';
+    html += '</div>' + window.MebiExperiment.safetyHTML(S);
     return html;
   }
 
@@ -922,6 +858,7 @@
 
         // Resmi MEBİ Laboratuvar Deney Rapor Sayfası
         '<div class="mebi-report-sheet">' +
+          (window.MebiParticleInspection ? window.MebiParticleInspection.entryHTML(S) : '') +
 
           // 🌟 BİRBİRİNİN DEVAMI ŞEKLİNDE BÜTÜNLEŞİK ÇİFT SEKME ÇUBUĞU (CONNECTED STEPPER TABS)
           '<div class="report-connected-nav" role="tablist" aria-label="Rapor ve Değerlendirme Aşamaları">' +
@@ -1530,7 +1467,7 @@
       if (S.resumeScreen === 'card') resumeStage = 'card';
       else if (S.resumeScreen === 'micro') resumeStage = 'micro';
       else if (S.resumeScreen === 'lab') resumeStage = S.resumeLabStep || 'predict';
-      else resumeStage = 'predict';
+      else resumeStage = 'pool';
     }
 
     var html = topbarHTML(true, resumeStage) +
@@ -1570,6 +1507,7 @@
     }
 
     function onPointerDown(e) {
+      if (!window.MebiExperiment.get(S).safetyAccepted) { dispatch('requestManualPour'); return; }
       if (e.target && e.target.closest && e.target.closest('.beaker-side-pour-btn')) {
         return;
       }
@@ -1623,6 +1561,29 @@
 
   /* ----------------- 5. EYLEMLER VE YÖNLENDİRİCİ (ACTIONS & ROUTER) ----------------- */
   var actions = {
+    toggleStageHeader: function() {
+      var compact = headerIsCompact();
+      S.headerCollapsed = !compact; render(false);
+      var toggle = document.querySelector('.mebi-stage-toggle'); if (toggle) toggle.focus({preventScroll:true});
+    },
+    closeStageReview: function() { S.stageReview = null; render(false); },
+    navigateStage: function(value) {
+      var target = Number(value);
+      if (!isFinite(target) || target % 1 || target < 0 || target > stageIndex() || stageNavigationBusy()) return;
+      S.stageReview = null;
+      if (target === 0 && S.screen !== 'pool') S.stageReview = 'pool';
+      else if (target === 1 && window.MebiPrediction.started(S)) S.stageReview = 'predict';
+      else if (target === 1) { S.screen = 'lab'; S.labStep = S.predictionRecord ? 'predictionSaved' : 'predict'; }
+      else if (target === 2) S.screen = 'lab';
+      else if (target === 3) S.screen = 'card';
+      else if (target === 4) S.screen = 'micro';
+      render(false);
+    },
+    cancelExperimentSafety: function() {
+      var e = window.MebiExperiment.get(S); if (S.screen !== 'lab' || !e.safetyOpen) return; e.safetyOpen = false; e.pending = null;
+      window.MebiExperiment.syncSafetyDOM(S);
+      var button = document.querySelector('[data-action="triggerPour"]'); if (button) button.focus({preventScroll:true});
+    },
     toggleReagentPanel: function() {
       S.reagentPanelCollapsed = !S.reagentPanelCollapsed;
       render(false);
@@ -1640,6 +1601,8 @@
     },
     goPool: function(arg) {
       ++fillToken; S.isFilling = false;
+      S.searchQuery = '';
+      S.categoryFilter = 'all';
       if (window.MebiAudio) window.MebiAudio.playClick();
       S.reagentPanelCollapsed = false;
       S.screen = 'pool';
@@ -1648,7 +1611,9 @@
       S.activeReaction = null;
       S.poured = false;
       S.labStep = 'predict';
-      S.prediction = [];
+      window.MebiPrediction.reset(S);
+      window.MebiExperiment.reset(S, false);
+      window.MebiObservation.reset(S);
       S.resumeScreen = null;
       S.resumeLabStep = null;
       var viewMode = (arg === 'fromMenu') ? 'wide' : 'desk';
@@ -1660,6 +1625,8 @@
     },
     changeReactants: function() {
       ++fillToken; S.isFilling = false;
+      S.searchQuery = '';
+      S.categoryFilter = 'all';
       if (window.MebiAudio) window.MebiAudio.playClick();
       S.reagentPanelCollapsed = false;
       S.screen = 'pool';
@@ -1668,7 +1635,9 @@
       S.activeReaction = null;
       S.poured = false;
       S.labStep = 'predict';
-      S.prediction = [];
+      window.MebiPrediction.reset(S);
+      window.MebiExperiment.reset(S, false);
+      window.MebiObservation.reset(S);
       S.resumeScreen = null;
       S.resumeLabStep = null;
       S.labView = 'desk';
@@ -1812,7 +1781,7 @@
       } else {
         S.selectedSlot2 = id;
       }
-      S.reagentPanelCollapsed = !!(S.selectedSlot1 && S.selectedSlot2);
+      S.reagentPanelCollapsed = false;
       S.labView = 'desk';
       finishSelection();
     },
@@ -1836,6 +1805,22 @@
       S.labView = 'desk';
       finishSelection();
     },
+    randomReactivePairForTesting: function() {
+      if (S.screen !== 'pool') return;
+      var reagents = window.MebiData.REAGENTS, pairs = [];
+      for (var i = 0; i < reagents.length; i++) {
+        for (var j = i + 1; j < reagents.length; j++) {
+          if (window.MebiData.getReaction(reagents[i].id, reagents[j].id).typeCategory !== 'none') pairs.push([reagents[i].id, reagents[j].id]);
+        }
+      }
+      if (!pairs.length) return;
+      var pair = pairs[Math.floor(Math.random() * pairs.length)];
+      if (Math.random() < 0.5) pair = [pair[1], pair[0]];
+      S.selectedSlot1 = pair[0]; S.selectedSlot2 = pair[1];
+      S.searchQuery = ''; S.categoryFilter = 'all';
+      S.reagentPanelCollapsed = false; S.labView = 'desk';
+      finishSelection();
+    },
     resetExperiment: function() {
       function doReset() {
         ++fillToken; S.isFilling = false;
@@ -1845,7 +1830,9 @@
         S.selectedSlot1 = null;
         S.selectedSlot2 = null;
         S.activeReaction = null;
-        S.prediction = [];
+        window.MebiPrediction.reset(S);
+        window.MebiExperiment.reset(S, false);
+        window.MebiObservation.reset(S);
         S.labStep = 'predict';
         S.manualTypeInput = '';
         S.manualTypeSelections = [];
@@ -1870,127 +1857,202 @@
       }
     },
     startExperiment: function() {
-      if (!S.selectedSlot1 || !S.selectedSlot2 || S.isFilling) return;
+      if (S.screen !== 'pool' || !S.selectedSlot1 || !S.selectedSlot2 || S.isFilling) return;
       if (window.MebiAudio) window.MebiAudio.playClick();
       enterPredictionScreen();
       render();
     },
-    // Gözlem Butonları Mantığı (Yönergeye göre "Belirgin değişim yok" karşılıklı dışlayan çalışır)
-    toggleObs: function(key) {
-      if (window.MebiAudio) window.MebiAudio.playClick();
-      var idx = S.prediction.indexOf(key);
-
-      if (key === 'none') {
-        if (idx > -1) {
-          S.prediction = [];
-        } else {
-          // "Belirgin değişim yok" seçildiğinde diğer tüm seçenekler otomatik olarak pasifleşir/temizlenir
-          S.prediction = ['none'];
-        }
-      } else {
-        // Diğer seçeneklerden biri seçildiğinde "none" otomatik olarak kaldırılır
-        var noneIdx = S.prediction.indexOf('none');
-        if (noneIdx > -1) {
-          S.prediction.splice(noneIdx, 1);
-        }
-        if (idx > -1) {
-          S.prediction.splice(idx, 1);
-        } else {
-          S.prediction.push(key);
-        }
-      }
-      render(false);
+    setPredictionChoice: function(value) {
+      if (window.MebiPrediction.setChoice(S, value)) render(false);
+    },
+    togglePredictionNone: function() {
+      if (window.MebiPrediction.toggleNone(S)) render(false);
+    },
+    autoFillPredictionForTesting: function() {
+      if (window.MebiPrediction.autoFillForTesting(S)) render(false);
+    },
+    autoFillObservationForTesting: function() {
+      if (window.MebiObservation.autoFillForTesting(S)) render(false);
     },
     savePrediction: function() {
-      if (S.screen !== 'lab' || S.labStep !== 'predict' || !S.activeReaction) return;
-      if (window.MebiAudio) window.MebiAudio.playClick();
-      S.labStep = 'ready';
-      render();
+      window.MebiPrediction.save(S);
+      render(false);
     },
     redoPrediction: function() {
+      if (window.MebiPrediction.edit(S)) render(false);
+    },
+    beginExperiment: function() {
+      if (!window.MebiPrediction.begin(S)) return;
+      HISTORY.length = 0;
+      window.MebiExperiment.reset(S, false);
+      window.MebiObservation.reset(S);
       if (window.MebiAudio) window.MebiAudio.playClick();
-      S.labStep = 'predict';
-      S.poured = false;
-      if (S.activeReaction) {
-        S.currentTemp = S.activeReaction.tempInit;
-      }
       render();
     },
+    requestManualPour: function() {
+      if (!window.MebiPrediction.started(S)) return;
+      window.MebiExperiment.request(S, 'manual');
+      window.MebiExperiment.syncSafetyDOM(S);
+    },
+    toggleSafetyCheck: function(arg) {
+      if (window.MebiExperiment.toggleSafetyItem(S, arg)) {
+        if (window.MebiAudio) window.MebiAudio.playClick();
+        window.MebiExperiment.syncSafetyDOM(S);
+      }
+    },
+    toggleAllSafetyChecks: function() {
+      if (window.MebiExperiment.toggleAllSafetyItems(S)) {
+        if (window.MebiAudio) window.MebiAudio.playClick();
+        window.MebiExperiment.syncSafetyDOM(S);
+      }
+    },
+    acceptExperimentSafety: function() {
+      if (!window.MebiExperiment.allSafetyChecked(S)) return;
+      if (window.MebiAudio) window.MebiAudio.playClick();
+      var pending = window.MebiExperiment.accept(S);
+      window.MebiExperiment.syncSafetyDOM(S);
+      if (pending === 'auto') actions.triggerPour();
+    },
+    restartExperiment: function() {
+      if (S.screen !== 'lab' || !window.MebiPrediction.started(S)) return;
+      window.MebiExperiment.reset(S, true);
+      window.MebiObservation.reset(S);
+      S.labStep = 'ready'; S.poured = false;
+      S.currentTemp = S.activeReaction.tempInit;
+      render(false);
+    },
     triggerPour: function() {
-      if (S.labStep !== 'ready') return;
-      var reactionAtStart = S.activeReaction;
-      S.labStep = 'pouring';
-      S.poured = true;
+      if (!window.MebiPrediction.started(S)) return;
+      if (!window.MebiExperiment.request(S, 'auto')) { window.MebiExperiment.syncSafetyDOM(S); return; }
+      if (!window.MebiExperiment.startAuto(S)) return;
+      S.labStep = 'pouring'; S.poured = false;
       if (window.MebiAudio) window.MebiAudio.playPour();
+      render(false);
+      // The button remains usable if WebGL is unavailable.
+      if (!window.LabScene || !window.LabScene.available || !window.LabScene.handlesTransfer) {
+        var run = S.experiment.run;
+        var timer = setInterval(function() {
+          if (!S.experiment || S.experiment.run !== run || S.screen !== 'lab' || S.experiment.mode !== 'auto') { clearInterval(timer); return; }
+          var done = window.MebiExperiment.advance(S, 0.05, window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          window.MebiExperiment.paint(S);
+          if (done) { clearInterval(timer); actions.finishPour(); }
+        }, 50);
+      }
+    },
+    finishPour: function() {
+      if (S.screen !== 'lab' || !S.experiment || S.experiment.transfer < 1 || (S.labStep !== 'ready' && S.labStep !== 'pouring')) return;
+      var reactionAtStart = S.activeReaction;
+      var experimentRun = S.experiment.run;
+      S.poured = true;
+      S.labStep = 'reacting';
+      var rx = S.activeReaction;
+      if (window.MebiAudio && (rx.obs.indexOf('gas') > -1 || rx.hasTempRise)) {
+        window.MebiAudio.playFizz();
+      }
+
+      var targetTemp = rx.tempFinal;
+      var initTemp = rx.tempInit;
+      var tempStep = (targetTemp - initTemp) / 10;
+      var count = 0;
+      var tempInterval = setInterval(function() {
+        if (S.activeReaction !== reactionAtStart || !S.experiment || S.experiment.run !== experimentRun || (S.labStep !== 'reacting' && S.labStep !== 'observed')) {
+          clearInterval(tempInterval);
+          return;
+        }
+        count++;
+        S.currentTemp += tempStep;
+        var digitalValEl = document.getElementById('digitalTempValue');
+        var thermoHeadEl = document.getElementById('digitalThermoHead');
+        var sensorEl = document.getElementById('sensorTempDisplay');
+        var textEl = document.getElementById('thermoText');
+
+        if (digitalValEl) {
+          digitalValEl.textContent = S.currentTemp.toFixed(1);
+        } else if (textEl) {
+          textEl.innerHTML = window.MebiSVG.icon('temp') + '<span>' + S.currentTemp.toFixed(1) + '°C</span>';
+        }
+        if (window.LabScene) window.LabScene.setTemperature(S.currentTemp);
+
+        if (thermoHeadEl && rx.hasTempRise) {
+          thermoHeadEl.classList.add('is-heating');
+        }
+
+        if (sensorEl) {
+          var curD = (S.currentTemp - rx.tempInit).toFixed(1);
+          var curSign = curD > 0 ? ('+' + curD) : curD;
+          sensorEl.innerHTML = window.MebiSVG.icon('temp') + '<span>' + S.currentTemp.toFixed(1) + '°C</span><span style="font-size:11px;opacity:0.85;margin-left:4px;">(ΔT: ' + curSign + '°C)</span>';
+        }
+
+        if (count >= 10) {
+          clearInterval(tempInterval);
+          S.currentTemp = targetTemp;
+          if (digitalValEl) digitalValEl.textContent = targetTemp.toFixed(1);
+        }
+        window.MebiExperiment.paint(S);
+      }, 100);
+
       render(false);
 
       setTimeout(function() {
-        if (S.activeReaction !== reactionAtStart || S.labStep !== 'pouring') return;
-        S.labStep = 'reacting';
-        var rx = S.activeReaction;
-        if (window.MebiAudio && (rx.obs.indexOf('gas') > -1 || rx.hasTempRise)) {
-          window.MebiAudio.playFizz();
-        }
-
-        var targetTemp = rx.tempFinal;
-        var initTemp = rx.tempInit;
-        var tempStep = (targetTemp - initTemp) / 10;
-        var count = 0;
-        var tempInterval = setInterval(function() {
-          if (S.activeReaction !== reactionAtStart || (S.labStep !== 'reacting' && S.labStep !== 'observed')) {
-            clearInterval(tempInterval);
-            return;
-          }
-          count++;
-          S.currentTemp += tempStep;
-          var digitalValEl = document.getElementById('digitalTempValue');
-          var thermoHeadEl = document.getElementById('digitalThermoHead');
-          var sensorEl = document.getElementById('sensorTempDisplay');
-          var textEl = document.getElementById('thermoText');
-
-          if (digitalValEl) {
-            digitalValEl.textContent = S.currentTemp.toFixed(1);
-          } else if (textEl) {
-            textEl.innerHTML = window.MebiSVG.icon('temp') + '<span>' + S.currentTemp.toFixed(1) + '°C</span>';
-          }
-          if (window.LabScene) window.LabScene.setTemperature(S.currentTemp);
-
-          if (thermoHeadEl && rx.hasTempRise) {
-            thermoHeadEl.classList.add('is-heating');
-          }
-
-          if (sensorEl) {
-            var curD = (S.currentTemp - rx.tempInit).toFixed(1);
-            var curSign = curD > 0 ? ('+' + curD) : curD;
-            sensorEl.innerHTML = window.MebiSVG.icon('temp') + '<span>' + S.currentTemp.toFixed(1) + '°C</span><span style="font-size:11px;opacity:0.85;margin-left:4px;">(ΔT: ' + curSign + '°C)</span>';
-          }
-
-          if (count >= 10) {
-            clearInterval(tempInterval);
-            S.currentTemp = targetTemp;
-            if (digitalValEl) digitalValEl.textContent = targetTemp.toFixed(1);
-          }
-        }, 100);
-
-        render(false);
-
-        setTimeout(function() {
-          if (S.activeReaction !== reactionAtStart || S.labStep !== 'reacting') return;
-          var exact = sameSet(S.prediction, rx.obs);
-          S.labStep = 'observed';
-          if (exact && window.MebiAudio) {
-            window.MebiAudio.playSuccess();
-          }
-          render();
-        }, 1600);
-      }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 50 : 5000);
+        if (S.activeReaction !== reactionAtStart || !S.experiment || S.experiment.run !== experimentRun || S.labStep !== 'reacting') return;
+        S.labStep = 'observed';
+        render();
+      }, 4200);
+    },
+    showObservationDesk: function() {
+      if (window.MebiObservation.showLab(S, true)) render(false);
+    },
+    openObservationCard: function() {
+      if (window.MebiObservation.showLab(S, false)) render(false);
+    },
+    setObservationChoice: function(value) {
+      if (window.MebiObservation.setChoice(S, value)) render(false);
+    },
+    saveObservation: function() {
+      var saved = window.MebiObservation.save(S);
+      render(false);
+      if (saved) {
+        var dock = document.getElementById('benchDock');
+        var tab = document.getElementById('observationTabCompare');
+        if (dock) dock.scrollTop = 0;
+        var panel = document.getElementById('observationPanel');
+        if (panel) panel.scrollTop = 0;
+        if (tab) tab.focus({ preventScroll:true });
+      }
+    },
+    setObservationTab: function(value) {
+      if (!window.MebiObservation.setTab(S, value)) return;
+      render(false);
+      var dock = document.getElementById('benchDock');
+      if (dock) dock.scrollTop = 0;
+      var panel = document.getElementById('observationPanel');
+      if (panel) panel.scrollTop = 0;
+    },
+    saveObservationReflection: function() {
+      window.MebiObservation.saveReflection(S);
+      render(false);
     },
     toCard: function() {
+      if (S.screen !== 'lab' || S.labStep !== 'observed' || !window.MebiObservation.get(S).record) return;
       if (window.MebiAudio) window.MebiAudio.playClick();
       S.reportTab = 'analysis';
       S.screen = 'card';
       render();
     },
+    openParticleInspection: function(view) {
+      if (!window.MebiParticleInspection.eligible(S) || !window.LabScene || !window.LabScene.available || !/^(before|reaction)$/.test(view)) return;
+      var previous = S.particleInspection;
+      S.particleInspection = {view:view,running:!window.matchMedia('(prefers-reduced-motion: reduce)').matches,micro:true,time:0,revision:(previous ? previous.revision : 0)+1,returnScreen:previous ? previous.returnScreen : S.screen};
+      S.screen='lab'; S.labStep='observed'; render(false);
+    },
+    closeParticleInspection: function() {
+      var inspection=S.particleInspection;if(!inspection)return;
+      S.particleInspection=null;S.screen=inspection.returnScreen==='card'?'card':'lab';
+      if(S.screen==='lab')window.MebiObservation.showLab(S,false);render(false);
+    },
+    toggleParticlePlayback: function() {var p=S.particleInspection;if(!p)return;p.micro=true;p.running=!p.running;window.MebiParticleInspection.paint(S);},
+    toggleParticleNormal: function() {var p=S.particleInspection;if(!p)return;p.micro=!p.micro;p.running=false;window.MebiParticleInspection.paint(S);},
+    seekParticleInspection: function(value) {var p=S.particleInspection;if(!p||p.view!=='reaction')return;p.time=Math.max(0,Math.min(16,Number(value)||0));p.running=false;p.revision++;window.MebiParticleInspection.paint(S);},
     selectType: function(typeText) {
       if (window.MebiAudio) window.MebiAudio.playClick();
       if (!S.manualTypeSelections) S.manualTypeSelections = [];
@@ -2202,15 +2264,18 @@
         }
         ++fillToken; prev.isFilling = false;
         S = prev;
+        var previousTransfer = S.experiment ? S.experiment.transfer : (S.poured ? 1 : 0);
+        window.MebiExperiment.reset(S, true);
+        S.experiment.transfer = previousTransfer;
+        if (S.labStep === 'pouring') S.labStep = 'ready';
         render();
       } else {
         if (S.screen === 'lab') {
           if (S.labStep === 'observed') {
-            S.labStep = 'ready';
-            S.poured = false;
-            S.currentTemp = S.activeReaction ? S.activeReaction.tempInit : 22.0;
+            actions.restartExperiment();
+            return;
           } else if (S.labStep === 'ready') {
-            S.labStep = 'predict';
+            if (!window.MebiPrediction.started(S)) S.labStep = 'predictionSaved';
           } else {
             S.screen = 'pool';
             S.selectedSlot1 = null;
@@ -2241,7 +2306,8 @@
 
   function dispatch(action, arg, btn) {
     if (!actions[action]) return;
-    if (action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
+    if (/^(goMenu|goPool|changeReactants|resumeExperiment)$/.test(action)) S.stageReview = null;
+    if (!/^(navigateStage|closeStageReview|toggleStageHeader|cancelExperimentSafety|setObservationChoice|autoFillObservationForTesting|saveObservation|setObservationTab|saveObservationReflection|showObservationDesk|openObservationCard|toggleSafetyCheck|toggleAllSafetyChecks|acceptExperimentSafety|openParticleInspection|closeParticleInspection|toggleParticlePlayback|toggleParticleNormal|seekParticleInspection)$/.test(action) && action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
       HISTORY.push(JSON.stringify(S));
       if (HISTORY.length > 40) HISTORY.shift();
     }
@@ -2261,18 +2327,49 @@
   function render(scrollTop) {
     var app = document.getElementById('app');
     if (!app) return;
-    var fn = SCREENS[S.screen] || screenMenu;
-    var oldList = app.querySelector('.lab-reagent-list');
+    if(S.particleInspection && (S.screen!=='lab'||S.stageReview||!window.MebiParticleInspection.eligible(S)))S.particleInspection=null;
+    document.body.dataset.particleInspection=String(!!S.particleInspection);
+    var focusedCard = document.activeElement;
+    var focusedReagent = focusedCard && focusedCard.matches && focusedCard.matches('.reagent-gallery-card')
+      ? focusedCard.getAttribute('data-arg') : null;
+    var focusedObservation = focusedCard && focusedCard.getAttribute ? focusedCard.getAttribute('data-observation-control') : null;
+    var focusedPrediction = focusedCard && focusedCard.getAttribute ? focusedCard.getAttribute('data-prediction-control') : null;
+    var focusedSafety = focusedCard && focusedCard.getAttribute ? focusedCard.getAttribute('data-safety-control') : null;
+    var fn = S.stageReview ? stageReviewHTML : SCREENS[S.screen] || screenMenu;
+    var oldList = app.querySelector('.prediction-content, .reagent-gallery-grid, .lab-reagent-list, .observation-dock');
     var listScroll = oldList ? oldList.scrollTop : 0;
+    var oldObservationPanel = app.querySelector('#observationPanel');
+    var observationScroll = oldObservationPanel ? oldObservationPanel.scrollTop : 0;
     if (window.ParticleScene) window.ParticleScene.disposeCards();
     app.innerHTML = fn();
-    var newList = app.querySelector('.lab-reagent-list');
+    var newList = app.querySelector('.prediction-content, .reagent-gallery-grid, .lab-reagent-list, .observation-dock');
     if (newList) newList.scrollTop = listScroll;
-    app.dataset.screen = S.screen;
+    var newObservationPanel = app.querySelector('#observationPanel');
+    if (newObservationPanel) newObservationPanel.scrollTop = observationScroll;
+    app.dataset.screen = S.stageReview === 'pool' ? 'pool' : S.stageReview ? 'lab' : S.screen;
     if (window.LabScene) window.LabScene.sync(S, dispatch);
     if (window.ParticleScene) window.ParticleScene.sync(S);
     wireInputs();
+    if (focusedSafety && S.screen === 'lab') {
+      var safetyControl = app.querySelector('[data-safety-control="' + focusedSafety + '"]');
+      if (safetyControl && !safetyControl.disabled) safetyControl.focus({ preventScroll:true });
+    }
+    window.MebiExperiment.wire(S);
     wireDragAndDrop();
+    if (window.MebiFloatingCards) window.MebiFloatingCards.wire(S);
+    if (window.requestAnimationFrame) window.requestAnimationFrame(fitStageHeader);
+    if (focusedReagent && S.screen === 'pool') {
+      var replacementCard = app.querySelector('.reagent-gallery-card[data-arg="' + focusedReagent + '"]');
+      if (replacementCard) replacementCard.focus({ preventScroll: true });
+    }
+    if (focusedObservation && S.screen === 'lab') {
+      var observationControl = app.querySelector('[data-observation-control="' + focusedObservation + '"]');
+      if (observationControl && !observationControl.disabled) observationControl.focus({ preventScroll:true });
+    }
+    if (focusedPrediction && S.screen === 'lab') {
+      var predictionControl = app.querySelector('[data-prediction-control="' + focusedPrediction + '"]');
+      if (predictionControl) predictionControl.focus({ preventScroll:true });
+    }
     if (S.screen === 'lab' && S.labStep === 'predict') {
       highlightSettingsGearOnce();
     }
@@ -2283,6 +2380,9 @@
   }
 
   function wireInputs() {
+    window.MebiPrediction.wireInputs(S);
+    window.MebiObservation.wireInputs(S);
+    if(window.MebiParticleInspection)window.MebiParticleInspection.wire(S);
     var si = document.getElementById('poolSearchInput');
     if (si) {
       si.addEventListener('input', function() {
@@ -2310,10 +2410,10 @@
         dispatch(action, arg, btn);
       });
 
-      // Klavye ile role="button" erişimi (Enter ve Boşluk tuşu)
+      // Klavye ile role="button" ve role="checkbox" erişimi (Enter ve Boşluk tuşu)
       app.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
-          var btn = e.target.closest('[data-action][role="button"]');
+          var btn = e.target.closest('[data-action][role="button"], [data-action][role="checkbox"]');
           if (btn && !btn.disabled && !btn.classList.contains('is-disabled')) {
             e.preventDefault();
             btn.click();
@@ -2354,6 +2454,18 @@
   });
 
   // Global erişim
+  function resizeStageHeader() {
+    var compact = window.innerHeight < 650 || window.innerWidth < 760;
+    var smaller = window.innerWidth < headerViewport.width || window.innerHeight < headerViewport.height;
+    var changed = compact !== headerAutoCompact;
+    headerViewport = {width:window.innerWidth,height:window.innerHeight};
+    headerAutoCompact = compact;
+    if (smaller && compact && S.headerCollapsed === false) { S.headerCollapsed = null; changed = true; }
+    if (changed && S.headerCollapsed == null) render(false);
+    if (window.requestAnimationFrame) window.requestAnimationFrame(fitStageHeader);
+  }
+  window.addEventListener('resize',resizeStageHeader);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize',resizeStageHeader);
   window.TepkimeArenasi = {
     get state() { return S; },
     dispatch: dispatch,
