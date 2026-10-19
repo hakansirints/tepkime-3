@@ -1,52 +1,31 @@
-/* Shared minimize/restore controls for the prediction and observation forms. */
-#app .floating-card-enabled > header { padding-right:40px; }
-.floating-card-minimize,.floating-card-restore { display:grid; place-items:center; position:absolute; top:8px; right:8px; width:32px; height:32px; padding:0; border:0; border-radius:var(--mebi-radius-sm); color:var(--mebi-text-secondary); background:var(--mebi-bg-subtle); cursor:pointer; }
-.floating-card-minimize:hover,.floating-card-restore:hover { color:var(--mebi-text-main); background:var(--mebi-bg-sunken); }
-.floating-card-minimize svg,.floating-card-restore svg { width:18px; height:18px; }
-.floating-card-tile[hidden] { display:none; }
-#app .prediction-card.is-minimized { position:fixed; z-index:40; top:var(--floating-top); left:var(--floating-left); width:92px !important; height:92px !important; min-height:0; max-height:none !important; margin:0 !important; padding:0 !important; border-radius:22px; overflow:hidden; }
-#app .prediction-card.is-minimized > :not(.floating-card-tile) { display:none !important; }
-.floating-card-tile { width:100%; height:100%; }
-.floating-card-grip { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; width:100%; height:100%; padding:16px 0 0; border:0; border-radius:22px; background:transparent; color:var(--mebi-primary); font:inherit; font-size:11px; font-weight:800; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; }
-.floating-card-symbol { display:flex; }
-.floating-card-symbol svg { width:30px; height:30px; }
-.floating-card-restore { top:3px; right:3px; width:30px; height:30px; background:transparent; }
-.floating-card-restore svg { width:16px; height:16px; }
-.is-dragging .floating-card-grip { cursor:grabbing; }
-#app .prediction-card[data-floating-ghost] { z-index:41; pointer-events:none !important; overflow:hidden; }
-[data-theme="dark"] .floating-card-grip { color:var(--mebi-text-main); }
-.observation-open-hint { position:fixed; z-index:40; display:flex; align-items:center; gap:10px; width:max-content; max-width:min(240px,calc(100vw - 16px)); min-height:54px; padding:10px 14px; border:0; border-radius:14px; color:var(--mebi-text-main); background:var(--mebi-bg-surface-solid); box-shadow:0 3px 0 var(--mebi-base-card),var(--mebi-shadow-lg); font:inherit; font-size:11px; line-height:1.5; text-align:left; cursor:pointer; }
-.observation-open-hint svg { width:21px; height:21px; flex:none; color:var(--mebi-primary); }
-.observation-open-hint strong { color:var(--mebi-primary); }
-.observation-open-hint:focus-visible { outline:3px solid var(--mebi-border-focus); outline-offset:3px; }
-#app .observation-card.is-awaiting-observation:not([data-floating-ghost]) { box-shadow:0 0 0 3px var(--mebi-primary-border),0 0 18px var(--mebi-primary-light),0 4px 0 var(--mebi-base-card); }
-[data-theme="dark"] .observation-open-hint :is(svg,strong) { color:var(--mebi-text-main); }
-@media(prefers-reduced-motion:no-preference) {
-  #app .observation-card.is-awaiting-observation:not([data-floating-ghost]) { animation:observation-attention 2.4s ease-in-out infinite; }
-  @keyframes observation-attention { 50% { box-shadow:0 0 0 6px var(--mebi-primary-border),0 0 28px var(--mebi-primary-border),0 4px 0 var(--mebi-base-card); } }
-}
-#app .observation-card.floating-card-enabled > header { padding-right:232px; }
-.observation-peek-toggle { position:absolute; top:8px; right:48px; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:6px 12px; border:0; border-radius:var(--mebi-radius-full); color:var(--mebi-primary); background:var(--mebi-primary-light); font:inherit; font-size:11px; font-weight:800; cursor:pointer; transition:background-color 150ms ease,box-shadow 150ms ease; }
+/* Observation peek only: prediction and observation no longer minimize or drag. */
+#app .observation-card.floating-card-enabled > header { padding-right:156px; }
+.observation-peek-toggle { position:absolute; top:8px; right:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:6px 12px; border:0; border-radius:var(--mebi-radius-full); color:var(--mebi-primary); background:var(--mebi-primary-light); font:inherit; font-size:11px; font-weight:700; cursor:pointer; }
 .observation-peek-toggle svg { width:17px; height:17px; flex:none; }
 .observation-peek-toggle:hover { box-shadow:0 2px 0 var(--mebi-base-card); }
-#app .observation-card.is-collapsed { height:auto !important; min-height:48px; max-height:none !important; padding:8px 14px !important; gap:0; justify-content:center; }
-#app .observation-card.is-collapsed > :not(header):not(.observation-peek-toggle):not(.floating-card-minimize) { display:none !important; }
+#app .observation-card.is-collapsed { height:auto!important; min-height:44px; max-height:none!important; padding:4px 6px 4px 10px!important; gap:0; justify-content:center; opacity:.44; border:1px solid var(--mebi-glass-border); border-radius:13px; background:var(--mebi-glass-clear); box-shadow:0 2px 12px #172c2520; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); transition:opacity .18s ease,background-color .18s ease; }
+#app .observation-card.is-collapsed:hover,#app .observation-card.is-collapsed:has(:focus-visible) { opacity:1; background:var(--mebi-glass-regular); }
+#app .observation-card.is-collapsed > :not(header):not(.observation-peek-toggle) { display:none!important; }
 .observation-card.is-collapsed .prediction-intro { display:none; }
 .observation-card.is-collapsed .prediction-heading { margin-bottom:0; }
+#app .prediction-card[data-floating-ghost] { z-index:41; pointer-events:none!important; overflow:hidden; }
 [data-theme="dark"] .observation-peek-toggle { color:var(--mebi-text-main); }
-#app[data-screen="lab"] #benchDock.observation-live-dock { position:fixed; top:var(--observation-data-top) !important; right:18px; bottom:auto; z-index:8; width:min(360px,calc(100vw - 32px)) !important; max-width:none !important; max-height:calc(100dvh - var(--observation-data-top) - 12px) !important; margin:0; padding:14px; overflow:auto; overscroll-behavior:contain; box-sizing:border-box; pointer-events:auto; border:0; border-radius:var(--mebi-radius-lg); background:var(--mebi-bg-surface-solid) !important; box-shadow:0 4px 0 var(--mebi-base-card),var(--mebi-shadow-lg); }
-[data-theme="dark"] .observation-live-dock .experiment-live-grid .experiment-reading strong { color:var(--mebi-text-main); }
+@media(pointer:coarse) { .observation-peek-toggle { top:3px; right:3px; min-height:40px; } }
+@media(prefers-reduced-motion:reduce) { #app .observation-card.is-collapsed { transition:none; } }
+
+/* Strip snapshots animate independently of the centered live strip's transform. */
+#app .observation-card[data-peek-strip] { padding:4px 6px 4px 10px; border:1px solid var(--mebi-glass-border); border-radius:13px; background:var(--mebi-glass-clear); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+#app .observation-card[data-peek-strip] > :not(header):not(.observation-peek-toggle) { display:none; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) > .learning-card-header { display:block; min-width:0; padding-right:144px; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-heading { flex-wrap:nowrap; min-width:0; margin:0; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-heading h1 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-intro,#app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-pair { display:none; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) .observation-peek-toggle { top:50%; right:5px; transform:translateY(-50%); min-height:32px; background:transparent; border-radius:9px; color:var(--mebi-text-main); }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) .observation-peek-toggle:hover { background:var(--mebi-bg-subtle); box-shadow:none; }
 @media(max-height:650px) and (orientation:landscape) {
-  #app[data-screen="lab"] #benchDock.observation-live-dock { right:8px; width:220px !important; padding:8px 10px !important; }
-}
-@media(prefers-reduced-motion:no-preference) {
-  .observation-live-dock { animation:observation-data-enter 180ms ease-out; }
-  @keyframes observation-data-enter { from { opacity:0; } to { opacity:1; } }
-}
-@media(pointer:coarse) {
-  .floating-card-minimize { top:3px; right:3px; width:44px; height:44px; }
-  .floating-card-restore { top:0; right:0; width:44px; height:44px; }
-  #app .floating-card-enabled > header { padding-right:44px; }
-  .observation-peek-toggle { top:3px; right:50px; min-height:44px; }
-  #app .observation-card.is-collapsed { min-height:52px; }
+ #app[data-screen="lab"] .observation-card.is-collapsed { width:min(460px,max(220px,calc(100vw - 2 * (var(--experiment-card-width) + var(--experiment-edge) + 8px))))!important; }
+ #app .observation-card:is(.is-collapsed,[data-peek-strip]) > .learning-card-header { padding-right:38px; }
+ #app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-eyebrow { display:none; }
+ #app .observation-card:is(.is-collapsed,[data-peek-strip]) .observation-peek-toggle { width:32px; padding:6px; }
+ #app .observation-card:is(.is-collapsed,[data-peek-strip]) .observation-peek-toggle span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 }

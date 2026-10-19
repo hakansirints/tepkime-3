@@ -13,7 +13,7 @@
     transfer = Math.max(0, Math.min(1, transfer));
     reactionProgress = Math.max(0, Math.min(1, reactionProgress));
     var liquid = (a && !a.solid ? 0.42 : 0) + (b && !b.solid ? 0.34 * transfer : 0);
-    var powder = (a && a.solid ? 0.42 : 0) + (b && b.solid ? 0.34 * transfer : 0);
+    var powder = (a && a.solid ? 0.42 * root.MebiExperiment.initialAmount(a).solidGrams : 0) + (b && b.solid ? 0.34 * root.MebiExperiment.initialAmount(b).solidGrams * transfer : 0);
     var active = reaction && reaction.typeCategory !== 'none';
     if (liquid > 0) {
       var solid = a && a.solid ? a : (b && b.solid ? b : null);

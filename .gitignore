@@ -22,3 +22,6 @@ take_*.js
 serve_*.js
 test_*.js
 
+
+# Generated visual verification artifacts
+artifacts/

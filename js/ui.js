@@ -147,110 +147,6 @@
     }
   }
 
-  /* ----------------- 4. 3B TANECİK BÜYÜTME VE İNCELEME MODALI (Atıl Modal - Temizlendi) ----------------- */
-  function openParticleModal() {}
-  function closeParticleModal() {}
-
-  /* ----------------- 5. DEĞERLENDİRME GERİ BİLDİRİM BİLGİ KARTI MODALI ----------------- */
-  function openEvalModal(evalData, userSelections, rx) {
-    if (!evalData) return;
-    var overlay = document.getElementById('evalModalOverlay');
-    var headerEl = document.getElementById('evalModalHeader');
-    var badgeEl = document.getElementById('evalModalBadge');
-    var titleEl = document.getElementById('evalModalTitle');
-    var bodyEl = document.getElementById('evalModalBody');
-
-    if (!overlay || !bodyEl) return;
-
-    var status = evalData.status || 'wrong';
-    var isExact = (status === 'exact');
-    var isPartial = (status === 'partial');
-
-    // Header ve Rozet Konfigürasyonu
-    if (headerEl) {
-      headerEl.className = 'eval-modal-header ' + (isExact ? 'is-exact' : (isPartial ? 'is-partial' : 'is-wrong'));
-    }
-
-    if (badgeEl) {
-      if (isExact) {
-        badgeEl.className = 'eval-status-badge eval-badge-exact';
-        badgeEl.textContent = '✓ TAM DOĞRU DEĞERLENDİRME';
-      } else if (isPartial) {
-        badgeEl.className = 'eval-status-badge eval-badge-partial';
-        badgeEl.textContent = '! KISMİ DOĞRU TESPİTİ';
-      } else {
-        badgeEl.className = 'eval-status-badge eval-badge-wrong';
-        badgeEl.textContent = '! İNCELEME GEREKLİ';
-      }
-    }
-
-    if (titleEl) {
-      titleEl.textContent = evalData.title || (isExact ? 'Tebrikler! Doğru Tespit' : 'Tepkime Türü Analizi');
-    }
-
-    // Callout İkonu
-    var iconSvg = isExact
-      ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-      : (isPartial
-        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
-      );
-
-    var calloutClass = isExact ? 'eval-callout-exact' : (isPartial ? 'eval-callout-partial' : 'eval-callout-wrong');
-
-    // Seçimlerin Özeti (Kullanıcının işaretlediği şıklar)
-    var chipsHtml = '';
-    if (userSelections && userSelections.length > 0) {
-      chipsHtml = '<div class="eval-selections-bar">' +
-        '<span class="eval-selections-label">İşaretlediğiniz Seçenekler:</span>' +
-        '<div class="eval-chips-grid">';
-
-      for (var i = 0; i < userSelections.length; i++) {
-        var opt = userSelections[i];
-        var optLetter = opt.charAt(0);
-        var catKey = (optLetter === 'A' ? 'ppt' : (optLetter === 'B' ? 'acidbase' : (optLetter === 'C' ? 'redox' : (optLetter === 'D' ? 'complex' : 'none'))));
-        var isValid = (evalData.validCategories && evalData.validCategories.indexOf(catKey) > -1);
-
-        chipsHtml += '<span class="eval-chip ' + (isValid ? 'eval-chip-valid' : 'eval-chip-invalid') + '">' +
-          (isValid ? '✓ ' : '✕ ') + opt +
-        '</span>';
-      }
-      chipsHtml += '</div></div>';
-    }
-
-    // Johnstone Üçgeni Pedagojik İpucu
-    var pedagogyHtml = '<div class="eval-pedagogy-tip">' +
-      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
-      '<span><b>Johnstone Üçgeni:</b> Makroskobik ve sembolik analizi tamamladınız. Tepkimenin moleküler mekanizmasını görmek için üç boyutlu tanecik modeline geçebilirsiniz.</span>' +
-    '</div>';
-
-    bodyEl.innerHTML =
-      '<div class="eval-callout ' + calloutClass + '">' +
-        '<div class="eval-callout-icon">' + iconSvg + '</div>' +
-        '<div class="eval-callout-content">' +
-          '<div class="eval-callout-title">' + (evalData.title || 'Değerlendirme Açıklaması') + '</div>' +
-          '<div class="eval-callout-text">' + evalData.explanation + '</div>' +
-        '</div>' +
-      '</div>' +
-      chipsHtml +
-      pedagogyHtml;
-
-    overlay.classList.add('is-active');
-    overlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    if (window.MebiAudio) window.MebiAudio.playClick();
-  }
-
-  function closeEvalModal() {
-    var overlay = document.getElementById('evalModalOverlay');
-    if (overlay) {
-      overlay.classList.remove('is-active');
-      overlay.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      if (window.MebiAudio) window.MebiAudio.playClick();
-    }
-  }
-
   /* ----------------- 5b. SIFIRLAMA ONAY MODALI (RESET CONFIRMATION MODAL) ----------------- */
   var pendingResetConfirmCallback = null;
 
@@ -554,30 +450,6 @@
     }
 
 
-    // Değerlendirme Bilgi Kartı Modalı butonları
-    var closeEvalBtn = document.getElementById('btnCloseEvalModal');
-    var dismissEvalBtn = document.getElementById('btnDismissEvalModal');
-    var proceedMicroBtn = document.getElementById('btnProceedMicroFromModal');
-    var evalOverlay = document.getElementById('evalModalOverlay');
-
-    if (closeEvalBtn) closeEvalBtn.addEventListener('click', closeEvalModal);
-    if (dismissEvalBtn) dismissEvalBtn.addEventListener('click', closeEvalModal);
-    if (proceedMicroBtn) {
-      proceedMicroBtn.addEventListener('click', function() {
-        closeEvalModal();
-        if (window.TepkimeArenasi && window.TepkimeArenasi.dispatch) {
-          window.TepkimeArenasi.dispatch('saveCard');
-        }
-      });
-    }
-    if (evalOverlay) {
-      evalOverlay.addEventListener('click', function(e) {
-        if (e.target === evalOverlay) {
-          closeEvalModal();
-        }
-      });
-    }
-
     // Yatay ekran kalkanı butonları
     var closeOriBtn = document.getElementById('btnCloseOrientation');
     var dismissOriBtn = document.getElementById('btnDismissOrientation');
@@ -620,10 +492,6 @@
           closeWelcomeModal();
           return;
         }
-        if (evalOverlay && evalOverlay.classList.contains('is-active')) {
-          closeEvalModal();
-          return;
-        }
 
         if (oriOverlay && (oriOverlay.classList.contains('is-active') || oriOverlay.classList.contains('is-forced'))) {
           closeOrientationOverlay();
@@ -663,10 +531,6 @@
     closeDrawer: closeDrawer,
     openWelcomeModal: openWelcomeModal,
     closeWelcomeModal: closeWelcomeModal,
-    openParticleModal: openParticleModal,
-    closeParticleModal: closeParticleModal,
-    openEvalModal: openEvalModal,
-    closeEvalModal: closeEvalModal,
     openResetModal: openResetModal,
     closeResetModal: closeResetModal,
     openOrientation: openOrientationOverlay,

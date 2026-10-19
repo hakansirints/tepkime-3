@@ -154,13 +154,6 @@
      D — Kompleksleşme tepkimesi
      E — Bu koşullarda belirgin bir tepkime gözlenmez
   ---------------------------------------------------------------------------- */
-  var QUIZ_OPTIONS = [
-    'A — Çökelme tepkimesi',
-    'B — Asit–baz tepkimesi',
-    'C — Yükseltgenme–indirgenme (redoks) tepkimesi',
-    'D — Kompleksleşme tepkimesi',
-    'E — Bu koşullarda belirgin bir tepkime gözlenmez'
-  ];
 
   /* ----------------- 4. REAKSİYON MATRİSİ (66 REAKSİYON ÇİFTİ) ----------------- */
   var REACTION_PAIRS = {
@@ -181,8 +174,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'Renksiz kurşun(II) nitrat çözeltisi ile beyaz sodyum hidrojen karbonat tozu hazırlanmıştır.',
       macroProductsText: 'Maddeler karıştığında beherde beyaz PbCO₃ çökeltisi oluşur ve hafif CO₂ gaz kabarcıkları gözlenir.',
-      microReactantsNote: 'Sulu ortamda serbest Pb²⁺ ve NO₃⁻ iyonları katı bikarbonat yüzeyiyle temas eder.',
-      microProductsNote: 'Pb²⁺ katyonları karbonatla birleşerek suda çözünmeyen beyaz PbCO₃ kristal kafesini kurar; CO₂ gazı ve su açığa çıkar.'
     },
 
     // 2. HCl + NaHCO3
@@ -201,8 +192,6 @@
       tempInit: 22.0, tempFinal: 36.5, hasTempRise: true,
       macroReactantsText: 'Renksiz berrak hidroklorik asit ile beyaz katı yemek sodası tozu tepkime için hazır bekler.',
       macroProductsText: 'Toz asitle birleştiğinde anında şiddetli köpürme ve yoğun CO₂ gaz fışkırması gerçekleşir, çözelti sıcaklığı 36.5°C\'ye yükselir.',
-      microReactantsNote: 'HCl çözeltisindeki serbest H⁺ protonları katı bikarbonat (HCO₃⁻) yüzeyine hücum eder.',
-      microProductsNote: 'Proton transferiyle derhal doğrusal apolar CO₂ gazı ve kovalent H₂O molekülleri oluşur; Na⁺ ve Cl⁻ serbest hidratlanmış kalır.'
     },
 
     // 3. CaCl2 + NaHCO3
@@ -222,8 +211,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'Renksiz kalsiyum klorür çözeltisi ile beyaz katı bikarbonat tozu hazır bekler.',
       macroProductsText: 'Karışım gerçekleştikten sonra beyaz tebeşir (CaCO₃) çökeltisi oluşur ve çözeltiden hafif CO₂ gazı çıkar.',
-      microReactantsNote: 'Ca²⁺ ve Cl⁻ iyonları çözeltide serbest haldeyken katı bikarbonatla etkileşir.',
-      microProductsNote: 'Ca²⁺ katyonları karbonat anyonlarıyla kenetlenerek beyaz CaCO₃ kalsit kristal kafesini oluşturur.'
     },
 
     // 4. NaHCO3 + NaOH
@@ -242,8 +229,6 @@
       tempInit: 22.0, tempFinal: 25.5, hasTempRise: true,
       macroReactantsText: 'Renksiz sodyum hidroksit bazı ile katı beyaz yemek sodası tozu hazırlanmıştır.',
       macroProductsText: 'Katı toz çözünür, belirgin bir renk veya çökelti oluşmaz ancak hafif sıcaklık artışı ölçülür.',
-      microReactantsNote: 'Bazdan gelen serbest OH⁻ hidroksit anyonları bikarbonatın asidik protonuna saldırır.',
-      microProductsNote: 'Proton transferiyle kararlı kovalent su (H₂O) molekülleri ve serbest karbonat (CO₃²⁻) anyonları oluşur.'
     },
 
     // 5. AgNO3 + NaHCO3
@@ -264,8 +249,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'Berrak renksiz gümüş nitrat çözeltisi ile beyaz katı bikarbonat tozu birleştirilmek üzere bekler.',
       macroProductsText: 'Maddeler karıştırıldığında soluk sarı-beyaz renkli Ag₂CO₃ çökeltisi ve hafif gaz kabarcıkları gözlenir.',
-      microReactantsNote: 'Sulu ortamda serbest Ag⁺ katyonları katı bikarbonat yüzeyiyle tepkimeye girer.',
-      microProductsNote: 'Ag⁺ ve karbonat anyonları suda çözünmeyen iyonik Ag₂CO₃ kristal kafesini örer.'
     },
 
     // 6. Cu(NO3)2 + NaHCO3
@@ -286,8 +269,6 @@
       tempInit: 22.0, tempFinal: 23.5, hasTempRise: false,
       macroReactantsText: 'Karakteristik berrak mavi bakır(II) nitrat çözeltisi ile beyaz bikarbonat tozu masadadır.',
       macroProductsText: 'Karışım anında yoğun köpürerek CO₂ gazı çıkarır ve beher tabanında mavi-yeşil renkli katı tortu birikir.',
-      microReactantsNote: 'Açık mavi Cu²⁺ iyonları sulu ortamda bikarbonat anyonlarıyla karşılaşır.',
-      microProductsNote: 'Cu²⁺ iyonları bazik karbonat (malahit) kafesini örerek çökerken, karbonik asit CO₂ gazına dönüşür.'
     },
 
     // 7. H2O2 + KI
@@ -307,8 +288,6 @@
       tempInit: 22.0, tempFinal: 54.5, hasTempRise: true,
       macroReactantsText: 'İki adet tamamen renksiz ve berrak sulu çözelti (peroksit ve iyodür) hazır bekler.',
       macroProductsText: 'İyodür damladığı anda çözelti sarı-kahverengi renge bürünür, O₂ gaz kabarcıkları çıkarır ve sıcaklık 54.5°C\'ye yükselir.',
-      microReactantsNote: 'H₂O₂ moleküllerindeki peroksi bağı I⁻ iyonlarının katalitik saldırısına uğrar.',
-      microProductsNote: 'Redoks basamaklarında O-O bağları kırılarak kararlı kovalent O₂ gazı ve su açığa çıkar; geçici I₂ çözeltiye renk verir.'
     },
 
     // 8. H2O2 + HCl
@@ -327,8 +306,6 @@
       tempInit: 22.0, tempFinal: 23.5, hasTempRise: false,
       macroReactantsText: 'Her iki beherde de tamamen renksiz, şeffaf ve berrak asidik çözeltiler yer alır.',
       macroProductsText: 'Maddeler birleştiğinde ortamda klor gazı (Cl₂) oluşumu ve ince kabarcık çıkışı gerçekleşir.',
-      microReactantsNote: 'Sulu ortamda serbest H⁺ ve Cl⁻ iyonları ile H₂O₂ molekülleri bir aradadır.',
-      microProductsNote: 'Klorür anyonları peroksit tarafından kovalent bağlı Cl₂ klor gazına yükseltgenirken peroksit suya indirgenir.'
     },
 
     // 9. H2O2 + NaOH
@@ -347,8 +324,6 @@
       tempInit: 22.0, tempFinal: 27.5, hasTempRise: true,
       macroReactantsText: 'İki renksiz, berrak sıvı deney masasında ayrı beherlerde bulunur.',
       macroProductsText: 'Görünür bir renk değişimi veya çökelti oluşmaz; dijital termometrede ekzotermik sıcaklık artışı ölçülür.',
-      microReactantsNote: 'H₂O₂ zayıf asidik yapısıyla ortamdaki serbest OH⁻ iyonlarıyla karşılaşır.',
-      microProductsNote: 'OH⁻ iyonları peroksitten bir proton kopararak su moleküllerini ve hidroperoksit (HO₂⁻) anyonlarını oluşturur.'
     },
 
     // 10. AgNO3 + H2O2
@@ -369,8 +344,6 @@
       tempInit: 22.0, tempFinal: 25.0, hasTempRise: false,
       macroReactantsText: 'İki tamamen berrak, renksiz tuz ve peroksit çözeltisi masadadır.',
       macroProductsText: 'Karıştığında çözeltiden O₂ gazı kabarır ve ortamda ince taneli gri-siyah metalik gümüş çökeltisi belirir.',
-      microReactantsNote: 'Ag⁺ katyonları ile kararsız H₂O₂ molekülleri sulu ortamda temas eder.',
-      microProductsNote: 'Gümüş katyonları elektron alarak nötr Ag atomlarına indirgenir; peroksit oksijene yükseltgenir.'
     },
 
     // 11. Cu(NO3)2 + H2O2
@@ -389,8 +362,6 @@
       tempInit: 22.0, tempFinal: 28.0, hasTempRise: true,
       macroReactantsText: 'Mavi bakır çözeltisi ile renksiz peroksit çözeltisi hazırlanmıştır.',
       macroProductsText: 'Maddeler birleştiğinde mavi renk korunur, ancak çözelti içerisinden O₂ gaz kabarcıkları yükselir ve sıcaklık artar.',
-      microReactantsNote: 'Mavi renk veren Cu²⁺ iyonları H₂O₂ molekülleriyle redoks döngüsüne girer.',
-      microProductsNote: 'Cu²⁺ iyonları kimyasal olarak harcanmadan O-O bağlarının kırılarak O₂ gazına dönüşmesini katalizler.'
     },
 
     // 12. KI + Pb(NO3)2
@@ -411,8 +382,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'İki beherde de tamamen şeffaf, berrak ve renksiz iki tuz çözeltisi yer alır.',
       macroProductsText: 'İki berrak sıvı birleştiği mikrosaniyede çözelti göz alıcı parlak altın sarısı bir katı çökeltiye bürünür.',
-      microReactantsNote: 'KI çözeltisinde hidratlanmış K⁺ ve I⁻ iyonları; kurşun nitratta ise Pb²⁺ ve NO₃⁻ iyonları yüzer.',
-      microProductsNote: 'Pb²⁺ katyonları ile I⁻ anyonları bir araya gelerek suda çözünmeyen hekzagonal PbI₂ kristal kafesini kurar.'
     },
 
     // 13. AgNO3 + KI
@@ -433,8 +402,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'İki renksiz, berrak ve şeffaf çözelti deney için hazırlanmıştır.',
       macroProductsText: 'Sıvılar karıştığında anında açık sarı renkte opak bir katı AgI çökeltisi meydana gelir.',
-      microReactantsNote: 'Ag⁺ ve I⁻ iyonları su molekülleri arasında bağımsız haldeyken karşılaşır.',
-      microProductsNote: 'Gümüş ve iyodür iyonları çok güçlü elektrostatik çekimle katı AgI kristal yapısını oluşturur.'
     },
 
     // 14. Cu(NO3)2 + KI
@@ -455,8 +422,6 @@
       tempInit: 22.0, tempFinal: 24.5, hasTempRise: false,
       macroReactantsText: 'Açık mavi bakır çözeltisi ile renksiz iyodür çözeltisi masada bekler.',
       macroProductsText: 'Maddeler temas ettiği anda çözelti koyu kahverengi renge bürünür ve dipte katı CuI çökeltisi birikir.',
-      microReactantsNote: 'Cu²⁺ iyonları I⁻ anyonlarından elektron alarak Cu⁺ iyonuna indirgenir.',
-      microProductsNote: 'Oluşan Cu⁺ iyonları I⁻ ile CuI katısını oluştururken, iyodür moleküler I₂ iyotuna yükseltgenerek kahverengi rengi verir.'
     },
 
     // 15. HCl + Pb(NO3)2
@@ -476,8 +441,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'İki berrak ve renksiz çözelti masada beklemektedir.',
       macroProductsText: 'Çözeltiler birleştiği anda beyaz bir PbCl₂ çökeltisi oluşur.',
-      microReactantsNote: 'Pb²⁺ ve Cl⁻ iyonları sulu ortamda serbest hidratlanmış haldedir.',
-      microProductsNote: 'Pb²⁺ ve Cl⁻ iyonları çözünürlük sınırını aşarak katı beyaz PbCl₂ kristallerini kurar.'
     },
 
     // 16. CaCl2 + Pb(NO3)2
@@ -497,8 +460,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'İki berrak tuz çözeltisi deney masasında yer alır.',
       macroProductsText: 'Maddeler karıştığında beyaz bir PbCl₂ çökeltisi meydana gelir.',
-      microReactantsNote: 'Ca²⁺, Cl⁻, Pb²⁺ ve NO₃⁻ iyonları çözeltide serbest dağılmıştır.',
-      microProductsNote: 'Pb²⁺ katyonları ile Cl⁻ anyonları birleşerek suda az çözünen PbCl₂ kristallerini oluşturur.'
     },
 
     // 17. NaOH + Pb(NO3)2
@@ -518,8 +479,6 @@
       tempInit: 22.0, tempFinal: 23.0, hasTempRise: false,
       macroReactantsText: 'İki adet renksiz ve şeffaf çözelti deney için hazırdır.',
       macroProductsText: 'Maddeler birleştiğinde anında beyaz bir Pb(OH)₂ katısı çöker.',
-      microReactantsNote: 'Suda serbest Pb²⁺ ve bazdan gelen serbest OH⁻ iyonları karşılaşır.',
-      microProductsNote: 'Pb²⁺ katyonları OH⁻ anyonlarıyla suda çözünmeyen Pb(OH)₂ kafesini örer.'
     },
 
     // 18. NH3 + Pb(NO3)2
@@ -539,8 +498,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'Renksiz kurşun çözeltisi ile renksiz amonyak çözeltisi bulunur.',
       macroProductsText: 'Karışım gerçekleştiğinde beyaz jel kıvamında Pb(OH)₂ çökeltisi oluşur.',
-      microReactantsNote: 'Amonyak molekülleri suda az miktarda OH⁻ üretir.',
-      microProductsNote: 'Açığa çıkan OH⁻ iyonları Pb²⁺ katyonları ile Pb(OH)₂ katısını oluşturur.'
     },
 
     // 19. Na2CO3 + Pb(NO3)2
@@ -560,8 +517,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'Renksiz kurşun nitrat çözeltisi ile beyaz katı çamaşır sodası tozu hazırlanmıştır.',
       macroProductsText: 'Maddeler birleştiğinde anında yoğun beyaz PbCO₃ çökeltisi meydana gelir.',
-      microReactantsNote: 'Pb²⁺ katyonları ile suda çözünen serbest CO₃²⁻ anyonları temas eder.',
-      microProductsNote: 'Pb²⁺ ve CO₃²⁻ iyonları elektrostatik çekimle katı PbCO₃ kristal kafesini kurar.'
     },
 
     // 20. CaCO3 + HCl
@@ -580,8 +535,6 @@
       tempInit: 22.0, tempFinal: 33.5, hasTempRise: true,
       macroReactantsText: 'Beyaz katı kireçtaşı tozu ile berrak renksiz asit çözeltisi hazırlanmıştır.',
       macroProductsText: 'Katı kireçtaşı asitle temas ettiği anda cızırdayarak erir, yoğun CO₂ gazı fışkırır ve sıcaklık yükselir.',
-      microReactantsNote: 'Kalsiyum karbonatın güçlü kristal örgüsü serbest H⁺ protonlarının saldırısına uğrar.',
-      microProductsNote: 'Kristaldeki karbonat anyonları CO₂ gazı ve suya dönüşür; kalsiyum serbest Ca²⁺ olarak çözünür.'
     },
 
     // 21. AgNO3 + CaCO3
@@ -602,8 +555,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'Berrak gümüş çözeltisi ile katı beyaz kireçtaşı tozu birleştirilir.',
       macroProductsText: 'Katı taneciklerin yüzeyi soluk sarı-beyaz renkli Ag₂CO₃ tabakasıyla kaplanır.',
-      microReactantsNote: 'Ag⁺ iyonları katı CaCO₃ kristal yüzeyindeki karbonat gruplarıyla temas eder.',
-      microProductsNote: 'Çözünürlüğü daha düşük olan Ag₂CO₃ katısı katı yüzeyinde çökelerek kristal tabaka oluşturur.'
     },
 
     // 22. CaCO3 + Cu(NO3)2
@@ -624,8 +575,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'Mavi bakır çözeltisi ile beyaz katı kireçtaşı tozu bulunur.',
       macroProductsText: 'Zamanla katı yüzeyinde mavi-yeşil bazik bakır karbonat tabakası oluşur ve hafif kabarcıklar görülür.',
-      microReactantsNote: 'Cu²⁺ iyonları katı kireçtaşı yüzeyindeki karbonat anyonları ile etkileşir.',
-      microProductsNote: 'Katı yüzeyinde malahit (mavi-yeşil) kafesi örülür.'
     },
 
     // 23. HCl + NaOH
@@ -644,8 +593,6 @@
       tempInit: 22.0, tempFinal: 44.5, hasTempRise: true,
       macroReactantsText: 'Renksiz, şeffaf asit ve baz çözeltileri karıştırılmadan önce ayrı beherlerde oda sıcaklığında bulunur.',
       macroProductsText: 'Maddeler birleştiğinde renk değişimi veya çökelti oluşmaz, ancak güçlü ekzotermik nötrleşme ısısıyla dijital termometrede sıcaklık 22.0°C\'den 44.5°C\'ye fırlar.',
-      microReactantsNote: 'HCl suda serbest H⁺ ve Cl⁻ iyonlarına, NaOH ise Na⁺ ve OH⁻ iyonlarına tamamen ayrışmıştır.',
-      microProductsNote: 'Serbest H⁺ ve OH⁻ iyonları birleşerek kararlı kovalent su (H₂O) moleküllerini oluşturur. Na⁺ ve Cl⁻ seyirci olarak kalır.'
     },
 
     // 24. HCl + NH3
@@ -664,8 +611,6 @@
       tempInit: 22.0, tempFinal: 36.0, hasTempRise: true,
       macroReactantsText: 'İki berrak ve renksiz çözelti tepkime için hazır bekler.',
       macroProductsText: 'Görünür renk veya çökelti değişimi olmamasına rağmen dijital termometrede 36.0°C sıcaklık yükselmesi ölçülür.',
-      microReactantsNote: 'HCl\'den gelen serbest H⁺ protonları ile NH₃ üzerindeki ortaklanmamış elektron çifti etkileşir.',
-      microProductsNote: 'Proton transferiyle dörtyüzlü amonyum (NH₄⁺) katyonu ve klorür (Cl⁻) tuzu oluşur.'
     },
 
     // 25. AgNO3 + HCl
@@ -685,8 +630,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'Berrak renksiz gümüş nitrat ile berrak hidroklorik asit çözeltisi masada hazırdır.',
       macroProductsText: 'Sıvılar karıştığında anında süt beyazı, opak ve çöken bir katı AgCl tortusu meydana gelir.',
-      microReactantsNote: 'Ag⁺, NO₃⁻, H⁺ ve Cl⁻ iyonları çözeltide birbirinden bağımsız hareket eder.',
-      microProductsNote: 'Gümüş katyonları ve klorür anyonları hızla kenetlenerek suda çözünmeyen kübik AgCl kristal kafesini oluşturur.'
     },
 
     // 26. Cu(NO3)2 + HCl
@@ -706,8 +649,6 @@
       tempInit: 22.0, tempFinal: 23.0, hasTempRise: false,
       macroReactantsText: 'Açık mavi bakır çözeltisi ile renksiz asit çözeltisi masadadır.',
       macroProductsText: 'Çözeltiler birleştiğinde klorür iyonlarının ligand etkisiyle renk maviden yeşilimsi tona kayar; çökelti oluşmaz.',
-      microReactantsNote: 'Cu²⁺ katyonlarının etrafındaki su molekülleri yüksek derişimli Cl⁻ iyonlarıyla yer değiştirir.',
-      microProductsNote: 'Dörtyüzlü [CuCl₄]²⁻ koordinasyon kompleksi oluşur.'
     },
 
     // 27. HCl + Na2CO3
@@ -726,8 +667,6 @@
       tempInit: 22.0, tempFinal: 38.5, hasTempRise: true,
       macroReactantsText: 'Renksiz berrak hidroklorik asit ile beyaz kristal toz formundaki sodyum karbonat hazır bekler.',
       macroProductsText: 'Maddeler temas ettiği anda beherde şiddetli bir köpürme meydana gelir, yoğun CO₂ gaz kabarcıkları havaya yükselir ve sıcaklık 38.5°C\'ye çıkar.',
-      microReactantsNote: 'HCl çözeltisindeki serbest H⁺ iyonları ile katı Na₂CO₃ kristalindeki düzlemsel CO₃²⁻ anyonları temas eder.',
-      microProductsNote: 'Proton transferiyle karbonat derhal doğrusal apolar CO₂ gazı ve kovalent H₂O moleküllerine ayrışır.'
     },
 
     // 28. CaCl2 + NaOH
@@ -747,8 +686,6 @@
       tempInit: 22.0, tempFinal: 23.0, hasTempRise: false,
       macroReactantsText: 'İki renksiz ve berrak çözelti masada beklemektedir.',
       macroProductsText: 'Karışım gerçekleştikten sonra çözeltide beyaz renkli Ca(OH)₂ çökeltisi belirir.',
-      microReactantsNote: 'Ca²⁺ katyonları ile bazdan gelen serbest OH⁻ anyonları sulu ortamda karşılaşır.',
-      microProductsNote: 'İyonlar elektrostatik çekimle suda az çözünen Ca(OH)₂ kristal kafesini oluşturur.'
     },
 
     // 29. AgNO3 + CaCl2
@@ -768,8 +705,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'İki renksiz, şeffaf tuz çözeltisi deney için hazırlanmıştır.',
       macroProductsText: 'Çözeltiler birleştiğinde derhal yoğun beyaz AgCl çökelmesi gerçekleşir.',
-      microReactantsNote: 'Ag⁺, NO₃⁻, Ca²⁺ ve Cl⁻ iyonları su molekülleri arasında hidratlanmış haldedir.',
-      microProductsNote: 'Ag⁺ ve Cl⁻ iyonları elektrostatik çekimle katı AgCl kafesini kurarken, Ca²⁺ ve NO₃⁻ seyirci iyon olarak kalır.'
     },
 
     // 30. CaCl2 + Na2CO3
@@ -789,8 +724,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'Berrak kalsiyum klorür çözeltisi ile beyaz sodyum karbonat tozu hazır bekler.',
       macroProductsText: 'Maddeler birleştiğinde anında beyaz tebeşir çökeltisi (CaCO₃) oluşur ve dipte birikir.',
-      microReactantsNote: 'Ca²⁺ ve serbest CO₃²⁻ anyonları sulu ortamda karşılaşır.',
-      microProductsNote: 'Ca²⁺ ve CO₃²⁻ iyonları çözünürlüğü aşarak katı kalsit kristal kafesini kurar; Na⁺ ve Cl⁻ bağımsız kalır.'
     },
 
     // 31. AgNO3 + NaOH
@@ -811,8 +744,6 @@
       tempInit: 22.0, tempFinal: 26.5, hasTempRise: true,
       macroReactantsText: 'İki renksiz, berrak sıvı deney için hazırlanmıştır.',
       macroProductsText: 'Maddeler karıştırıldığında derhal koyu kahverengi/siyah renkli Ag₂O çökeltisi oluşur ve hafif sıcaklık artışı gözlenir.',
-      microReactantsNote: 'Serbest Ag⁺ ve serbest OH⁻ iyonları çözelti içerisinde temas eder.',
-      microProductsNote: 'Oluşan kararsız gümüş hidroksit anında su kaybederek koyu renkli Ag₂O kristal kafesini kurar.'
     },
 
     // 32. Cu(NO3)2 + NaOH
@@ -833,8 +764,6 @@
       tempInit: 22.0, tempFinal: 23.5, hasTempRise: false,
       macroReactantsText: 'Açık mavi renkli bakır(II) nitrat çözeltisi ile renksiz kostik bazı bulunur.',
       macroProductsText: 'Maddeler birleştiğinde açık mavi berrak sıvı derhal jel kıvamında koyu mavi bir katı çökeltiye dönüşür.',
-      microReactantsNote: 'Sulu ortamda Cu²⁺ iyonları ile bazdan gelen serbest OH⁻ iyonları dağılmıştır.',
-      microProductsNote: 'Cu²⁺ iyonları OH⁻ iyonlarıyla koordine olarak suda çözünmeyen polimerik ağ yapılı Cu(OH)₂ katısını kurar.'
     },
 
     // 33. AgNO3 + NH3
@@ -853,8 +782,6 @@
       tempInit: 22.0, tempFinal: 22.5, hasTempRise: false,
       macroReactantsText: 'İki berrak ve renksiz çözelti deney masasında hazırdır.',
       macroProductsText: 'Maddeler karıştırıldığında çözelti tamamen berrak ve renksiz kalır; kompleks iyon çözünür durumdadır.',
-      microReactantsNote: 'Ag⁺ katyonları ile serbest elektron çifti taşıyan NH₃ molekülleri karşılaşır.',
-      microProductsNote: 'İki adet NH₃ ligandı Ag⁺ iyonuna koordine kovalent bağlarla bağlanarak doğrusal [Ag(NH₃)₂]⁺ kompleksi kurar.'
     },
 
     // 34. Cu(NO3)2 + NH3
@@ -874,8 +801,6 @@
       tempInit: 22.0, tempFinal: 25.0, hasTempRise: false,
       macroReactantsText: 'Açık gök mavisi bakır çözeltisi ile renksiz amonyak çözeltisi masada bekler.',
       macroProductsText: 'Amonyak eklendiği anda çözelti aniden büyüleyici bir koyu safir lacivert renge bürünür; hiçbir çökelti oluşmaz.',
-      microReactantsNote: 'Cu²⁺ katyonları ve serbest elektron çifti barındıran piramidal NH₃ molekülleri mevcuttur.',
-      microProductsNote: 'Dört adet NH₃ molekülü ligand olarak elektron çiftleriyle Cu²⁺ iyonuna koordine kovalent bağlanarak kare düzlem safir kompleksi oluşturur.'
     },
 
     // 35. AgNO3 + Na2CO3
@@ -896,8 +821,6 @@
       tempInit: 22.0, tempFinal: 22.0, hasTempRise: false,
       macroReactantsText: 'Renksiz gümüş çözeltisi ile katı beyaz sodyum karbonat tozu hazırlanmıştır.',
       macroProductsText: 'Maddeler birleştiğinde anında soluk sarı-krem renkli bir Ag₂CO₃ çökeltisi oluşur.',
-      microReactantsNote: 'Serbest Ag⁺ katyonları ile suda çözünen serbest CO₃²⁻ anyonları bir araya gelir.',
-      microProductsNote: 'Gümüş katyonları ve karbonat anyonları suda çözünmeyen katı kristal kafesini kurar.'
     },
 
     // 36. Cu(NO3)2 + Na2CO3
@@ -918,8 +841,6 @@
       tempInit: 22.0, tempFinal: 23.0, hasTempRise: false,
       macroReactantsText: 'Berrak mavi bakır(II) nitrat çözeltisi ile beyaz sodyum karbonat tozu masadadır.',
       macroProductsText: 'Karışım anında mavi-yeşil renkli katı çökelti oluşturur ve hafif CO₂ gaz kabarcıkları açığa çıkar.',
-      microReactantsNote: 'Cu²⁺ iyonları ile karbonat ve su molekülleri temas eder.',
-      microProductsNote: 'Cu²⁺ iyonları bazik karbonat yapısını kurarak çökerken, karbonatın bir kısmı CO₂ gazına dönüşür.'
     }
   };
 
@@ -964,8 +885,6 @@
       hasTempRise: false,
       macroReactantsText: (r1 ? r1.name : '1. Madde') + ' ile ' + (r2 ? r2.name : '2. Madde') + ' deney masasında ayrı ayrı hazır bulunur.',
       macroProductsText: dry ? 'Beyaz katı tanecikler kuru bir karışım oluşturur. Beherde sıvı, gaz kabarcığı veya yeni çökelti oluşmaz.' : (hasSolid ? 'Başlangıçtaki katı çözünür veya sulu ortamda dağılır. Bu senaryoda gaz çıkışı, yeni çökelti veya belirgin sıcaklık değişimi gözlenmez.' : 'Çözeltiler karışır; gaz, yeni çökelti veya belirgin sıcaklık değişimi gözlenmez. Başlangıçtaki madde rengi karışımda korunabilir.'),
-      microReactantsNote: dry ? 'Her iki maddenin tanecikleri ayrı katı yapılarda bulunur; su molekülleri yoktur.' : (hasSolid ? 'Katı madde başlangıçta kendi yapısını korur; çözeltideki tanecikler sulu ortamda bulunur.' : 'Sulu çözeltilerdeki iyonlar veya moleküller su molekülleriyle etkileşir.'),
-      microProductsNote: dry ? 'Fiziksel Karışım Modeli: Kuru katı tanecikler yan yana bulunur; su kılıfı veya yeni ürün gösterilmez.' : 'Fiziksel Karışım Modeli: Yeni kimyasal ürün oluşumu gösterilmez. Başlangıç maddeleri çözünmüş veya katı fazda bulunabilir; her taneciğin çözündüğü varsayılmaz.'
     };
   }
 
@@ -976,159 +895,6 @@
       .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
       .replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
   }
-
-  function matchReactionType(userInput, expectedCategory) {
-    var norm = foldTR(userInput);
-    if (!norm) return false;
-    if (expectedCategory === 'ppt') return /cokel/.test(norm) || /cokelti/.test(norm) || /tortu/.test(norm) || /^a\b/.test(norm);
-    if (expectedCategory === 'acidbase') return /asit/.test(norm) || /baz/.test(norm) || /notrles/.test(norm) || /^b\b/.test(norm);
-    if (expectedCategory === 'redox') return (/indirgen/.test(norm) && /yukseltgen/.test(norm)) || /redoks/.test(norm) || /redox/.test(norm) || /^c\b/.test(norm);
-    if (expectedCategory === 'complex') return /kompleks/.test(norm) || /koordinasyon/.test(norm) || /^d\b/.test(norm);
-    if (expectedCategory === 'none') return /belirgin/.test(norm) || /gozlenmez/.test(norm) || /gerceklesmez/.test(norm) || /fiziksel/.test(norm) || /^e\b/.test(norm);
-    return false;
-  }
-  /* ----------------- 5. ÇOKLU TEPKİME TÜRÜ VE PEDAGOJİK DEĞERLENDİRME MOTORU ----------------- */
-  var OPTION_CAT_MAP = {
-    'A': 'ppt',
-    'B': 'acidbase',
-    'C': 'redox',
-    'D': 'complex',
-    'E': 'none'
-  };
-
-  var CAT_NAME_MAP = {
-    'ppt': 'A — Çökelme tepkimesi',
-    'acidbase': 'B — Asit–baz tepkimesi',
-    'redox': 'C — Yükseltgenme–indirgenme (redoks) tepkimesi',
-    'complex': 'D — Kompleksleşme tepkimesi',
-    'none': 'E — Bu koşullarda belirgin bir tepkime gözlenmez'
-  };
-
-  function getCategoryFromOption(optStr) {
-    if (!optStr) return null;
-    var letter = String(optStr).trim().charAt(0).toUpperCase();
-    return OPTION_CAT_MAP[letter] || null;
-  }
-
-  function evaluateReactionTypes(selectedOptions, rx) {
-    if (!selectedOptions || selectedOptions.length === 0) {
-      return {
-        status: 'empty',
-        correct: false,
-        userCategories: [],
-        validCategories: (rx && rx.typeCategories) ? rx.typeCategories : [(rx && rx.typeCategory) || 'none'],
-        explanation: 'Lütfen deneysel gözlem ve bulgularınızı dikkate alarak uygun gördüğünüz seçeneği / seçenekleri işaretleyiniz.'
-      };
-    }
-
-    var validCats = (rx && rx.typeCategories && rx.typeCategories.length > 0)
-      ? rx.typeCategories
-      : [rx && rx.typeCategory ? rx.typeCategory : 'none'];
-
-    var userCats = [];
-    for (var i = 0; i < selectedOptions.length; i++) {
-      var cat = getCategoryFromOption(selectedOptions[i]);
-      if (cat && userCats.indexOf(cat) === -1) {
-        userCats.push(cat);
-      }
-    }
-
-    var invalidCats = [];
-    var matchedCats = [];
-    for (var i = 0; i < userCats.length; i++) {
-      if (validCats.indexOf(userCats[i]) > -1) {
-        matchedCats.push(userCats[i]);
-      } else {
-        invalidCats.push(userCats[i]);
-      }
-    }
-
-    var missedCats = [];
-    for (var i = 0; i < validCats.length; i++) {
-      if (userCats.indexOf(validCats[i]) === -1) {
-        missedCats.push(validCats[i]);
-      }
-    }
-
-    var note = (rx && rx.pedagogicalNote) ? (' ' + rx.pedagogicalNote) : '';
-
-    var canonName = (rx && (rx.canonical || rx.typeName)) ? (rx.canonical || rx.typeName) : 'Fiziksel Karışım (Belirgin Tepkime Yok)';
-
-    // Durum 1: Hiç hatalı/geçersiz seçenek yok
-    if (invalidCats.length === 0) {
-      if (missedCats.length === 0) {
-        // Tam Doğru (Tüm geçerli türler eksiksiz seçildi)
-        return {
-          status: 'exact',
-          correct: true,
-          userCategories: userCats,
-          validCategories: validCats,
-          matchedCategories: matchedCats,
-          missedCategories: [],
-          title: 'Tam Doğru: ' + canonName,
-          explanation: (validCats.length > 1)
-            ? ('Tebrikler! Deneyde gerçekleşen her iki kimyasal süreci de eksiksiz ve tam doğru tespit ettiniz: <b>' + canonName + '</b>.' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : ''))
-            : ('Tebrikler! Kimyasal süreci doğru tespit ettiniz: <b>' + canonName + '</b>.' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : ''))
-        };
-      } else {
-        // Kısmi Başarı (Doğru seçti ama çoklu reaksiyondaki diğer süreci kaçırdı)
-        var matchedNames = matchedCats.map(function(c) { return CAT_NAME_MAP[c]; }).join(' ve ');
-        var missedNames = missedCats.map(function(c) { return CAT_NAME_MAP[c]; }).join(' ve ');
-        return {
-          status: 'partial',
-          correct: false,
-          userCategories: userCats,
-          validCategories: validCats,
-          matchedCategories: matchedCats,
-          missedCategories: missedCats,
-          title: 'Kısmi Doğru Tespiti',
-          explanation: 'Kısmi Doğru! Seçtiğiniz <b>' + matchedNames + '</b> tespiti bu deney için doğrudur. Ancak deneyde eşzamanlı olarak <b>' + missedNames + '</b> süreci de gerçekleşmektedir. Her iki seçeneği de işaretleyerek tam başarıya ulaşabilirsiniz!' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : '')
-        };
-      }
-    }
-
-    // Durum 2: Seçimler içinde geçersiz seçenekler var
-    if (userCats.indexOf('none') > -1 && validCats.indexOf('none') === -1) {
-      return {
-        status: 'wrong',
-        correct: false,
-        userCategories: userCats,
-        validCategories: validCats,
-        matchedCategories: matchedCats,
-        missedCategories: missedCats,
-        title: 'Gözden Geçiriniz',
-        explanation: 'Bu deneyde belirgin kimyasal değişim kanıtları (çökelti, gaz, renk veya sıcaklık değişimi) gözlenmiştir; dolayısıyla fiziksel temas değildir. Bilimsel sınıflandırma: <b>' + canonName + '</b>.' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : '')
-      };
-    }
-
-    if (matchedCats.length > 0) {
-      var matchedNames = matchedCats.map(function(c) { return CAT_NAME_MAP[c]; }).join(' ve ');
-      var invalidNames = invalidCats.map(function(c) { return CAT_NAME_MAP[c]; }).join(', ');
-      return {
-        status: 'wrong',
-        correct: false,
-        userCategories: userCats,
-        validCategories: validCats,
-        matchedCategories: matchedCats,
-        missedCategories: missedCats,
-        title: 'Gözden Geçiriniz',
-        explanation: 'İşaretlediğiniz <b>' + matchedNames + '</b> tespiti bu deney için geçerlidir; ancak işaretlediğiniz <b>' + invalidNames + '</b> süreci bu tepkimede yer almaz. Doğru sınıflandırma: <b>' + canonName + '</b>.' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : '')
-      };
-    }
-
-    var invalidNames = invalidCats.map(function(c) { return CAT_NAME_MAP[c]; }).join(', ');
-    return {
-      status: 'wrong',
-      correct: false,
-      userCategories: userCats,
-      validCategories: validCats,
-      matchedCategories: matchedCats,
-      missedCategories: missedCats,
-      title: 'Gözden Geçiriniz',
-      explanation: 'Seçtiğiniz <b>' + invalidNames + '</b> bu deney için uygun değildir. Bu deneyin bilimsel karşılığı: <b>' + canonName + '</b>.' + (note ? ('<br><span style="margin-top:6px;display:inline-block;opacity:0.95;">' + note + '</span>') : '')
-    };
-  }
-
 
   Object.keys(REACTION_PAIRS).forEach(function(key) {
     var rx = REACTION_PAIRS[key];
@@ -1142,13 +908,10 @@
   window.MebiData = {
     REAGENTS: REAGENTS,
     OBS: OBS,
-    QUIZ_OPTIONS: QUIZ_OPTIONS,
     REACTION_PAIRS: REACTION_PAIRS,
     getReagent: getReagent,
     getReaction: getReaction,
-    foldTR: foldTR,
-    matchReactionType: matchReactionType,
-    evaluateReactionTypes: evaluateReactionTypes
+    foldTR: foldTR
   };
 
 })(window);

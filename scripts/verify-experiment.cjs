@@ -2,6 +2,11 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),asse
 const root=path.resolve(__dirname,'..'),context={console,document:{querySelector(){return null},querySelectorAll(){return[]},getElementById(){return null}}};context.window=context;vm.createContext(context);
 for(const file of ['data.js','experiment.js'])vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),context,{filename:file});
 const e=context.MebiExperiment,data=context.MebiData;
+assert.equal(e.defaults.solutionMl,50);
+for(const [id,grams]of Object.entries({NaHCO3:1,CaCO3:1,Na2CO3:1}))assert.equal(e.initialAmount(id).solidGrams,grams);
+assert(Math.abs(e.initialAmount('HCl').moles-.005)<1e-12);
+for(const [id,molarMass] of Object.entries({NaHCO3:84.01,CaCO3:100.09,Na2CO3:105.99}))assert(Math.abs(e.initialAmount(id).moles*molarMass-1)<1e-12);
+assert(Object.isFrozen(e.defaults.solidGrams));
 const state={screen:'lab',labStep:'ready',selectedSlot1:'HCl',selectedSlot2:'NaOH'};
 e.reset(state);assert.equal(e.request(state,'manual'),false);assert.equal(state.experiment.safetyOpen,true);assert.equal(e.startManual(state),false);assert.equal(e.accept(state),null);e.toggleAllSafetyItems(state);assert.equal(e.accept(state),'manual');assert(e.startManual(state));
 e.scrub(state,.20);for(let i=0;i<30;i++)e.advance(state,.02);assert.equal(state.experiment.transfer,0,'Approach alone does not transfer');
@@ -14,14 +19,25 @@ assert(e.startManual(state));e.scrub(state,.80);for(let i=0;i<160;i++)e.advance(
 assert.equal(e.sample(0).angle,0);assert.equal(e.sample(.22).angle,.8);assert.equal(e.sample(.8).angle,1.32);assert.equal(e.sample(1).angle,0);
 const original=p=>{const ease=x=>.5-Math.cos(Math.max(0,Math.min(1,x))*Math.PI)/2;return p<.22?ease(p/.22)*.80:p<.80?.80+.52*ease((p-.22)/.58):1.32*(1-ease((p-.8)/.2));};
 for(let i=0;i<=100;i++)assert(Math.abs(e.sample(i/100).angle-original(i/100))<1e-12);
-state.selectedSlot2='NaHCO3';e.reset(state);e.request(state,'manual');e.toggleAllSafetyItems(state);e.accept(state);assert(e.startManual(state));e.scrub(state,.5);for(let i=0;i<40;i++)e.advance(state,.02);assert.equal(state.experiment.transfer,0,'Solids first slide toward the lip before leaving');e.scrub(state,.8);for(let i=0;i<160;i++)e.advance(state,.02);assert.equal(state.experiment.transfer,1,'The inverted vessel can completely empty');assert(e.sample(.8,true).angle>Math.PI/2);
+state.selectedSlot2='NaHCO3';e.reset(state);e.request(state,'manual');e.toggleAllSafetyItems(state);e.accept(state);assert(e.startManual(state));e.scrub(state,.5);for(let i=0;i<40;i++)e.advance(state,.02);assert.equal(state.experiment.transfer,0,'Solids first slide toward the lip before leaving');e.scrub(state,.8);for(let i=0;i<160;i++)e.advance(state,.02);assert.equal(state.experiment.transfer,1,'The inverted vessel can completely empty');assert(e.sample(.8,true).angle>Math.PI/2);assert.equal(e.sample(.57,true).fraction,0,'Smaller solid samples reach the lip before transfer begins');
 let cases=0;
-for(const a of data.REAGENTS)for(const b of data.REAGENTS){if(a===b)continue;state.selectedSlot1=a.id;state.selectedSlot2=b.id;e.reset(state);for(const f of [0,.25,.5,1]){state.experiment.transfer=f;const q=e.quantities(state);assert.equal(q.volume+q.remainingMl,(a.solid?0:40)+(b.solid?0:40));assert(Math.abs(q.inputGrams+q.remainingGrams-((a.solid?1:0)+(b.solid?1:0)))<1e-12);if(!a.solid&&q.volume)assert(Math.abs(q.concentration1*q.volume-4)<1e-12);if(!b.solid&&q.volume)assert(Math.abs(q.concentration2*q.volume-4*f)<1e-12);if(b.solid)assert.equal(q.sourceConcentration,null);}cases++;}
-state.selectedSlot1='HCl';state.selectedSlot2='NaOH';e.reset(state);e.request(state,'auto');e.toggleAllSafetyItems(state);e.accept(state);state.experiment.transfer=.4;assert(e.startAuto(state));let done=0;for(let i=0;i<270;i++)if(e.advance(state,.02))done++;assert.equal(done,1);assert.equal(state.experiment.transfer,1);assert.equal(state.experiment.path,0);const q=e.quantities(state);assert.equal(q.volume,80);assert.equal(q.concentration1,.05);assert.equal(q.concentration2,.05);assert.equal(q.sourceConcentration,null);
+for(const a of data.REAGENTS)for(const b of data.REAGENTS){if(a===b)continue;state.selectedSlot1=a.id;state.selectedSlot2=b.id;e.reset(state);for(const f of [0,.25,.5,1]){state.experiment.transfer=f;const q=e.quantities(state);assert.equal(q.volume+q.remainingMl,(a.solid?0:50)+(b.solid?0:50));assert(Math.abs(q.inputGrams+q.remainingGrams-(e.initialAmount(a).solidGrams+e.initialAmount(b).solidGrams))<1e-12);if(!a.solid&&q.volume)assert(Math.abs(q.concentration1*q.volume-5)<1e-12);if(!b.solid&&q.volume)assert(Math.abs(q.concentration2*q.volume-5*f)<1e-12);if(b.solid)assert.equal(q.sourceConcentration,null);}cases++;}
+state.selectedSlot1='HCl';state.selectedSlot2='NaOH';e.reset(state);e.request(state,'auto');e.toggleAllSafetyItems(state);e.accept(state);state.experiment.transfer=.4;assert(e.startAuto(state));let done=0;for(let i=0;i<270;i++)if(e.advance(state,.02))done++;assert.equal(done,1);assert.equal(state.experiment.transfer,1);assert.equal(state.experiment.path,0);const q=e.quantities(state);assert.equal(q.volume,100);assert.equal(q.concentration1,.05);assert.equal(q.concentration2,.05);assert.equal(q.sourceConcentration,null);
 context.MebiSVG={icon:()=>''};state.activeReaction=data.getReaction('HCl','NaOH');
 for(const [current,delta,trend] of [[22,0,'Sabit'],[36.5,14.5,'↑ Artış'],[18,-4,'↓ Düşüş']]){
  state.currentTemp=current;const t=e.temperature(state);assert.equal(t.current,current);assert.equal(t.delta,delta);assert.equal(t.trend,trend);
- assert.equal(t.minimum,0);assert(t.currentPercent>0);assert(Math.abs(t.currentPercent-current/t.maximum*100)<1e-9);
- const html=e.cardHTML(state);assert(html.includes('data-experiment-meter="temperature"'));assert(html.includes('data-experiment-temperature-delta'));assert(!html.includes('<details'));assert(html.includes('experiment-model-conditions'));
+ assert.equal(t.minimum,0);assert.equal(t.maximum,100);assert.equal(t.startPercent,22);assert(t.currentPercent>0);assert(Math.abs(t.currentPercent-current/t.maximum*100)<1e-9);
+ const html=e.cardHTML(state);assert(html.includes('data-experiment-meter="temperature"'));assert(html.includes('data-experiment-temperature-delta'));assert(!html.includes('<details'));assert(!html.includes('experiment-model-conditions'));assert(!html.includes('100 mL Beherler'));
 }
-console.log(JSON.stringify({passed:true,cases,checks:['first-action safety gate','original automatic keyframes','manual rewind preserves transfer','partial pause/resume','full manual pour','return before completion','single completion event','restart and run identity','solution and solid inventory conservation','formal input concentrations','automatic completion after partial pour','live temperature increase decrease and no change','always visible concentrations and model conditions']}));
+for(const a of data.REAGENTS)for(const b of data.REAGENTS){
+ if(a===b)continue;
+ state.selectedSlot1=a.id;state.selectedSlot2=b.id;state.activeReaction=data.getReaction(a.id,b.id);state.currentTemp=state.activeReaction.tempInit;state.labStep='ready';e.reset(state);
+ const html=e.cardHTML(state);
+ assert(html.includes('<strong class="experiment-formula">'+a.f+'</strong>')&&html.includes('<strong class="experiment-formula">'+b.f+'</strong>'),'Formula case: '+a.id+' / '+b.id);assert(html.includes('Deney Masası Düzeneği'));assert(!html.includes('Kalan Tepken Miktarını Göstermez'));assert(html.includes('data-layout="vertical"'));
+ assert(html.includes('data-experiment-value="'+(a.solid?'initialGrams':'initialMl')+'"'));
+ assert(html.includes('data-experiment-temperature-end>—</strong>'),'Final temperature must not be revealed before completion');
+ if(a.solid&&b.solid)assert(!html.includes('data-experiment-value="volume"'),'Dry solids have no invented solution volume');
+ state.labStep='observed';state.currentTemp=state.activeReaction.tempFinal;
+ assert(!e.cardHTML(state).includes('data-experiment-temperature-end>—</strong>'));
+}
+console.log(JSON.stringify({passed:true,cases,checks:['first-action safety gate','original automatic keyframes','manual rewind preserves transfer','partial pause/resume','full manual pour','return before completion','single completion event','restart and run identity','50 mL solutions and 1 g solid samples; conservation at every transfer step','formal input concentrations','automatic completion after partial pour','live temperature increase decrease and no change','always visible concentrations; removed education-model footer','vertical initial/source/mixture card for all 132 pairs','chemical formula case and final temperature timing']}));

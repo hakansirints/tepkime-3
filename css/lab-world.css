@@ -384,7 +384,7 @@ body #app .lab-reagent-panel.has-selection-summary .lab-slot-badge { top:4px; ri
 }
 
 /* Üst çubuk ve deney aşamaları bütün ekranlarda tek karttır. */
-.lab-3d-active #app:is([data-screen="menu"],[data-screen="card"],[data-screen="micro"],[data-screen="collection"]) { width:100%; max-width:none; padding:14px 18px 40px; }
+.lab-3d-active #app:is([data-screen="menu"],[data-screen="card"],[data-screen="collection"]) { width:100%; max-width:none; padding:14px 18px 40px; }
 .lab-3d-active #app[data-screen="collection"] > .mebi-card { width:min(1060px,calc(100% - 28px)); margin:14px auto 24px; }
 .lab-3d-active #app .mebi-top-shell { position:relative; z-index:12; margin:0; background:var(--mebi-bg-surface); }
 .lab-3d-active #app .mebi-top-shell > .mebi-topbar { margin:0; border:0; border-radius:12px 12px 0 0; box-shadow:none; }

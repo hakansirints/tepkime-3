@@ -48,7 +48,7 @@ function advance(ms) {
   now=target;
   if(frameCallback)frameCallback();
 }
-load('data.js'); load('chemistry-visuals.js'); load('svg-models.js'); load('prediction.js'); load('experiment.js'); load('observation.js');
+load('data.js'); load('chemistry-visuals.js'); load('svg-models.js'); load('prediction.js'); load('experiment.js'); load('observation.js'); load('explanation.js');
 context.LabScene={available:true,sync(){},setTemperature(){}};
 load('app.js');
 const app=context.TepkimeArenasi,data=context.MebiData;
@@ -57,16 +57,16 @@ function fillPrediction(choices) {
   prediction.items.forEach(item=>{app.dispatch('setPredictionChoice',item.key+':'+(choices ? choices[item.key] : 'unsure'));prediction.setReason(app.state,item.key,'Bu belirtiyi önceki bilgilerime göre değerlendiriyorum.');});
   app.render(false);
 }
-const progressLabels=['1. Seç','2. Tahmin','3. Deney','4. Açıkla','5. Model'];
+const progressLabels=['1. Seç','2. Tahmin','3. Deney','4. Açıkla'];
 function assertProgress(index) {
   assert.deepEqual(Array.from(appElement.innerHTML.matchAll(/class="mebi-step-label">([^<]+)</g),m=>m[1]),progressLabels);
   const items=Array.from(appElement.innerHTML.matchAll(/class="mebi-step-item ([^"]*)"([^>]*)>/g));
-  assert.equal(items.length,5);
+  assert.equal(items.length,4);
   items.forEach((item,i)=>{
     assert.equal(item[1],i<index?'is-done':i===index?'is-active':'');
     assert.equal(item[2].includes('aria-current="step"'),i===index);
   });
-  assert(appElement.innerHTML.includes('class="mebi-step-line-fill" style="width:'+(index*25)+'%;"'));
+  assert(appElement.innerHTML.includes('class="mebi-step-line-fill" style="width:'+(index/3*100)+'%;"'));
 }
 assert.equal(app.state.screen,'menu','Existing opening menu is preserved');
 app.dispatch('goPool');
@@ -156,8 +156,7 @@ for(let i=0;i<data.REAGENTS.length;i++)for(let j=i+1;j<data.REAGENTS.length;j++)
     prediction.items.forEach(item=>app.dispatch('setObservationChoice',item.key+':unsure'));
     context.MebiObservation.setNote(app.state,'Bu denemede gözlediğim bulguları kaydettim.');
     app.dispatch('saveObservation');assertProgress(2);
-    assert(appElement.innerHTML.includes('Tahminim ve Gözlemim'));
-    assert(appElement.innerHTML.includes('data-action="toCard"'));
+    assert(appElement.innerHTML.includes('Gözlemin kaydedildi.'));app.dispatch('setObservationTab','compare');assert(appElement.innerHTML.includes('Tahminim ve Gözlemim'));assert(appElement.innerHTML.includes('data-action="toCard"'));
     app.dispatch('toCard');assertProgress(3);
     pairs++;
   }

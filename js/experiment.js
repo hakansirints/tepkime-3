@@ -2,7 +2,21 @@
 (function(window) {
   'use strict';
   var serial = 0;
-  var DEFAULTS = Object.freeze({ solutionMl:40, molarity:0.10, solidGrams:1 });
+  // Solid transfer starts at this shared tilt phase.
+  var SOLID_FLOW_START = 0.58;
+  // Educational sample sizes, not a universal practical-laboratory recipe.
+  // Each solid starts at 1 g so its bed remains visible in the laboratory.
+  var DEFAULTS = Object.freeze({ solutionMl:50, molarity:0.10,
+    solidGrams:Object.freeze({ NaHCO3:1, CaCO3:1, Na2CO3:1 }) });
+  var SOLID_MOLAR_MASS = Object.freeze({ NaHCO3:84.01, CaCO3:100.09, Na2CO3:105.99 });
+  function initialAmount(id) {
+    var reagent = typeof id === 'string' ? window.MebiData.getReagent(id) : id;
+    if (!reagent) return { solutionMl:0, solidGrams:0, moles:0 };
+    var grams = reagent.solid ? DEFAULTS.solidGrams[reagent.id] : 0;
+    if (reagent.solid && !(grams > 0)) throw new Error('Missing solid sample size: ' + reagent.id);
+    return { solutionMl:reagent.solid ? 0 : DEFAULTS.solutionMl, solidGrams:grams,
+      moles:reagent.solid ? grams / SOLID_MOLAR_MASS[reagent.id] : DEFAULTS.solutionMl / 1000 * DEFAULTS.molarity };
+  }
   // Retire the old preference so previously hidden reminders also return.
   try { window.localStorage.removeItem('mebi_hide_safety_warning'); } catch (e) {}
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
@@ -38,7 +52,7 @@
     path = clamp(Number(path) || 0, 0, 1);
     var lift = ease(path / 0.22), returning = ease((path - 0.80) / 0.20);
     var tiltFraction = clamp((path - 0.22) / 0.58, 0, 1);
-    var start = solid ? 0.54 : 0.22, endAngle = solid ? 1.95 : 1.32;
+    var start = solid ? SOLID_FLOW_START : 0.22, endAngle = solid ? 1.95 : 1.32;
     var fraction = clamp((path - start) / (0.80 - start), 0, 1);
     return { path:path, lift:lift, returning:returning, fraction:fraction,
       angle:path < 0.22 ? lift * 0.80 : path < 0.80 ? 0.80 + (endAngle - 0.80) * ease(tiltFraction) : endAngle * (1 - returning) };
@@ -89,7 +103,7 @@
     var e = get(state);
     dt = clamp(Number(dt) || 0, 0, 0.10);
     var reagent = window.MebiData.getReagent(state.selectedSlot2), solid = !!(reagent && reagent.solid);
-    var flowStart = solid ? 0.54 : 0.22;
+    var flowStart = solid ? SOLID_FLOW_START : 0.22;
     e.flow = 0;
     if (e.mode === 'auto') {
       var duration = reduced ? 0.16 : 5;
@@ -120,14 +134,27 @@
   }
   function quantities(state) {
     var a = window.MebiData.getReagent(state.selectedSlot1), b = window.MebiData.getReagent(state.selectedSlot2);
-    var f = get(state).transfer, v1 = a && !a.solid ? DEFAULTS.solutionMl : 0;
-    var v2 = b && !b.solid ? DEFAULTS.solutionMl : 0, volume = v1 + v2 * f;
-    return { volume:volume, remainingMl:v2 * (1 - f), remainingGrams:b && b.solid ? DEFAULTS.solidGrams * (1 - f) : 0,
-      inputGrams:(a && a.solid ? DEFAULTS.solidGrams : 0) + (b && b.solid ? DEFAULTS.solidGrams * f : 0),
+    var amounts = [initialAmount(a),initialAmount(b)], f = get(state).transfer, v1 = amounts[0].solutionMl;
+    var v2 = amounts[1].solutionMl, volume = v1 + v2 * f, m1 = amounts[0].solidGrams, m2 = amounts[1].solidGrams;
+    return { initialMl:v1, initialGrams:m1, volume:volume, remainingMl:v2 * (1 - f), remainingGrams:m2 * (1 - f),
+      inputGrams:m1 + m2 * f,
       concentration1:volume && v1 ? DEFAULTS.molarity * v1 / volume : null,
       concentration2:volume && v2 ? DEFAULTS.molarity * v2 * f / volume : null,
       sourceConcentration:v2 && f < 1 ? DEFAULTS.molarity : null,
-      transferredMl:v2 * f, transferredGrams:b && b.solid ? DEFAULTS.solidGrams * f : 0 };
+      transferredMl:v2 * f, transferredGrams:m2 * f };
+  }
+  // Replay owns a presentation clock, never the student's recorded experiment.
+  function replayState(state, delta) {
+    var replay=state.explanationReview;
+    if (!replay) return state;
+    replay.elapsed=clamp((replay.elapsed||0)+Math.max(0,Number(delta)||0),0,9);
+    var time=replay.elapsed,path=clamp(time/5,0,1),solid=!!window.MebiData.getReagent(state.selectedSlot2).solid;
+    var pose=sample(path,solid),contact=(solid?SOLID_FLOW_START:.22)*5,progress=clamp((time-contact)/(9-contact),0,1);
+    var initial=Number(state.activeReaction.tempInit),final=Number(state.observation.record.temperature.final);
+    return Object.assign({},state,{labStep:time<=contact?'predict':time<9?'reacting':'observed',
+      currentTemp:initial+(final-initial)*ease(progress),explanationReplayProgress:progress,
+      experiment:Object.assign({},get(state),{mode:time>0&&time<5?'explanation-replay':'idle',path:time<5?path:0,
+        transfer:pose.fraction,flow:time>0&&time<4&&pose.fraction>0?1:0,completionNotified:true})});
   }
   function esc(value) { return String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function number(value, digits) { return Number(value).toLocaleString('tr-TR', { minimumFractionDigits:digits || 0, maximumFractionDigits:digits == null ? 1 : digits }); }
@@ -138,45 +165,38 @@
     if (!isFinite(initial)) initial = 22;
     if (!isFinite(current)) current = initial;
     var delta = Math.round((current - initial) * 10) / 10;
-    var target = state.activeReaction ? Number(state.activeReaction.tempFinal) : current;
-    if (!isFinite(target)) target = current;
-    var minimum = Math.min(0,initial,current,target);
-    var maximum = Math.max(10,Math.ceil(Math.max(initial,current,target) * 1.25 / 10) * 10);
+    var minimum = 0, maximum = 100;
     return { initial:initial, current:current, delta:delta, minimum:minimum, maximum:maximum,
       zeroPercent:(0 - minimum) / (maximum - minimum) * 100,
-      startPercent:(initial - minimum) / (maximum - minimum) * 100, currentPercent:(current - minimum) / (maximum - minimum) * 100,
+      startPercent:clamp(initial,minimum,maximum), currentPercent:clamp(current,minimum,maximum),
       trend:delta > 0 ? '↑ Artış' : delta < 0 ? '↓ Düşüş' : 'Sabit',
       change:(delta > 0 ? '+' : '') + number(delta,1) + ' °C' };
   }
   function field(key, label, value) { return '<div class="experiment-reading"><span>' + label + '</span><strong data-experiment-value="' + key + '">' + value + '</strong></div>'; }
   function meterHTML(key, label, value, maximum, unit) {
     var percent = clamp(value / maximum, 0, 1) * 100;
-    return '<div class="experiment-amount-meter" role="meter" aria-label="' + esc(label) + '" aria-valuemin="0" aria-valuemax="' + maximum + '" aria-valuenow="' + value + '" aria-valuetext="' + number(value,unit === 'g' ? 2 : 1) + ' ' + unit + '" data-experiment-meter="' + key + '" data-meter-unit="' + unit + '"><span class="experiment-amount-fill" style="width:' + percent + '%"></span></div><small class="experiment-meter-scale">0–' + number(maximum,unit === 'g' ? 2 : 0) + ' ' + unit + '</small>';
+    return '<div class="experiment-amount-meter" role="meter" aria-label="' + esc(label) + '" aria-valuemin="0" aria-valuemax="' + maximum + '" aria-valuenow="' + value + '" aria-valuetext="' + number(value,unit === 'g' ? 3 : 1) + ' ' + unit + '" data-experiment-meter="' + key + '" data-meter-unit="' + unit + '"><span class="experiment-amount-fill" style="width:' + percent + '%"></span></div><small class="experiment-meter-scale">0–' + number(maximum,unit === 'g' ? 3 : 0) + ' ' + unit + '</small>';
   }
   function cardHTML(state) {
-    var a = window.MebiData.getReagent(state.selectedSlot1), b = window.MebiData.getReagent(state.selectedSlot2), q = quantities(state);
-    var massScale = ((a.solid ? 1 : 0) + (b.solid ? 1 : 0)) * DEFAULTS.solidGrams, t = temperature(state);
-    return '<section class="experiment-live-data" aria-labelledby="experimentLiveTitle"><header class="experiment-live-heading"><span>' + window.MebiSVG.icon('beakerIc') + '</span><div><h2 id="experimentLiveTitle">Deneyin Anlık Verileri</h2><small>100 mL beherler · Eğitim modeli</small></div><span class="experiment-live-dot" aria-hidden="true"></span></header>' +
-      '<div class="experiment-live-grid"><section class="experiment-vessel"><div class="experiment-vessel-title"><b>1</b><strong>Karışım</strong></div>' +
-      (!a.solid || !b.solid ? field('volume','Çözelti hacmi',number(q.volume) + ' mL') + meterHTML('volume','Karışımdaki çözelti hacmi',q.volume,100,'mL') : '') +
-      (massScale ? field('inputGrams','Eklenen katı',number(q.inputGrams,2) + ' g') + meterHTML('inputGrams','Karışıma eklenen katı',q.inputGrams,massScale,'g') : '') + '</section>' +
-      '<section class="experiment-vessel"><div class="experiment-vessel-title"><b>2</b><strong>' + esc(b.f) + '</strong></div>' +
-      (b.solid ? field('remainingGrams','Kalan katı',number(q.remainingGrams,2) + ' g') + meterHTML('remainingGrams',b.f + ' kalan katı',q.remainingGrams,massScale,'g') : field('remainingMl','Kalan çözelti',number(q.remainingMl) + ' mL') + meterHTML('remainingMl',b.f + ' kalan çözelti',q.remainingMl,100,'mL') + '<div class="experiment-source-concentration">' + field('sourceConcentration','Derişim',concentration(q.sourceConcentration)) + '</div>') + '</section></div>' +
-      '<section class="experiment-temperature" aria-label="Anlık sıcaklık"><div class="experiment-temperature-heading">' + field('temperature','Anlık sıcaklık',number(t.current,1) + ' °C') + '<span data-experiment-temperature-trend>' + t.trend + '</span></div>' +
-      '<div class="experiment-thermometer" role="meter" aria-label="Yatay termometre, karışımın sıcaklığı" aria-valuemin="' + t.minimum + '" aria-valuemax="' + t.maximum + '" aria-valuenow="' + t.current + '" aria-valuetext="Başlangıç ' + number(t.initial,1) + ' °C; anlık ' + number(t.current,1) + ' °C" data-experiment-meter="temperature" data-meter-unit="°C" style="--temperature-start:' + t.startPercent + '%;--temperature-current:' + t.currentPercent + '%">' +
-      '<span class="experiment-thermometer-bulb" aria-hidden="true"></span><span class="experiment-thermometer-zero" aria-hidden="true">0 °C</span><div class="experiment-thermometer-body"><div class="experiment-thermometer-track"><span class="experiment-amount-fill" style="left:' + Math.min(t.zeroPercent,t.currentPercent) + '%;width:' + Math.abs(t.currentPercent-t.zeroPercent) + '%"></span></div>' +
-      '<span class="experiment-thermometer-start"><i></i><span>İlk ' + number(t.initial,1) + ' °C</span></span><span class="experiment-thermometer-current"><i></i><span data-experiment-temperature-end>' + (state.labStep === 'observed' ? 'Son ' : 'Anlık ') + number(t.current,1) + ' °C</span></span></div></div>' +
-      '<div class="experiment-temperature-change"><span>Başlangıca göre değişim</span><strong data-experiment-temperature-delta>ΔT: ' + t.change + '</strong></div></section>' +
-      '<div class="experiment-model-inline">' +
-      (!a.solid || !b.solid ? '<p class="experiment-concentration-caption">Karışım · Giriş esaslı nominal derişim</p><div class="experiment-concentrations">' : '') +
-      (!a.solid ? field('concentration1','1. ' + esc(a.f),concentration(q.concentration1)) : '') +
-      (!b.solid ? field('concentration2','2. ' + esc(b.f),concentration(q.concentration2)) : '') +
-      (!a.solid || !b.solid ? '</div>' : '') +
-      '<p class="experiment-model-conditions"><b>Model:</b> Çözelti ' + DEFAULTS.solutionMl + ' mL · 0,10 mol/L; katı 1,00 g.</p>' +
-      '<p class="experiment-model-note">Nominal derişim tepkime sonrası kalan maddeyi göstermez. Hacimler yaklaşık toplanır; katı barları eklenen ve kalan kütleyi gösterir.</p></div></section>';
+    var a = window.MebiData.getReagent(state.selectedSlot1), b = window.MebiData.getReagent(state.selectedSlot2), q = quantities(state), t = temperature(state);
+    var m1 = initialAmount(a).solidGrams, m2 = initialAmount(b).solidGrams, massScale = m1 + m2;
+    var initialKey = a.solid ? 'initialGrams' : 'initialMl', sourceKey = b.solid ? 'remainingGrams' : 'remainingMl';
+    var initialUnit = a.solid ? 'g' : 'mL', sourceUnit = b.solid ? 'g' : 'mL';
+    var finished = state.labStep === 'observed';
+    var mixtureValue = !a.solid || !b.solid ? 'volume' : 'inputGrams';
+    var mixtureUnit = mixtureValue === 'volume' ? 'mL' : 'g';
+    var nominal = (!a.solid || !b.solid) ? '<div class="experiment-concentrations" aria-label="Giriş Esaslı Nominal Derişim"><span>' + (!a.solid && !b.solid ? 'C₁ / C₂' : !a.solid ? 'C₁' : 'C₂') + ' · mol/L</span><strong>' + (!a.solid ? '<span data-experiment-value="concentration1">' + (q.concentration1 == null ? '—' : number(q.concentration1,3)) + '</span>' : '') + (!a.solid && !b.solid ? ' / ' : '') + (!b.solid ? '<span data-experiment-value="concentration2">' + (q.concentration2 == null ? '—' : number(q.concentration2,3)) + '</span>' : '') + '</strong></div>' : '';
+    return '<section class="experiment-live-data" data-layout="vertical" aria-labelledby="experimentLiveTitle"><header class="experiment-card-heading">' + window.MebiSVG.icon('beakerIc') + '<strong id="experimentLiveTitle">Deney Masası Düzeneği</strong></header>' +
+      '<section class="experiment-card-vessel"><div class="experiment-vessel-title"><span>1. Beher</span><strong class="experiment-formula">' + esc(a.f) + '</strong></div>' + field(initialKey,'Başlangıç',number(q[initialKey],a.solid ? 3 : undefined) + ' ' + initialUnit) + meterHTML(initialKey,'Birinci Maddenin Başlangıç Miktarı',q[initialKey],a.solid ? m1 : 100,initialUnit) + '</section>' +
+      '<section class="experiment-card-vessel"><div class="experiment-vessel-title"><span>2. Beher</span><strong class="experiment-formula">' + esc(b.f) + '</strong></div>' + field(sourceKey,'Kalan',number(q[sourceKey],b.solid ? 3 : undefined) + ' ' + sourceUnit) + meterHTML(sourceKey,'İkinci Beherde Kalan Miktar',q[sourceKey],b.solid ? m2 : 100,sourceUnit) + '</section>' +
+      '<section class="experiment-card-vessel experiment-card-mixture"><div class="experiment-vessel-title"><span>' + window.MebiSVG.icon('flaskOutline') + 'Karışım</span><strong data-experiment-value="' + mixtureValue + '">' + number(q[mixtureValue],mixtureValue === 'inputGrams' ? 3 : undefined) + ' ' + mixtureUnit + '</strong></div><small class="experiment-mixture-caption">' + (mixtureValue === 'volume' ? 'Çözelti Hacmi · 1. Beherde' : 'Toplam Katı · Sıvı Eklenmedi') + '</small>' + meterHTML(mixtureValue,'Karışım Miktarı',q[mixtureValue],mixtureValue === 'volume' ? 100 : massScale,mixtureUnit) +
+      (mixtureValue === 'volume' && massScale ? field('inputGrams','Eklenen Katı',number(q.inputGrams,3) + ' g') : '') + nominal + '</section>' +
+      '<section class="experiment-temperature" aria-label="Sıcaklık Verileri"><div class="experiment-temperature-heading"><span>' + window.MebiSVG.icon('temp') + 'Sıcaklık</span><small data-experiment-temperature-trend>' + t.trend + '</small></div><div class="experiment-temperature-values"><span><small>İlk</small><strong>' + number(t.initial,1) + ' °C</strong></span><span class="is-current"><small>Anlık</small><strong data-experiment-value="temperature">' + number(t.current,1) + ' °C</strong></span><span><small>Son</small><strong data-experiment-temperature-end>' + (finished ? number(t.current,1) + ' °C' : '—') + '</strong></span></div>' +
+      '<div class="experiment-thermometer" role="meter" aria-label="Karışımın Anlık Sıcaklığı" aria-valuemin="' + t.minimum + '" aria-valuemax="' + t.maximum + '" aria-valuenow="' + t.current + '" aria-valuetext="Başlangıç ' + number(t.initial,1) + ' °C; anlık ' + number(t.current,1) + ' °C" data-experiment-meter="temperature" data-meter-unit="°C" style="--temperature-start:' + t.startPercent + '%;--temperature-current:' + t.currentPercent + '%"><span class="experiment-thermometer-bulb" aria-hidden="true"></span><div class="experiment-thermometer-track"><span class="experiment-amount-fill" style="left:' + Math.min(t.zeroPercent,t.currentPercent) + '%;width:' + Math.abs(t.currentPercent-t.zeroPercent) + '%"></span><span class="experiment-start-mark" aria-hidden="true"></span></div></div><div class="experiment-thermometer-range" aria-hidden="true"><span>0 °C</span><span>100 °C</span></div><div class="experiment-temperature-change"><span>Değişim</span><strong data-experiment-temperature-delta>ΔT: ' + t.change + '</strong></div></section></section>';
   }
+
   function actionsHTML() {
-    return '<div class="experiment-live-actions"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="restartExperiment">' + window.MebiSVG.icon('reset') + '<span>Deneyi Yeniden Başlat</span></button><button type="button" class="experiment-change" data-action="changeReactants">' + window.MebiSVG.icon('undo') + 'Tepkenleri Değiştir</button></div>';
+    return '<div class="experiment-live-actions"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="restartExperiment">' + window.MebiSVG.icon('reset') + '<span>Deneyi Yeniden Başlat</span></button><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="changeReactants">' + window.MebiSVG.icon('undo') + '<span>Tepkenleri Değiştir</span></button></div>';
   }
   function safetyIconSVG(kind) {
     if (kind === 'headerWarn') {
@@ -268,6 +288,7 @@
     '</div>';
   }
   function syncSafetyDOM(state) {
+    if (window.LabScene && window.LabScene.refreshLayout) window.LabScene.refreshLayout();
     var app = document.getElementById('app');
     if (!app) return false;
     var e = get(state);
@@ -320,10 +341,10 @@
   }
   function paint(state) {
     var e = get(state), q = quantities(state), t = temperature(state);
-    ['volume','remainingMl','remainingGrams','inputGrams','concentration1','concentration2','sourceConcentration'].forEach(function(key) {
+    ['initialMl','initialGrams','volume','remainingMl','remainingGrams','inputGrams','concentration1','concentration2','sourceConcentration'].forEach(function(key) {
       var el = document.querySelector('[data-experiment-value="' + key + '"]');
       if (!el) return;
-      var text = /[Cc]oncentration/.test(key) ? concentration(q[key]) : /Grams/.test(key) ? number(q[key],2) + ' g' : number(q[key]) + ' mL';
+      var text = /[Cc]oncentration/.test(key) ? (q[key] == null ? '—' : number(q[key],3)) : /Grams/.test(key) ? number(q[key],3) + ' g' : number(q[key]) + ' mL';
       if (el.textContent !== text) el.textContent = text;
     });
     document.querySelectorAll('[data-experiment-meter]').forEach(function(meter) {
@@ -338,9 +359,9 @@
         meter.setAttribute('aria-valuemin',String(t.minimum)); meter.setAttribute('aria-valuemax',String(t.maximum));
       }
       meter.setAttribute('aria-valuenow',String(value));
-      meter.setAttribute('aria-valuetext',(isTemperature ? 'Başlangıç ' + number(t.initial,1) + ' °C; anlık ' : '') + number(value,meter.dataset.meterUnit === 'g' ? 2 : 1) + ' ' + meter.dataset.meterUnit);
+      meter.setAttribute('aria-valuetext',(isTemperature ? 'Başlangıç ' + number(t.initial,1) + ' °C; anlık ' : '') + number(value,meter.dataset.meterUnit === 'g' ? 3 : 1) + ' ' + meter.dataset.meterUnit);
     });
-    [['[data-experiment-value="temperature"]',number(t.current,1) + ' °C'],['[data-experiment-temperature-trend]',t.trend],['[data-experiment-temperature-delta]','ΔT: ' + t.change],['[data-experiment-temperature-end]',(state.labStep === 'observed' ? 'Son ' : 'Anlık ') + number(t.current,1) + ' °C']].forEach(function(row) {
+    [['[data-experiment-value="temperature"]',number(t.current,1) + ' °C'],['[data-experiment-temperature-trend]',t.trend],['[data-experiment-temperature-delta]','ΔT: ' + t.change],['[data-experiment-temperature-end]',(state.labStep === 'observed' ? number(t.current,1) + ' °C' : '—')]].forEach(function(row) {
       var el = document.querySelector(row[0]); if (el && el.textContent !== row[1]) el.textContent = row[1];
     });
     var button = document.querySelector('#benchDock [data-action="triggerPour"]');
@@ -365,7 +386,7 @@
         else if (firstItem) firstItem.focus({ preventScroll:true });
       }
     }
-    if (state.screen === 'lab' && state.selectedSlot1 && state.selectedSlot2) paint(state);
+    if (state.screen === 'lab' && state.selectedSlot1 && state.selectedSlot2) paint(state.explanationReview ? replayState(state,0) : state);
   }
   if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown',function(event) {
     var dialog = document.querySelector('.experiment-safety-card');
@@ -377,8 +398,8 @@
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   });
-  window.MebiExperiment = { defaults:DEFAULTS, reset:reset, get:get, sample:sample, request:request, accept:accept,
+  window.MebiExperiment = { defaults:DEFAULTS, initialAmount:initialAmount, reset:reset, get:get, sample:sample, request:request, accept:accept,
     allSafetyChecked:allSafetyChecked, toggleSafetyItem:toggleSafetyItem, toggleAllSafetyItems:toggleAllSafetyItems, syncSafetyDOM:syncSafetyDOM,
     startManual:startManual, scrub:scrub, release:release, startAuto:startAuto, park:park, advance:advance,
-    quantities:quantities, temperature:temperature, cardHTML:cardHTML, actionsHTML:actionsHTML, safetyHTML:safetyHTML, paint:paint, wire:wire };
+    quantities:quantities, replayState:replayState, temperature:temperature, cardHTML:cardHTML, actionsHTML:actionsHTML, safetyHTML:safetyHTML, paint:paint, wire:wire };
 })(window);

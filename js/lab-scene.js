@@ -357,8 +357,8 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let particleLoadError = false;
   function ensureParticleLayer() {
     if (particleLayer || particleLoading || particleLoadError) return;
-    particleLoading = import('./beaker-particles.js?v=1.2').then(module => {
-      particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature});
+    particleLoading = import('./beaker-particles.js?v=2.3').then(module => {
+      particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,main,secondary,secondaryHome,setTemperature});
       particleLayer.sync(state);resize();renderFrame();
     }).catch(error => {
       particleLoadError = true;
@@ -378,6 +378,8 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let temperature = 22;
   let drag = null;
   let cameraTransition = null;
+  let zoomMotion = null;
+  let cameraFraming = null;
   let hasPlayedIntro = false;
   let closeView = false;
   let panelWasCompact = false;
@@ -391,6 +393,128 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let mainLabel = null;
   let secondaryLabel = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let viewportWidth = 0, viewportHeight = 0;
+  const cameraTools = document.createElement('div');
+  cameraTools.id = 'labCameraTools';
+  cameraTools.className = 'lab-camera-tools';
+  cameraTools.setAttribute('role','toolbar');
+  cameraTools.setAttribute('aria-label','Laboratuvar Kamera Kontrolleri');
+  cameraTools.hidden = true;
+  cameraTools.innerHTML = [['out','Uzaklaştır','−'],['in','Yakınlaştır','+'],['center','Beherleri Merkeze Al',null]].map(([action,label,symbol]) => '<button type="button" data-lab-camera="' + action + '" aria-label="' + label + '" title="' + label + '">' + (symbol ? '<span class="lab-zoom-symbol" aria-hidden="true">' + symbol + '</span>' : window.MebiSVG.icon('focus')) + '</button>').join('');
+  cameraTools.addEventListener('click',event => {
+    const button = event.target.closest('[data-lab-camera]');
+    if (!button || cameraTools.hidden) return;
+    if (button.dataset.labCamera === 'center') centerBeakers();
+    else zoomCamera(button.dataset.labCamera === 'in');
+  });
+  document.body.appendChild(cameraTools);
+
+  function updateCameraTools() {
+    const card = document.querySelector('#app .prediction-card:not([data-floating-ghost])');
+    const focused = state && state.screen === 'lab' && !state.stageReview && !window.MebiExperiment.get(state).safetyOpen && (!card || card.classList.contains('is-minimized') || card.classList.contains('is-collapsed'));
+    cameraTools.hidden = !focused;
+  }
+
+  function zoomCamera(nearer) {
+    const distance = zoomMotion ? zoomMotion.distance : camera.position.distanceTo(controls.target);
+    if (!zoomMotion) stopCameraInertia();
+    cameraTransition = null;
+    // Rapid taps accumulate from the pending destination, retaining a smooth dolly.
+    zoomMotion = {distance:THREE.MathUtils.clamp(distance * (nearer ? 1 / 1.2 : 1.2),controls.minDistance,controls.maxDistance),at:performance.now()};
+  }
+
+  function stopCameraInertia() {
+    // Drain OrbitControls' pending drag through its public API without showing
+    // that extra movement. A deliberate toolbar command takes over this pose.
+    const position = camera.position.clone(), target = controls.target.clone(), damping = controls.enableDamping;
+    controls.enableDamping = false;
+    controls.update();
+    controls.enableDamping = damping;
+    camera.position.copy(position);controls.target.copy(target);camera.lookAt(target);
+  }
+
+  function visibleRect(node) {
+    if (!node || !node.getClientRects().length || getComputedStyle(node).visibility === 'hidden') return null;
+    const r = node.getBoundingClientRect();
+    return r.width && r.height ? {left:Math.max(0,r.left),right:Math.min(innerWidth,r.right),top:Math.max(0,r.top),bottom:Math.min(innerHeight,r.bottom)} : null;
+  }
+
+  function freeCameraRect() {
+    // Explicit centering and the lens layout reserve room for visible overlays.
+    const gap = innerHeight < 650 ? 8 : 14;
+    const top = Math.max(...['.mebi-top-shell','.mebi-stepper'].map(s => visibleRect(document.querySelector(s))?.bottom || 0)) + gap;
+    const base = {left:gap,right:innerWidth-gap,top,bottom:(visibleRect(cameraTools)?.top || innerHeight)-gap};
+    const lensWindow = state?.particleInspection && visibleRect(document.querySelector('.particle-lens-window'));
+    if (lensWindow && lensWindow.left > base.left + 140 && innerWidth > 600) return {...base,right:lensWindow.left-gap};
+    const selectors = '.lab-experiment-heading,.observation-live-dock>.experiment-live-data,#benchDock:not(.observation-live-dock),.particle-lens-window,.observation-live-dock>.beaker-particle-entry,.prediction-card.is-minimized:not(.observation-card),.observation-card.is-collapsed';
+    const obstacles = [...document.querySelectorAll(selectors)].filter(n => !n.closest('[data-floating-ghost]')).map(visibleRect).filter(r => r && r.right>base.left && r.left<base.right && r.bottom>base.top && r.top<base.bottom);
+    const xs = [base.left,base.right], ys = [base.top,base.bottom];
+    for (const r of obstacles) {
+      xs.push(THREE.MathUtils.clamp(r.left-gap,base.left,base.right),THREE.MathUtils.clamp(r.right+gap,base.left,base.right));
+      ys.push(THREE.MathUtils.clamp(r.top-gap,base.top,base.bottom),THREE.MathUtils.clamp(r.bottom+gap,base.top,base.bottom));
+    }
+    const x = [...new Set(xs)].sort((a,b)=>a-b), y = [...new Set(ys)].sort((a,b)=>a-b);
+    let best = null, score = -1;
+    for (let l=0;l<x.length-1;l++) for (let r=l+1;r<x.length;r++) for (let t=0;t<y.length-1;t++) for (let b=t+1;b<y.length;b++) {
+      const rect = {left:x[l],right:x[r],top:y[t],bottom:y[b]};
+      if (rect.right-rect.left<60 || rect.bottom-rect.top<60 || obstacles.some(o => rect.left<o.right+gap && rect.right>o.left-gap && rect.top<o.bottom+gap && rect.bottom>o.top-gap)) continue;
+      const area = (rect.right-rect.left)*(rect.bottom-rect.top);
+      if (area>score) {best=rect;score=area;}
+    }
+    return best || base;
+  }
+
+  function vesselCorners(vessel) {
+    vessel.group.updateWorldMatrix(true,false);
+    const points = [];
+    for (const x of [-vessel.radius-.015,vessel.radius+.015]) for (const y of [0,vessel.height+.015]) for (const z of [-vessel.radius-.015,vessel.radius+.015]) points.push(vessel.group.localToWorld(new THREE.Vector3(x,y,z)));
+    points.push(vessel.group.localToWorld(vessel.spoutPoint.clone()));
+    return points;
+  }
+
+  function projectedBounds(points, viewCamera = camera) {
+    const p = points.map(point => point.clone().project(viewCamera));
+    return {left:(Math.min(...p.map(v=>v.x))+1)*innerWidth/2,right:(Math.max(...p.map(v=>v.x))+1)*innerWidth/2,top:(1-Math.max(...p.map(v=>v.y)))*innerHeight/2,bottom:(1-Math.min(...p.map(v=>v.y)))*innerHeight/2};
+  }
+
+  function centerBeakers() {
+    const safeRect = freeCameraRect(), rect = {...safeRect};
+    const padding = Math.min(24,Math.max(6,(rect.right-rect.left)*.035));
+    rect.left+=padding;rect.right-=padding;rect.top+=padding;rect.bottom-=padding;
+    if (state?.particleInspection) {
+      const width=rect.right-rect.left,height=rect.bottom-rect.top;
+      rect.left+=width*.04;rect.right-=width*.12;
+      rect.top+=height*(innerHeight<650?.18:.38);rect.bottom-=height*.06;
+    }
+    const points = [...vesselCorners(main),...vesselCorners(secondary)];
+    if (thermometer.visible) {
+      const box = new THREE.Box3().setFromObject(thermometer);
+      for (const x of [box.min.x,box.max.x]) for (const y of [box.min.y,box.max.y]) for (const z of [box.min.z,box.max.z]) points.push(new THREE.Vector3(x,y,z));
+    }
+    const center = new THREE.Box3().setFromPoints(points).getCenter(new THREE.Vector3());
+    const direction = home.clone().sub(focus).normalize();
+    const right = new THREE.Vector3().crossVectors(camera.up,direction).normalize(), up = new THREE.Vector3().crossVectors(direction,right);
+    const fitCamera = camera.clone();fitCamera.fov=viewFov.desk;fitCamera.updateProjectionMatrix();
+    const tangent = Math.tan(THREE.MathUtils.degToRad(fitCamera.fov/2));
+    const ndcX = (rect.left+rect.right)/innerWidth-1, ndcY = 1-(rect.top+rect.bottom)/innerHeight;
+    function pose(distance) {
+      const shift = right.clone().multiplyScalar(-ndcX*distance*tangent*camera.aspect).addScaledVector(up,-ndcY*distance*tangent);
+      const target = center.clone().add(shift), position = target.clone().addScaledVector(direction,distance);
+      fitCamera.position.copy(position);fitCamera.lookAt(target);fitCamera.updateMatrixWorld();
+      return {target,position,bounds:projectedBounds(points,fitCamera)};
+    }
+    let low = controls.minDistance, high = controls.maxDistance;
+    for (let i=0;i<32;i++) {
+      const middle=(low+high)/2, b=pose(middle).bounds;
+      if (b.left>=rect.left && b.right<=rect.right && b.top>=rect.top && b.bottom<=rect.bottom) high=middle;
+      else low=middle;
+    }
+    const fit = pose(high);
+    cameraFraming = {safeRect,frameRect:rect};
+    activeView = 'desk'; closeView = false;
+    if (state) state.labView = 'desk';
+    moveCamera(fit.position,fit.target,reducedMotion.matches ? 1 : 650,viewFov.desk);
+  }
 
   function setTemperature(value) {
     temperature = value;
@@ -431,14 +555,29 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   function resize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, h < 650 ? 1.25 : 1.75));
-    renderer.setSize(w, h);
-    camera.aspect = w / h;
+    // Only a real viewport resize changes projection; the lens also adapts its framing.
+    if (w !== viewportWidth || h !== viewportHeight) {
+      viewportWidth = w; viewportHeight = h;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, h < 650 ? 1.25 : 1.75));
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.clearViewOffset();
+      camera.updateProjectionMatrix();
+    }
+    refreshLayout();
+  }
+
+  let particleFramingSnapshot = null, particleFramingSize = "";
+  function refreshLayout() {
+    const h = window.innerHeight;
     const dock = document.getElementById('benchDock');
-    const bench = document.getElementById('labBenchContainer');
-    const tools = document.querySelector('.lab-camera-tools');
     const left = document.querySelector('.lab-live-card, .lab-reagent-panel');
-    const predictionStage = state && (state.screen === 'pool' || (state.screen === 'lab' && state.labStep === 'predict'));
+    const app = document.getElementById('app');
+    if (app) {
+      const shell = document.querySelector('.mebi-top-shell'), stepper = document.querySelector('.mebi-stepper');
+      const headerBottom = Math.max(shell ? shell.getBoundingClientRect().bottom : 0,stepper ? stepper.getBoundingClientRect().bottom : 0);
+      app.style.setProperty('--lab-card-top', Math.ceil(headerBottom + (h < 650 ? 8 : 12)) + 'px');
+    }
     if (left && !left.classList.contains('is-collapsed')) {
       const heading = left.querySelector('.lab-panel-heading');
       const content = left.querySelector('.lab-panel-content');
@@ -455,27 +594,32 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       document.body.dataset.panelCompact = 'false';
       panelWasCompact = false;
     }
-    if (dock) {
+    if (dock && !dock.classList.contains('observation-live-dock')) {
       const topOffset = dock.getBoundingClientRect().top || 86;
       dock.style.maxHeight = Math.max(100, h - topOffset - 12) + 'px';
     }
-    const portrait = w < 600 && h > w;
-    const presetFov = viewFov[activeView] || 40;
-    if (state && state.screen === 'lab' && !portrait) {
-      // Keep the same apparatus framing with full, collapsed and floating forms.
-      const app = document.getElementById('app');
-      const reserved = app ? parseFloat(getComputedStyle(app).getPropertyValue('--right-panel')) : 0;
-      const width = reserved || (h < 650 ? 220 : w <= 1100 ? 250 : 400);
-      camera.setViewOffset(w, h, width / 2, h < 650 ? -12 : -20, w, h);
-      camera.fov = presetFov;
-    } else {
-      camera.clearViewOffset();
-      camera.fov = portrait ? Math.max(presetFov, 60) : presetFov;
+    const inspection = !!state?.particleInspection && state.screen === 'lab' && document.querySelector('.particle-lens-window');
+    const frameSize = innerWidth + 'x' + innerHeight;
+    if (inspection) {
+      window.MebiParticleInspection.positionWindow(state);
+      if (!particleFramingSnapshot) particleFramingSnapshot = {position:camera.position.clone(),target:controls.target.clone(),fov:camera.fov,view:activeView,close:closeView};
+      if (particleFramingSize !== frameSize) {
+        particleFramingSize = frameSize;
+        centerBeakers();
+      }
+    } else if (particleFramingSnapshot) {
+      const previous = particleFramingSnapshot;
+      particleFramingSnapshot = null;particleFramingSize = '';
+      activeView = previous.view;closeView = previous.close;
+      if(state)state.labView = previous.view;
+      moveCamera(previous.position,previous.target,1,previous.fov);
     }
-    camera.updateProjectionMatrix();
+    updateCameraTools();
   }
 
   function moveCamera(position, target = focus, duration = 650, fov = 40) {
+    stopCameraInertia();
+    zoomMotion = null;
     cameraTransition = { from: camera.position.clone(), to: position.clone(),
       targetFrom: controls.target.clone(), targetTo: target.clone(), fromFov: camera.fov, toFov: fov,
       started: performance.now(), duration };
@@ -576,9 +720,6 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       secondary.group.rotation.set(0, 0, 0);
       main.level = 0.42;
       secondary.level = 0.52;
-      if (state.screen === 'pool') {
-        setView(state.labView || 'desk', 700);
-      }
     }
     if (state.labStep !== lastStep) {
       if (state.labStep === 'reacting') reactionStarted = performance.now();
@@ -765,15 +906,15 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     const pouring = !!experiment && experiment.mode !== 'idle' && state.screen === 'lab';
     const progress = pouring ? experiment.path : 0;
     const transfer = experiment ? experiment.transfer : (reacting ? 1 : 0);
-    const reactionProgress = reacting ? THREE.MathUtils.clamp((performance.now() - reactionStarted) / 1200, 0, 1) : 0;
+    const reactionProgress = state?.particleInspection && state.particleReplayProgress != null ? state.particleReplayProgress : state?.explanationReview ? state.explanationReplayProgress || 0 : reacting ? THREE.MathUtils.clamp((performance.now() - reactionStarted) / 1200, 0, 1) : 0;
     const fill1 = updateFilling(main, r1, 0, time);
     const fill2 = updateFilling(secondary, r2, 1, time);
     const mlDepth = (vessel, ml) => ml * Math.pow(vessel.height / 6.68, 3) / (Math.PI * Math.pow(vessel.innerRadius - .002, 2));
     const amount = window.MebiExperiment.defaults.solutionMl;
-    updateContents(main, r1, (r1 && r1.solid ? .42 : mlDepth(main, amount)) * fill1);
+    updateContents(main, r1, (r1 && r1.solid ? .42 * window.MebiExperiment.initialAmount(r1).solidGrams : mlDepth(main, amount)) * fill1);
     const pose = window.MebiExperiment.sample(progress, r2 && r2.solid);
     const lift = pose.lift, returnPhase = pose.returning, pourAngle = pouring ? pose.angle : 0;
-    updateContents(secondary, r2, (r2 && r2.solid ? .52 : mlDepth(secondary, amount)) * fill2 * (1 - transfer), pourAngle);
+    updateContents(secondary, r2, (r2 && r2.solid ? .52 * window.MebiExperiment.initialAmount(r2).solidGrams : mlDepth(secondary, amount)) * fill2 * (1 - transfer), pourAngle);
     const mix = window.MebiChemistry.mixture(r1, r2, rx, transfer, reactionProgress);
     if (state && r1 && r2) mix.liquid = mlDepth(main, window.MebiExperiment.quantities(state).volume);
     if (transfer > 0) {
@@ -821,7 +962,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       } else if (r1 && !r1.solid) {
         localSurfaceY = main.floor + .002 + mlDepth(main, amount) * fill1;
       } else if (r1 && r1.solid) {
-        localSurfaceY = 0.065 + (0.42 * fill1 * 0.35);
+        localSurfaceY = 0.065 + (0.42 * window.MebiExperiment.initialAmount(r1).solidGrams * fill1 * 0.35);
       }
       end.y = main.group.position.y + (localSurfaceY * beakerScale);
       end.z = main.group.position.z;
@@ -935,7 +1076,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       const color = rx.precipColor || '#ffffff';
       flakes.material.color.set(color);
       main.sediment.material.color.set(color);
-      const settled = THREE.MathUtils.clamp((performance.now() - reactionStarted) / 1800, 0.05, 1);
+      const settled = state?.particleInspection && state.particleReplayProgress != null ? THREE.MathUtils.clamp(state.particleReplayProgress*2,0.05,1) : state?.explanationReview ? THREE.MathUtils.clamp(state.explanationReplayProgress*2,0.05,1) : THREE.MathUtils.clamp((performance.now() - reactionStarted) / 1800, 0.05, 1);
       main.sediment.scale.y = 0.08 * settled;
       main.sediment.position.y = 0.065 + 0.04 * settled;
       const maxY = Math.max(0.12, liquidHeight - 0.045);
@@ -967,16 +1108,35 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       camera.updateProjectionMatrix();
       if (t === 1) cameraTransition = null;
     }
+    if (zoomMotion) {
+      const now = performance.now(), offset = camera.position.clone().sub(controls.target), distance = offset.length();
+      const desired = THREE.MathUtils.clamp(zoomMotion.distance,controls.minDistance,controls.maxDistance);
+      const next = reducedMotion.matches ? desired : THREE.MathUtils.lerp(distance,desired,1-Math.exp(-Math.min(120,now-zoomMotion.at)/65));
+      zoomMotion.at = now;
+      offset.setLength(Math.abs(next-desired)<.00001 ? desired : next);
+      camera.position.copy(controls.target).add(offset);
+      if (Math.abs(next-desired)<.00001) zoomMotion = null;
+    }
     controls.update();
-    const cameraFloor = state && state.particleInspection ? tableY + .008 : cameraBounds.min.y;
+    const cameraFloor = tableY + .008;
+    if ((!state || !state.particleInspection) && controls.minDistance < 1.1) controls.minDistance = Math.min(1.1,camera.position.distanceTo(controls.target));
+    // A dolly ends at the room boundary instead of chasing an unreachable target.
+    if (zoomMotion && (camera.position.x < cameraBounds.min.x || camera.position.x > cameraBounds.max.x || camera.position.y < cameraFloor || camera.position.y > cameraBounds.max.y || camera.position.z < cameraBounds.min.z || camera.position.z > cameraBounds.max.z)) zoomMotion = null;
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, cameraBounds.min.x, cameraBounds.max.x);
     camera.position.y = THREE.MathUtils.clamp(camera.position.y, cameraFloor, cameraBounds.max.y);
     camera.position.z = THREE.MathUtils.clamp(camera.position.z, cameraBounds.min.z, cameraBounds.max.z);
     camera.lookAt(controls.target);
     camera.updateMatrixWorld();
     const recordedState = state;
-    thermometer.visible = !(recordedState && recordedState.particleInspection && recordedState.particleInspection.micro);
-    if (particleLayer) state = particleLayer.displayState(recordedState);
+    thermometer.visible = true;
+    if (recordedState?.explanationReview) {
+      const replay=recordedState.explanationReview,now=performance.now();
+      const delta=replay.frameAt==null?0:Math.min(.1,Math.max(0,(now-replay.frameAt)/1000));replay.frameAt=now;
+      state=window.MebiExperiment.replayState(recordedState,document.hidden?0:delta);
+      window.MebiExperiment.paint(state);setTemperature(state.currentTemp);
+      const label=document.getElementById('explanationReplayStatus');
+      if(label)label.textContent=replay.elapsed>=9?'Tekrar tamamlandı. Karışımın son durumunu inceleyebilirsin.':replay.elapsed<5?'Deney yeniden oynatılıyor · Maddeler karıştırılıyor…':'Deney yeniden oynatılıyor · Değişimleri gözle…';
+    } else if (particleLayer) state = particleLayer.displayState(recordedState);
     const displayState = state;
     updateExperiment(time);
     state = recordedState;
@@ -1014,9 +1174,9 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     if (window.TepkimeArenasi) window.TepkimeArenasi.render(false);
     resume();
   });
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', () => requestAnimationFrame(resize));
   // User input takes priority over a preset-camera transition.
-  controls.addEventListener('start', () => { cameraTransition = null; });
+  controls.addEventListener('start', () => { cameraTransition = null; zoomMotion = null; });
   document.addEventListener('visibilitychange', resume);
   window.LabScene = {
     available: true,
@@ -1024,9 +1184,18 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     // Read-only scene values also allow the shared trajectory to be verified.
     getTransferPose: () => ({ path:state && state.experiment ? state.experiment.path : 0, angle:secondary.group.rotation.z, position:secondary.group.position.toArray(), home:secondaryHome.toArray(), screen:screenPoint(secondary.group.position.clone().add(new THREE.Vector3(0,.20,0))), powder:secondary.powderMotion.summary, powderFlow:pourGrains.visible, spout:secondary.group.localToWorld(secondary.spoutPoint.clone()).toArray() }),
     sync,
-    refreshLayout: resize,
-    getCameraState: () => ({position:camera.position.toArray(),target:controls.target.toArray(),projection:camera.projectionMatrix.toArray(),near:camera.near,minDistance:controls.minDistance,zoomToCursor:controls.zoomToCursor,thermometerVisible:thermometer.visible}),
+    refreshLayout,
+    getCameraState: () => ({position:camera.position.toArray(),target:controls.target.toArray(),projection:camera.projectionMatrix.toArray(),fov:camera.fov,view:activeView,near:camera.near,minDistance:controls.minDistance,zoomToCursor:controls.zoomToCursor,thermometerVisible:thermometer.visible}),
+    getCameraFraming: () => ({...cameraFraming,beakers:[projectedBounds(vesselCorners(main)),projectedBounds(vesselCorners(secondary))]}),
     getParticleState: () => particleLayer && particleLayer.enabled ? particleLayer.getSummary() : null,
+    pickParticleLens: (x,y) => particleLayer?.pickLens(x,y) || null,
+    moveParticleLens: (x,y,index) => particleLayer?.moveLens(x,y,index) || false,
+    selectParticleLens: (x,y) => particleLayer?.selectLens(x,y),
+    getReplayState: () => {
+      if(!state?.explanationReview)return null;
+      const display=window.MebiExperiment.replayState(state,0);
+      return {elapsed:state.explanationReview.elapsed,transfer:display.experiment.transfer,path:display.experiment.path,temperature:display.currentTemp,quantities:window.MebiExperiment.quantities(display),finished:state.explanationReview.elapsed>=9};
+    },
     setTemperature,
     setView,
     setLighting: setLaboratoryLighting,

@@ -26,7 +26,7 @@ const T={
  I2:molecule([['I',-.034,0],['I',.034,0]],[[0,1]])
 };
 const IONIC={NaHCO3:['Na','HCO3'],Na2CO3:['Na','Na','CO3'],CaCO3:['Ca','CO3'],AgCl:['Ag','Cl'],AgI:['Ag','I'],PbI2:['Pb','I','I'],PbCl2:['Pb','Cl','Cl'],PbCO3:['Pb','CO3'],'Pb(OH)2':['Pb','OH','OH'],'Ca(OH)2':['Ca','OH','OH'],'Cu(OH)2':['Cu','OH','OH'],Ag2O:['Ag','Ag','O'],Ag2CO3:['Ag','Ag','CO3'],CuI:['Cu','I'],malachite:['Cu','Cu','CO3','OH','OH']};
-const REAGENTS={NaHCO3:{parts:['NaHCO3'],solid:true,mass:84.01,soluble:true},Na2CO3:{parts:['Na2CO3'],solid:true,mass:105.99,soluble:true},CaCO3:{parts:['CaCO3'],solid:true,mass:100.09},HCl:{parts:['H3O','Cl'],acid:true},H2O2:{parts:['H2O2']},KI:{parts:['K','I']},'Pb(NO3)2':{parts:['Pb','NO3','NO3']},CaCl2:{parts:['Ca','Cl','Cl']},NaOH:{parts:['Na','OH']},NH3:{parts:['NH3']},AgNO3:{parts:['Ag','NO3']},'Cu(NO3)2':{parts:['Cu','NO3','NO3']}};
+const REAGENTS={NaHCO3:{parts:['NaHCO3'],solid:true,soluble:true},Na2CO3:{parts:['Na2CO3'],solid:true,soluble:true},CaCO3:{parts:['CaCO3'],solid:true},HCl:{parts:['H3O','Cl'],acid:true},H2O2:{parts:['H2O2']},KI:{parts:['K','I']},'Pb(NO3)2':{parts:['Pb','NO3','NO3']},CaCl2:{parts:['Ca','Cl','Cl']},NaOH:{parts:['Na','OH']},NH3:{parts:['NH3']},AgNO3:{parts:['Ag','NO3']},'Cu(NO3)2':{parts:['Cu','NO3','NO3']}};
 function combine(parts){const atoms=[],bonds=[];parts.forEach(([name,offset])=>{const t=template(name),base=atoms.length;t.atoms.forEach(a=>atoms.push({...a,position:a.position.map((n,i)=>n+offset[i])}));t.bonds.forEach(([a,b,order=1])=>bonds.push([a+base,b+base,order]))});return{atoms,bonds}}
 export function template(name){
  if(T[name])return T[name];
@@ -80,9 +80,10 @@ reaction('Na2CO3','AgNO3',{Ag:2,CO3:1},[['Ag2CO3',1,solid]]);
 reaction('Na2CO3','Cu(NO3)2',{Cu:2,CO3:2,H2O:1},[['malachite',1,solid],['CO2',1,gas]]);
 export function inventory(items){const result={charge:0,atoms:{}};for(const item of items){result.charge+=CHARGES[item.kind]||0;for(const atom of template(item.kind).atoms)result.atoms[atom.element]=(result.atoms[atom.element]||0)+1}return result}
 function add(list,kind,count,source,phase='aqueous',extra={}){for(let i=0;i<count;i++)list.push({id:list.length,kind,source,phase,...extra})}
-export function buildModel(first,second){
+export function buildModel(first,second,amounts){
  const definitions=[REAGENTS[first],REAGENTS[second]];if(definitions.some(x=>!x))throw new Error('Unsupported reagent');
- const mols=definitions.map(d=>d.solid?1/d.mass:.004),quantum=Math.max(...mols)/12,units=mols.map(m=>Math.max(2,Math.round(m/quantum)));
+ if(!Array.isArray(amounts)||amounts.length!==2||amounts.some(a=>!Number.isFinite(a.moles)||a.moles<=0))throw new Error('Two explicit starting sample amounts are required');
+ const mols=amounts.map(a=>a.moles),quantum=Math.max(...mols)/12,units=mols.map(m=>Math.max(2,Math.round(m/quantum)));
  const initial=[],dissolved=[];let virtualID=0;
  definitions.forEach((d,source)=>{const waters=d.solid?0:32;d.parts.forEach(name=>add(initial,name,units[source],source,d.solid?'solid':'aqueous',{reagent:true}));add(initial,'H2O',waters-(d.acid?units[source]:0),source,'aqueous',{solvent:true})});
  const wet=definitions.some(d=>!d.solid);
@@ -99,7 +100,7 @@ export function buildModel(first,second){
  const spectators=dissolved.filter(item=>!used.has(item.id)),final=[...spectators,...products],startInventory=inventory(initial),endInventory=inventory(final);
  const atoms=new Set([...Object.keys(startInventory.atoms),...Object.keys(endInventory.atoms)]),balanced=startInventory.charge===endInventory.charge&&Array.from(atoms).every(atom=>startInventory.atoms[atom]===endInventory.atoms[atom]);
  if(!balanced)throw new Error('Unbalanced particle model '+key(first,second));
- return{pair:[first,second],initial,dissolved,spectators,products,events,recipe,units,wet,balanced,startInventory,endInventory,notes:[recipe?.condition,recipe?.catalyst?'Katalizörün net miktarı korunur; ara basamaklar sadeleştirilmiştir.':'',first==='NH3'||second==='NH3'?'Amonyağın sudaki düşük orandaki iyonlaşması başlangıç görünümünde sadeleştirilmiştir.':''].filter(Boolean)};
+ return{pair:[first,second],amounts,mols,initial,dissolved,spectators,products,events,recipe,units,wet,balanced,startInventory,endInventory,notes:[recipe?.condition,recipe?.catalyst?'Katalizörün net miktarı korunur; ara basamaklar sadeleştirilmiştir.':'',first==='NH3'||second==='NH3'?'Amonyağın sudaki düşük orandaki iyonlaşması başlangıç görünümünde sadeleştirilmiştir.':''].filter(Boolean)};
 }
 export function symbol(kind){return LABELS[kind]||kind}
 export function unique(items){return [...new Map(items.map(item=>[item.kind,item])).values()]}
