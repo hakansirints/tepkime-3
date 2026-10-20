@@ -5,7 +5,7 @@ for(const file of ['data.js','svg-models.js','prediction.js','experiment.js','ob
 const p=context.MebiPrediction,o=context.MebiObservation,e=context.MebiExperiment;
 const state={screen:'lab',labStep:'predict',selectedSlot1:'HCl',selectedSlot2:'NaOH',activeReaction:context.MebiData.getReaction('HCl','NaOH'),currentTemp:55.5,poured:false};
 p.reset(state);e.reset(state,false);o.reset(state);
-p.items.forEach(i=>{p.setChoice(state,i.key+':yes');p.setReason(state,i.key,'Önceki bilgilerime göre değerlendiriyorum.');});p.setChoice(state,'tempFall:no');assert(p.save(state));assert(p.begin(state));
+p.items.forEach(i=>{p.setChoice(state,i.key+':yes');p.setReason(state,i.key,'Önceki bilgilerime göre değerlendiriyorum.');});p.setChoice(state,'tempFall:no');p.setChoice(state,'tempRise:yes');assert(p.save(state));assert(p.begin(state));
 const originalPrediction=JSON.stringify(state.predictionRecord);
 assert.equal(o.setChoice(state,'gas:yes'),false);assert.equal(o.save(state),false,'Cannot save an observation before the experiment');assert.equal(o.showLab(state,true),false);
 assert.equal(o.autoFillForTesting(state),false,'Automatic filling also requires a completed experiment');
@@ -20,10 +20,12 @@ o.setNote(state,'<script>unsafe</script> Kabarcık görmedim.');assert(o.render(
 assert(o.save(state));assert.equal(o.get(state).tab,'observe');assert(o.render(state).includes('id="compareObservationButton"'));assert(!o.render(state).includes('observation-tabs'));assert(o.setTab(state,'compare'));assert.equal(state.labStep,'observed');assert.equal(o.get(state).record.temperature.final,55.5,'Capture the observed thermometer, not the scenario target');
 assert.equal(o.get(state).record.answers.tempRise,'no','Never replace a student response with the model outcome');assert.equal(o.get(state).record.predictionId,state.predictionRecord.id);assert.equal(o.get(state).record.quantities.volume,100);
 const firstRecord=JSON.stringify(o.get(state).record),firstId=o.get(state).attemptId;
-assert.equal(o.setChoice(state,'gas:yes'),false);assert.equal(o.setNote(state,'Overwrite first record'),false);assert.equal(o.save(state),false);
-assert(o.setTab(state,'observe'));assert(o.render(state).includes(' readonly'));assert.match(o.render(state),/data-observation-control="save" disabled/);assert(o.setTab(state,'compare'));
-assert.equal(o.saveReflection(state),false);o.setReflection(state,'Termometre verisiyle ilk tahminimi karşılaştırdım.');assert(o.saveReflection(state));assert.equal(o.get(state).reflectionSaved,true);assert.equal(JSON.stringify(o.get(state).record),firstRecord);assert.equal(JSON.stringify(state.predictionRecord),originalPrediction);
-o.get(state).record=null;o.get(state);assert.equal(JSON.stringify(o.get(state).record),firstRecord,'A restored navigation snapshot reloads the immutable first record');
+assert(o.setTab(state,'observe'));assert(!o.render(state).includes(' readonly'));assert(!o.render(state).includes('data-observation-control="save" disabled'));
+assert.equal(o.setChoice(state,'gas:yes'),true);assert.equal(o.setNote(state,'Düzenlenen gözlem notu'),true);
+assert(o.setTab(state,'compare'));assert.equal(o.get(state).record.answers.gas,'yes');assert.equal(o.get(state).record.note,'Düzenlenen gözlem notu');
+assert.equal(o.saveReflection(state),false);o.setReflection(state,'Termometre verisiyle ilk tahminimi karşılaştırdım.');assert(o.saveReflection(state));assert.equal(o.get(state).reflectionSaved,true);
+const updatedRecord=JSON.stringify(o.get(state).record);assert.equal(JSON.stringify(state.predictionRecord),originalPrediction);
+o.get(state).record=null;o.get(state);assert.equal(JSON.stringify(o.get(state).record),updatedRecord,'A restored navigation snapshot reloads the updated record');
 o.reset(state);assert.notEqual(o.get(state).attemptId,firstId);assert.equal(o.complete(state),0);assert.equal(o.get(state).record,null);assert.equal(JSON.parse(storage.get('tepkime_arenasi_observations_v1')).length,1,'Restart keeps previous local records');
 p.items.forEach(i=>o.setChoice(state,i.key+':unsure'));o.setNote(state,'İkinci denememde bulgulardan emin değilim.');assert(o.save(state));assert(o.setTab(state,'compare'));assert(o.render(state).includes('Gözlemimden emin değilim'));assert.equal(JSON.parse(storage.get('tepkime_arenasi_observations_v1')).length,2);
 o.reset(state);failWrites=true;p.items.forEach(i=>o.setChoice(state,i.key+':no'));o.setNote(state,'Bu denemede gözlemimi kaydettim.');assert(o.save(state));assert.equal(o.get(state).storageError,true);assert(o.render(state).includes('kalıcı kayıt yapılamadı'));assert(o.get(state).record,'Storage failure must not lose the current session record');
@@ -37,5 +39,5 @@ for(const a of context.MebiData.REAGENTS)for(const b of context.MebiData.REAGENT
  autoFilledPairs++;
 }
 state.activeReaction=context.MebiData.getReaction('HCl','NaOH');state.currentTemp=18.5;o.reset(state);assert(o.autoFillForTesting(state));assert.equal(o.get(state).answers.tempFall,'yes');assert.equal(o.get(state).answers.tempRise,'no');assert(o.get(state).note.includes('18,5'));
-assert(o.save(state));const autoRecord=JSON.stringify(o.get(state).record);assert(o.setTab(state,'compare'));assert(o.autoFillForTesting(state));assert(o.get(state).reflection.length>0);assert(!/test/i.test(o.get(state).reflection));assert.equal(JSON.stringify(o.get(state).record),autoRecord);assert.equal(o.get(state).reflectionSaved,false);o.setTab(state,'observe');assert.equal(o.autoFillForTesting(state),false);
+assert(o.save(state));const autoRecord=JSON.stringify(o.get(state).record);assert(o.setTab(state,'compare'));assert(o.autoFillForTesting(state));assert(o.get(state).reflection.length>0);assert(!/test/i.test(o.get(state).reflection));assert.equal(JSON.stringify(o.get(state).record),autoRecord);assert.equal(o.get(state).reflectionSaved,false);o.setTab(state,'observe');assert.equal(o.autoFillForTesting(state),true);
 console.log(JSON.stringify({passed:true,autoFilledPairs,checks:['experiment completion guard','blank form and evidence validation','temperature contradiction','student answers distinct from model outcomes','actual thermometer snapshot','escaped free text','locked first prediction and observation','local persistence and restored navigation','reflection without overwriting observation','separate restart attempts','storage failure fallback','automatic observation choices for every pair','automatic reflection never replaces the first record']}));

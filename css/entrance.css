@@ -1,0 +1,142 @@
+/* Selected entrance concept: a five-step winding journey. */
+#app[data-screen="menu"] { padding-inline:var(--activity-page-inset); }
+body #app[data-screen="menu"] .arena-menu-card.entrance-card {
+  width:var(--activity-card-width); max-width:none; margin:clamp(12px,8vh,80px) auto 24px;
+  display:grid; grid-template-columns:minmax(0,1.75fr) minmax(0,1fr); align-items:center;
+  gap:clamp(24px,3vw,48px); padding:clamp(28px,3.2vw,44px); min-height:470px;
+  border:1px solid #fff; border-radius:24px; text-align:left; overflow:hidden;
+  background:#eff6ff url('../assets/images/entrance-chemistry-bg.png') center / cover no-repeat;
+  box-shadow:0 20px 48px #1e40af1a;
+}
+.entrance-icon { display:block; width:100%; height:100%; background:currentColor; mask:var(--entrance-icon) center / contain no-repeat; -webkit-mask:var(--entrance-icon) center / contain no-repeat; }
+.entrance-overview { min-width:0; }
+.entrance-brand { display:flex; align-items:flex-start; gap:22px; margin:0 0 24px; }
+.entrance-brand-icon { display:grid; place-items:center; width:76px; height:84px; flex-shrink:0; color:var(--mebi-primary); background:#ffffffd9; border-radius:20px; box-shadow:0 8px 20px #1e40af0c; }
+.entrance-brand-icon > .entrance-icon { width:58px; height:64px; }
+.entrance-brand h1 { margin:0 0 7px; color:var(--mebi-primary); font-size:clamp(26px,3.1vw,40px); font-weight:800; line-height:1.15; letter-spacing:-1.2px; }
+.entrance-brand p { margin:0; color:var(--mebi-primary-hover); font-size:15px; line-height:1.6; max-width:430px; }
+.entrance-journey { list-style:none; padding:0 4% 0 0; margin:0; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); grid-template-rows:repeat(2,116px); gap:30px 54px; position:relative; isolation:isolate; }
+.entrance-journey::before { content:''; position:absolute; z-index:-1; top:14%; right:-2%; width:28%; height:69%; background:url('../assets/images/entrance-journey-turn.png') center / 100% 100% no-repeat; pointer-events:none; }
+.entrance-step { position:relative; grid-column:span 2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:14px 8px 12px; border:1px solid #dbeafe; border-radius:22px; background:var(--mebi-bg-surface); color:var(--mebi-primary); box-shadow:0 8px 18px #1e40af09; }
+.entrance-step-5 .entrance-step-label { max-width:125px; }
+.entrance-step-4 { grid-column:4 / span 2; grid-row:2; }
+.entrance-step-5 { grid-column:2 / span 2; grid-row:2; }
+.entrance-step-number { position:absolute; left:10px; top:12px; width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:#dbeafe; font-size:16px; font-weight:800; }
+.entrance-step-icon { display:flex; align-items:center; justify-content:center; color:var(--mebi-primary); }
+.entrance-step-icon > .entrance-icon { width:48px; height:48px; }
+.entrance-step-label { color:#243f72; text-align:center; font-size:14px; font-weight:800; line-height:1.35; max-width:145px; }
+.entrance-menu { display:flex; flex-direction:column; gap:12px; padding:26px 20px 18px; border:1px solid #fff; border-radius:28px; background:#ffffffb8; box-shadow:0 14px 32px #1e40af09; min-width:0; }
+.entrance-menu .arena-mint-pill-btn { min-height:54px; padding:7px 12px 7px 7px; gap:9px; }
+.entrance-menu .pill-btn-text { font-size:14px; white-space:normal; overflow:visible; line-height:1.4; }
+.entrance-menu .pill-btn-icon-wrap { width:32px; min-width:32px; height:32px; }
+.entrance-menu .pill-btn-icon-wrap > .entrance-icon { width:23px; height:23px; }
+.entrance-menu .arena-mint-pill-btn.is-primary { background:#2563eb; }
+.entrance-menu .arena-mint-reset-link { align-self:center; margin-top:5px; min-height:32px; }
+.entrance-menu button:focus-visible { outline:3px solid #93c5fd; outline-offset:4px; }
+[data-theme="dark"] body #app[data-screen="menu"] .arena-menu-card.entrance-card { background-color:#172554; background-blend-mode:multiply; border-color:#334e80; }
+[data-theme="dark"] .entrance-brand h1,[data-theme="dark"] .entrance-step-label { color:#dbeafe; }
+[data-theme="dark"] .entrance-brand p { color:#bfdbfe; }
+[data-theme="dark"] .entrance-menu { background:#172554b8; border-color:#334e80; }
+[data-theme="dark"] .entrance-step { border-color:#334e80; }
+
+/* The guide's five tabs share the available width; no scroll strip. */
+.welcome-tabs-track { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)); overflow:visible !important; }
+.welcome-tabs-track .welcome-tab-btn { min-width:0 !important; padding:7px 6px !important; overflow-wrap:anywhere; }
+.welcome-step-card { flex-shrink:0; }
+.welcome-modal-body { overflow-x:hidden !important; }
+
+@media (max-width:1100px) {
+  body #app[data-screen="menu"] .arena-menu-card.entrance-card { padding:30px; gap:24px; }
+  .entrance-brand { gap:16px; }
+  .entrance-brand-icon { width:58px; height:66px; border-radius:16px; }
+  .entrance-brand-icon > .entrance-icon { width:42px; height:48px; }
+  .entrance-brand p { font-size:13px; }
+  .entrance-menu { padding:20px 12px 14px; }
+  .entrance-journey { gap:28px 18px; }
+  .entrance-step-number { width:25px; height:25px; font-size:14px; left:8px; top:10px; }
+}
+@media (max-width:600px) and (orientation:portrait) {
+  body #app[data-screen="menu"] .arena-menu-card.entrance-card { grid-template-columns:1fr; margin:8px auto; padding:20px; gap:22px; min-height:0; }
+  .entrance-brand h1 { font-size:26px; }
+  .entrance-journey { grid-template-rows:repeat(2,112px); gap:22px 12px; }
+  .entrance-step { padding:12px 6px; border-radius:16px; }
+  .entrance-step-icon > .entrance-icon { width:32px; height:32px; }
+  .entrance-step-number { width:20px; height:20px; font-size:11px; top:6px; left:6px; }
+  .entrance-step-label { font-size:10px; }
+  .entrance-menu { padding:16px; }
+  .welcome-tabs-track .welcome-tab-btn { flex-direction:column; font-size:10px !important; gap:3px !important; }
+}
+@media (orientation:landscape) and (max-height:650px) {
+  body #app[data-screen="menu"] .arena-menu-card.entrance-card { margin:0 auto; min-height:0; max-height:none; padding:20px 26px; gap:24px; }
+  .entrance-brand { margin-bottom:16px; gap:14px; }
+  .entrance-brand-icon { width:52px; height:58px; border-radius:14px; }
+  .entrance-brand-icon > .entrance-icon { width:38px; height:42px; }
+  .entrance-brand h1 { font-size:28px; margin-bottom:4px; }
+  .entrance-brand p { font-size:12px; line-height:1.4; }
+  .entrance-journey { grid-template-rows:repeat(2,94px); gap:22px 18px; }
+  .entrance-step { gap:4px; border-radius:16px; padding:9px 6px; }
+  .entrance-step-icon > .entrance-icon { width:30px; height:30px; }
+  .entrance-step-label { font-size:11px; }
+  .entrance-step-number { width:22px; height:22px; font-size:12px; left:7px; top:8px; }
+  .entrance-menu { padding:18px 12px 12px; gap:10px; border-radius:22px; }
+  .entrance-menu .arena-mint-pill-btn { min-height:46px; }
+  .entrance-menu .pill-btn-text { font-size:11px; }
+}
+@media (orientation:landscape) and (max-height:520px) {
+  body #app[data-screen="menu"] .arena-menu-card.entrance-card { padding:14px 22px; gap:18px; border-radius:20px; }
+  .entrance-brand { margin-bottom:12px; }
+  .entrance-brand-icon { width:44px; height:48px; }
+  .entrance-brand-icon > .entrance-icon { width:32px; height:36px; }
+  .entrance-brand h1 { font-size:24px; }
+  .entrance-brand p { font-size:10px; }
+  .entrance-journey { grid-template-rows:repeat(2,78px); gap:18px 14px; }
+  .entrance-step-icon > .entrance-icon { width:26px; height:26px; }
+  .entrance-step-label { font-size:10px; }
+  .entrance-step-number { width:20px; height:20px; font-size:11px; left:6px; top:6px; }
+  .entrance-menu { padding:14px 10px 8px; gap:8px; }
+  .entrance-menu .arena-mint-pill-btn { min-height:42px; gap:6px; }
+  .entrance-menu .pill-btn-text { font-size:10px; }
+  .entrance-menu .pill-btn-icon-wrap { width:26px; min-width:26px; height:26px; }
+  .entrance-menu .pill-btn-icon-wrap > .entrance-icon { width:19px; height:19px; }
+  .entrance-menu .arena-mint-reset-link { font-size:11px; margin-top:0; }
+
+  #welcomeModalOverlay { padding:6px max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left)) !important; }
+  .welcome-modal-card { max-width:min(98vw,900px) !important; max-height:calc(100dvh - 12px) !important; }
+  .welcome-modal-header { padding:5px 12px !important; }
+  .welcome-modal-body { padding:7px 12px !important; gap:7px !important; }
+  .welcome-tabs-track { padding:3px !important; gap:3px !important; }
+  .welcome-tabs-track .welcome-tab-btn { min-width:0 !important; min-height:36px; padding:4px !important; font-size:10px !important; line-height:1.2 !important; }
+  .welcome-tab-btn .tab-num { width:17px !important; height:17px !important; font-size:10px !important; }
+  .welcome-step-card { flex-direction:row !important; align-items:center !important; padding:10px 12px !important; gap:12px !important; min-height:104px !important; }
+  .welcome-step-illus { width:78px !important; min-width:78px !important; height:76px !important; }
+  .welcome-step-text { gap:6px !important; }
+  .welcome-step-title { font-size:13px !important; }
+  .welcome-step-desc { font-size:12px !important; line-height:1.45 !important; }
+  .welcome-stepper-ctrl-bar { flex-direction:row !important; flex-wrap:nowrap !important; gap:8px !important; }
+  .welcome-johnstone-tag-wrap { min-width:0; flex-wrap:nowrap !important; gap:5px !important; }
+  .welcome-johnstone-label { font-size:9px !important; }
+  .welcome-johnstone-pill { font-size:10px !important; padding:3px 7px !important; }
+  .welcome-step-nav-wrap { width:auto !important; flex-shrink:0; }
+  .welcome-nav-btn { min-height:30px; font-size:11px !important; padding:4px 9px !important; }
+  .welcome-modal-footer { padding:5px 12px !important; flex-wrap:nowrap !important; }
+  .welcome-modal-dont-show { font-size:11px !important; }
+  .welcome-btn-close-footer { min-height:30px !important; padding:4px 10px !important; font-size:11px !important; }
+}
+@media (orientation:landscape) and (max-height:350px) {
+  body #app[data-screen="menu"] .arena-menu-card.entrance-card { padding:10px 18px; }
+  .entrance-brand { margin-bottom:8px; }
+  .entrance-brand h1 { font-size:21px; }
+  .entrance-journey { grid-template-rows:repeat(2,68px); gap:14px 12px; }
+  .entrance-step-icon > .entrance-icon { width:23px; height:23px; }
+  .entrance-step-label { font-size:9px; }
+  .welcome-modal-header { padding:3px 10px !important; }
+  .welcome-modal-body { padding:5px 10px !important; gap:5px !important; }
+  .welcome-step-card { min-height:86px !important; padding:7px 10px !important; }
+  .welcome-step-illus { width:62px !important; min-width:62px !important; height:62px !important; }
+  .welcome-johnstone-label { display:none !important; }
+}
+
+.entrance-step-1::after,.entrance-step-2::after,.entrance-step-4::after { content:''; position:absolute; width:52px; height:24px; top:calc(50% - 12px); left:calc(100% + 1px); background:#8bb6f5; mask:url('../assets/icons/phosphor/arrow-right.svg') center / 100% 100% no-repeat; -webkit-mask:url('../assets/icons/phosphor/arrow-right.svg') center / 100% 100% no-repeat; pointer-events:none; }
+.entrance-step-4::after { left:auto; right:calc(100% + 1px); mask-image:url('../assets/icons/phosphor/arrow-left.svg'); -webkit-mask-image:url('../assets/icons/phosphor/arrow-left.svg'); }
+@media (max-width:1100px),(max-height:650px) { .entrance-step-1::after,.entrance-step-2::after,.entrance-step-4::after { width:18px; height:18px; top:calc(50% - 9px); } }
+@media (max-height:350px) { .entrance-step-1::after,.entrance-step-2::after,.entrance-step-4::after { width:12px; height:18px; } }

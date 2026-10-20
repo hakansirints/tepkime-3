@@ -3,7 +3,8 @@ window.THREE = THREE;
 globalThis.THREE = THREE;
 import { OrbitControls } from './vendor/three/OrbitControls.js';
 import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js';
-import { createPowderMotion } from './powder-motion.js';
+import { createPowderMotion } from './powder-motion.js?v=2';
+import { createLiquidSurface } from './liquid-surface.js';
 
 function dismissLabLoader() {
   const loader = document.getElementById('mebiLabLoader');
@@ -290,7 +291,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   // Pour visuals and motion adapted from tepkimenin-uc-yuzu's LabGlassware.
   const pourVisualScale = main.height * beakerScale / 0.57;
   const streamMaterial = new THREE.MeshStandardMaterial({
-    color: '#ffffff', transparent: true, opacity: 0.6, roughness: 0.2
+    color: '#ffffff', transparent: true, opacity: 0.78, roughness: 0.2, depthWrite:false
   });
   const streamMesh = new THREE.Mesh(new THREE.CylinderGeometry(
     0.008 * pourVisualScale, 0.011 * pourVisualScale, 1, 12, 20), streamMaterial);
@@ -357,8 +358,8 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let particleLoadError = false;
   function ensureParticleLayer() {
     if (particleLayer || particleLoading || particleLoadError) return;
-    particleLoading = import('./beaker-particles.js?v=2.3').then(module => {
-      particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,main,secondary,secondaryHome,setTemperature});
+    particleLoading = import('./beaker-particles.js?v=3.2').then(module => {
+      particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature});
       particleLayer.sync(state);resize();renderFrame();
     }).catch(error => {
       particleLoadError = true;
@@ -440,13 +441,11 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   }
 
   function freeCameraRect() {
-    // Explicit centering and the lens layout reserve room for visible overlays.
+    // Explicit centering reserves room for the visible control cards.
     const gap = innerHeight < 650 ? 8 : 14;
     const top = Math.max(...['.mebi-top-shell','.mebi-stepper'].map(s => visibleRect(document.querySelector(s))?.bottom || 0)) + gap;
     const base = {left:gap,right:innerWidth-gap,top,bottom:(visibleRect(cameraTools)?.top || innerHeight)-gap};
-    const lensWindow = state?.particleInspection && visibleRect(document.querySelector('.particle-lens-window'));
-    if (lensWindow && lensWindow.left > base.left + 140 && innerWidth > 600) return {...base,right:lensWindow.left-gap};
-    const selectors = '.lab-experiment-heading,.observation-live-dock>.experiment-live-data,#benchDock:not(.observation-live-dock),.particle-lens-window,.observation-live-dock>.beaker-particle-entry,.prediction-card.is-minimized:not(.observation-card),.observation-card.is-collapsed';
+    const selectors = '.lab-experiment-heading,.observation-live-dock>.experiment-live-data,#benchDock:not(.observation-live-dock),.observation-live-dock>.beaker-particle-entry,.prediction-card.is-minimized:not(.observation-card),.observation-card.is-collapsed';
     const obstacles = [...document.querySelectorAll(selectors)].filter(n => !n.closest('[data-floating-ghost]')).map(visibleRect).filter(r => r && r.right>base.left && r.left<base.right && r.bottom>base.top && r.top<base.bottom);
     const xs = [base.left,base.right], ys = [base.top,base.bottom];
     for (const r of obstacles) {
@@ -482,23 +481,30 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     const padding = Math.min(24,Math.max(6,(rect.right-rect.left)*.035));
     rect.left+=padding;rect.right-=padding;rect.top+=padding;rect.bottom-=padding;
     if (state?.particleInspection) {
-      const width=rect.right-rect.left,height=rect.bottom-rect.top;
-      rect.left+=width*.04;rect.right-=width*.12;
-      rect.top+=height*(innerHeight<650?.18:.38);rect.bottom-=height*.06;
+      const legendWidth = innerHeight < 650 ? (innerWidth < 700 ? 78 : 92) : 130;
+      rect.left += legendWidth + 12; rect.right -= legendWidth + 12;
+      if (state.particleInspection.returnScreen === 'model') {
+        const modelDock = document.getElementById('particleInspectionModelDock');
+        const dockTop = modelDock ? modelDock.getBoundingClientRect().top : (innerHeight - 130);
+        rect.bottom = Math.min(rect.bottom, dockTop + 14);
+      }
     }
     const points = [...vesselCorners(main),...vesselCorners(secondary)];
-    if (thermometer.visible) {
+    const hideTherm = !!(state?.particleInspection && ['model', 'card'].includes(state.particleInspection.returnScreen));
+    if (thermometer.visible && !hideTherm) {
       const box = new THREE.Box3().setFromObject(thermometer);
       for (const x of [box.min.x,box.max.x]) for (const y of [box.min.y,box.max.y]) for (const z of [box.min.z,box.max.z]) points.push(new THREE.Vector3(x,y,z));
     }
     const center = new THREE.Box3().setFromPoints(points).getCenter(new THREE.Vector3());
     const direction = home.clone().sub(focus).normalize();
     const right = new THREE.Vector3().crossVectors(camera.up,direction).normalize(), up = new THREE.Vector3().crossVectors(direction,right);
-    const fitCamera = camera.clone();fitCamera.fov=viewFov.desk;fitCamera.updateProjectionMatrix();
+    // Layout can run before the renderer's resize callback; fit the new viewport.
+    const aspect=innerWidth/innerHeight;
+    const fitCamera = new THREE.PerspectiveCamera(viewFov.desk,aspect,camera.near,camera.far);
     const tangent = Math.tan(THREE.MathUtils.degToRad(fitCamera.fov/2));
     const ndcX = (rect.left+rect.right)/innerWidth-1, ndcY = 1-(rect.top+rect.bottom)/innerHeight;
     function pose(distance) {
-      const shift = right.clone().multiplyScalar(-ndcX*distance*tangent*camera.aspect).addScaledVector(up,-ndcY*distance*tangent);
+      const shift = right.clone().multiplyScalar(-ndcX*distance*tangent*aspect).addScaledVector(up,-ndcY*distance*tangent);
       const target = center.clone().add(shift), position = target.clone().addScaledVector(direction,distance);
       fitCamera.position.copy(position);fitCamera.lookAt(target);fitCamera.updateMatrixWorld();
       return {target,position,bounds:projectedBounds(points,fitCamera)};
@@ -555,7 +561,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   function resize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    // Only a real viewport resize changes projection; the lens also adapts its framing.
+    // Only a real viewport resize changes projection.
     if (w !== viewportWidth || h !== viewportHeight) {
       viewportWidth = w; viewportHeight = h;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, h < 650 ? 1.25 : 1.75));
@@ -598,20 +604,15 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       const topOffset = dock.getBoundingClientRect().top || 86;
       dock.style.maxHeight = Math.max(100, h - topOffset - 12) + 'px';
     }
-    const inspection = !!state?.particleInspection && state.screen === 'lab' && document.querySelector('.particle-lens-window');
-    const frameSize = innerWidth + 'x' + innerHeight;
+    const inspection = !!state?.particleInspection && state.screen === 'lab' && document.querySelector('.beaker-particle-panel');
     if (inspection) {
-      window.MebiParticleInspection.positionWindow(state);
       if (!particleFramingSnapshot) particleFramingSnapshot = {position:camera.position.clone(),target:controls.target.clone(),fov:camera.fov,view:activeView,close:closeView};
-      if (particleFramingSize !== frameSize) {
-        particleFramingSize = frameSize;
-        centerBeakers();
-      }
+      const size = innerWidth + 'x' + innerHeight + (state?.particleInspection ? '-' + state.particleInspection.returnScreen : '');
+      if (particleFramingSize !== size) { particleFramingSize = size; centerBeakers(); }
     } else if (particleFramingSnapshot) {
-      const previous = particleFramingSnapshot;
-      particleFramingSnapshot = null;particleFramingSize = '';
-      activeView = previous.view;closeView = previous.close;
-      if(state)state.labView = previous.view;
+      const previous = particleFramingSnapshot; particleFramingSnapshot = null; particleFramingSize = '';
+      activeView = previous.view; closeView = previous.close;
+      if (state) state.labView = previous.view;
       moveCamera(previous.position,previous.target,1,previous.fov);
     }
     updateCameraTools();
@@ -821,7 +822,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
 
   function setVesselContents(vessel, liquid, powder, color, opacity, angle = 0) {
     vessel.liquid.visible = liquid > 0.005;
-    vessel.surface.visible = liquid > 0.005 && angle < 0.05;
+    vessel.surface.visible = liquid > 0.005;
     vessel.powder.visible = vessel.grains.visible = powder > 0.005;
     const positions = vessel.liquid.geometry.attributes.position;
     const floor = vessel.floor + 0.002;
@@ -850,11 +851,11 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     vessel.liquid.geometry.computeBoundingSphere();
     vessel.liquid.position.y = 0;
     vessel.liquid.scale.y = 1;
-    vessel.surface.position.y = floor + liquid;
-    vessel.surface.rotation.z = -angle;
+    if(!vessel.liquidSurface)vessel.liquidSurface=createLiquidSurface(vessel);
+    vessel.liquidSurface.update(plane,slope,floor,vessel.rimHeight-floor-.018,opacity);
     vessel.powderMotion.update(powder, angle);
     vessel.liquid.material.color.set(color);
-    vessel.liquid.material.opacity = opacity;
+    vessel.liquid.material.opacity = angle > .05 ? Math.max(.32,opacity) : opacity;
     vessel.surface.material.color.set(color);
     vessel.powder.material.color.set(color);
     vessel.grains.material.color.set(color);
@@ -928,7 +929,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     splashRings.forEach(ring => { ring.visible = false; });
     pourDrops.forEach(drop => { drop.visible = false; });
     main.surface.scale.set(1, 1, 1);
-    main.surface.rotation.set(-Math.PI / 2, 0, 0);
+    main.surface.rotation.set(0, 0, 0);
     if (pouring && r2) {
       secondary.group.rotation.z = pourAngle;
       const spoutLocal = secondary.spoutPoint.clone();
@@ -1004,7 +1005,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
         drop.scale.set(1, 1.5, 1);
         drop.visible = t > 0 && t < 1;
       });
-      if (active) main.surface.rotation.set(-Math.PI / 2 + 0.006 * Math.sin(progress * 95),
+      if (active) main.surface.rotation.set(0.006 * Math.sin(progress * 95),
         0, 0.008 * Math.cos(progress * 80));
       const fallingGrains = Math.round(35 + (powderStreamCount - 35) * Math.min(1, experiment.flow / .5));
       pourGrains.count = fallingGrains;
@@ -1128,7 +1129,8 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     camera.lookAt(controls.target);
     camera.updateMatrixWorld();
     const recordedState = state;
-    thermometer.visible = true;
+    const hideThermometer = !!(recordedState?.particleInspection && ['model', 'card'].includes(recordedState.particleInspection.returnScreen));
+    thermometer.visible = !hideThermometer;
     if (recordedState?.explanationReview) {
       const replay=recordedState.explanationReview,now=performance.now();
       const delta=replay.frameAt==null?0:Math.min(.1,Math.max(0,(now-replay.frameAt)/1000));replay.frameAt=now;
@@ -1182,15 +1184,12 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     available: true,
     handlesTransfer: true,
     // Read-only scene values also allow the shared trajectory to be verified.
-    getTransferPose: () => ({ path:state && state.experiment ? state.experiment.path : 0, angle:secondary.group.rotation.z, position:secondary.group.position.toArray(), home:secondaryHome.toArray(), screen:screenPoint(secondary.group.position.clone().add(new THREE.Vector3(0,.20,0))), powder:secondary.powderMotion.summary, powderFlow:pourGrains.visible, spout:secondary.group.localToWorld(secondary.spoutPoint.clone()).toArray() }),
+    getTransferPose: () => ({ path:state && state.experiment ? state.experiment.path : 0, angle:secondary.group.rotation.z, position:secondary.group.position.toArray(), home:secondaryHome.toArray(), screen:screenPoint(secondary.group.position.clone().add(new THREE.Vector3(0,.20,0))), powder:secondary.powderMotion.summary, powderFlow:pourGrains.visible, liquids:[main,secondary].map(v=>({visible:v.liquid.visible,opacity:v.liquid.material.opacity,surface:v.surface.visible,surfaceOpacity:v.surface.material.opacity,surfaceVertices:v.liquidSurface?.summary?.vertices||0})), stream:{visible:streamMesh.visible,opacity:streamMaterial.opacity}, spout:secondary.group.localToWorld(secondary.spoutPoint.clone()).toArray() }),
     sync,
     refreshLayout,
     getCameraState: () => ({position:camera.position.toArray(),target:controls.target.toArray(),projection:camera.projectionMatrix.toArray(),fov:camera.fov,view:activeView,near:camera.near,minDistance:controls.minDistance,zoomToCursor:controls.zoomToCursor,thermometerVisible:thermometer.visible}),
     getCameraFraming: () => ({...cameraFraming,beakers:[projectedBounds(vesselCorners(main)),projectedBounds(vesselCorners(secondary))]}),
     getParticleState: () => particleLayer && particleLayer.enabled ? particleLayer.getSummary() : null,
-    pickParticleLens: (x,y) => particleLayer?.pickLens(x,y) || null,
-    moveParticleLens: (x,y,index) => particleLayer?.moveLens(x,y,index) || false,
-    selectParticleLens: (x,y) => particleLayer?.selectLens(x,y),
     getReplayState: () => {
       if(!state?.explanationReview)return null;
       const display=window.MebiExperiment.replayState(state,0);

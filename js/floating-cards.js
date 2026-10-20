@@ -27,24 +27,15 @@
   }
   function toggle(card, state, labState) {
     cleanup();
-    var content = card.querySelector('.prediction-content'), before = card.getBoundingClientRect();
+    var content = card.querySelector('.prediction-content');
     if (!state.collapsed) state.scroll = content.scrollTop;
-    var animate = card.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var ghost = animate ? card.cloneNode(true) : null;
-    var wasCollapsed = state.collapsed;
     state.collapsed = !state.collapsed;
     apply(card,state,labState);
     if (!state.collapsed) content.scrollTop = state.scroll || 0;
-    if (ghost) {
-      if (wasCollapsed) {ghost.classList.remove('is-collapsed');ghost.setAttribute('data-peek-strip','');}
-      ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(function(el) {el.removeAttribute('id');});
-      ghost.setAttribute('aria-hidden','true');ghost.setAttribute('data-floating-ghost','');ghost.inert=true;
-      Object.assign(ghost.style,{position:'fixed',left:before.left+'px',top:before.top+'px',width:before.width+'px',height:before.height+'px',maxHeight:'none',margin:'0',transformOrigin:'top left',pointerEvents:'none'});
-      card.parentNode.appendChild(ghost);
-      ghost.querySelector('.prediction-content').scrollTop = state.scroll || 0;
-      var after = card.getBoundingClientRect();
-      var motion = ghost.animate([{transform:'none',opacity:1},{transform:'translate('+(after.left-before.left)+'px,'+(after.top-before.top)+'px) scale('+after.width/before.width+','+after.height/before.height+')',opacity:0}],{duration:320,easing:'cubic-bezier(.22,.8,.25,1)'});
-      effects.push({animation:motion,ghost:ghost});motion.onfinish=function() {ghost.remove();};
+    if (card.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var opacity=Number(getComputedStyle(card).opacity);
+      var motion=card.animate([{opacity:opacity*.65},{opacity:opacity}],{duration:160,easing:'ease-out'});
+      effects.push({animation:motion});
     }
     card.querySelector('.observation-peek-toggle').focus({preventScroll:true});
   }

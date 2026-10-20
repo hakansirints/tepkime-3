@@ -43,7 +43,7 @@ export function createPowderMotion(vessel) {
     const r = Math.sqrt((i + .5) / 256) * radius, a = i * 2.399963;
     return {x:r * Math.cos(a),z:r * Math.sin(a)};
   });
-  const dummy = new THREE.Object3D();
+  const dummy = new THREE.Object3D(), slideTarget=new THREE.Vector3();
   let previous = '', summary = {amount:0,centroid:{x:0,y:floor},lipMaterial:false};
   function update(amount, angle = 0) {
     amount = Math.max(0,amount);
@@ -78,6 +78,10 @@ export function createPowderMotion(vessel) {
       const rise = THREE.MathUtils.smoothstep(y,vessel.rimHeight * .77,vessel.rimHeight * .98);
       return x - (Math.abs(vessel.spoutPoint.x) - radius - .006) * edge * rise;
     }
+    // At a steep tilt, the remainder becomes a sparse granular slide, not a solid cap at the mouth.
+    const loose=THREE.MathUtils.smoothstep(angle,1.30,1.60);
+    vessel.powder.material.transparent=loose>0;vessel.powder.material.opacity=1-loose;
+    vessel.powder.material.depthWrite=loose===0;vessel.powder.visible=amount>.001&&loose<.999;
     const position = geometry.attributes.position;
     points.forEach((p,i)=>{
       const s = span(p.x,p.z,plane);
@@ -90,9 +94,15 @@ export function createPowderMotion(vessel) {
     let visible = 0;
     grainSeeds.forEach((p,i)=>{
       const s = span(p.x,p.z,plane), thickness = s[1] - s[0];
-      if (thickness < .003) return;
+      const remaining=Math.min(1,amount/.52);
+      if(loose>.5 ? i>=Math.ceil(grainSeeds.length*remaining) : thickness<.003)return;
       const y = floor + (cosine > .15 ? s[1] : cosine < -.15 ? s[0] : s[0] + thickness * p.p);
       dummy.position.set(flare(p.x,p.z,y),y + .0015,p.z);
+      if(loose>0){
+        const slide=(i*.6180339)%1;
+        const target=slideTarget.set(THREE.MathUtils.lerp(-radius*.68,vessel.spoutPoint.x+.008,slide),THREE.MathUtils.lerp(floor+height*.32,vessel.spoutPoint.y-.008,slide),p.z*(1-slide)*.40);
+        dummy.position.lerp(target,loose);
+      }
       dummy.rotation.set(i * .71,i * .37,i * .19);
       dummy.scale.setScalar(.55 + .7 * p.p); dummy.updateMatrix(); grains.setMatrixAt(visible++,dummy.matrix);
     });
@@ -100,7 +110,7 @@ export function createPowderMotion(vessel) {
     let weight = 0, cx = 0, cy = 0;
     samples.forEach(p=>{const s=span(p.x,p.z,plane),w=s[1]-s[0];weight+=w;cx+=p.x*w;cy+=(floor+(s[0]+s[1])/2)*w;});
     const lip = span(-radius,0,plane);
-    summary = {amount:amount,centroid:{x:cx/Math.max(weight,.0001),y:cy/Math.max(weight,.0001)},lipMaterial:lip[1]>height-.025&&lip[1]-lip[0]>.002,meanDepth:weight/samples.length};
+    summary = {amount:amount,bulkOpacity:1-loose,looseGrains:loose>0,visibleGrains:visible,centroid:{x:cx/Math.max(weight,.0001),y:cy/Math.max(weight,.0001)},lipMaterial:lip[1]>height-.025&&lip[1]-lip[0]>.002,meanDepth:weight/samples.length};
     return summary;
   }
   return { update, get summary() { return summary; } };

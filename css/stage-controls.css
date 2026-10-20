@@ -1,9 +1,174 @@
 /* Previous stages can be reviewed without changing original student records. */
-#app button.mebi-step-item { border:0; background:transparent; padding:0; color:inherit; font:inherit; cursor:pointer; min-width:0; }
-#app button.mebi-step-item:disabled { opacity:1; cursor:default; }
-#app button.mebi-step-item:not(:disabled):hover .mebi-step-node { box-shadow:0 0 0 3px var(--mebi-primary-light),0 2px 0 var(--mebi-base-card); }
-#app button.mebi-step-item:focus-visible,.mebi-stage-toggle:focus-visible { outline:2px solid var(--mebi-border-focus); outline-offset:3px; border-radius:8px; }
-.mebi-stage-toggle { display:grid; place-items:center; flex:none; width:28px; height:28px; margin-left:8px; padding:5px; border:0; border-radius:7px; color:var(--mebi-text-secondary); background:var(--mebi-bg-subtle); cursor:pointer; }
+/* Recreated with the exact segmented pill track design and colors from Laboratuvar Rehberi */
+#app .mebi-stepper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #ffffff !important;
+  padding: 6px 14px !important;
+  box-sizing: border-box !important;
+}
+
+#app .mebi-step-line {
+  display: none !important;
+}
+
+#app .mebi-stepper-track {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 4px !important;
+  overflow-x: auto !important;
+  flex: 1 1 auto !important;
+  scrollbar-width: none !important;
+}
+#app .mebi-stepper-track::-webkit-scrollbar {
+  display: none !important;
+}
+
+#app button.mebi-step-item {
+  flex: 1 1 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 6px 12px !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  background: transparent !important;
+  color: #475569 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+  min-height: 32px !important;
+  box-sizing: border-box !important;
+}
+#app button.mebi-step-item:hover:not(.is-active):not(:disabled) {
+  color: #0284c7 !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+#app button.mebi-step-item:disabled {
+  opacity: 0.5 !important;
+  cursor: default !important;
+}
+
+#app .mebi-step-node {
+  width: 21px !important;
+  height: 21px !important;
+  border-radius: 50% !important;
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  transition: all 0.15s ease !important;
+}
+#app .mebi-step-node svg {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+#app .mebi-step-label {
+  margin-top: 0 !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: inherit !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  white-space: nowrap !important;
+}
+
+#app button.mebi-step-item.is-active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35) !important;
+}
+#app button.mebi-step-item.is-active .mebi-step-node {
+  background: #ffffff !important;
+  color: #0284c7 !important;
+}
+#app button.mebi-step-item.is-active .mebi-step-label {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+#app button.mebi-step-item.is-done .mebi-step-node {
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+}
+
+#app .mebi-stage-toggle {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+  border-radius: 9px !important;
+  width: 32px !important;
+  height: 32px !important;
+  cursor: pointer !important;
+}
+#app .mebi-stage-toggle:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Topbar Brand & Progress in Rehber visual identity */
+#app .mebi-topbar {
+  padding: 10px 18px !important;
+}
+#app .mebi-brand-icon {
+  background: rgba(2, 132, 199, 0.1) !important;
+  border: 1px solid rgba(2, 132, 199, 0.18) !important;
+  color: #0284c7 !important;
+  border-radius: 10px !important;
+}
+#app .mebi-brand span {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+#app .mebi-progress-wrapper {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+  color: #475569 !important;
+  border-radius: 999px !important;
+}
+#app .mebi-progress-bar-mini {
+  background: #e2e8f0 !important;
+}
+#app .mebi-progress-fill-mini {
+  background: #0284c7 !important;
+}
+#app .mebi-topbar-tools .mebi-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #475569 !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+}
+#app .mebi-topbar-tools .mebi-btn:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+#app .mebi-topbar-tools .mebi-btn.is-active {
+  background: #0284c7 !important;
+  border-color: #0369a1 !important;
+  color: #ffffff !important;
+}
+
+#app button.mebi-step-item:focus-visible, .mebi-stage-toggle:focus-visible { outline:2px solid #0284c7; outline-offset:2px; border-radius:8px; }
+.mebi-stage-toggle { display:grid; place-items:center; flex:none; margin-left:8px; padding:5px; border:0; }
 .mebi-stage-toggle svg { width:17px; height:17px; }
 .mebi-stage-toggle:not(.is-compact) svg { transform:rotate(180deg); }
 #app .mebi-top-shell.is-header-compact > .mebi-topbar { display:none !important; }
@@ -13,12 +178,22 @@
 #app .is-header-compact .mebi-stepper-inline-tools .mebi-btn { min-width:30px; width:30px; min-height:30px; height:30px; padding:0; }
 .prediction-review .prediction-content { overflow:auto; }
 @media(max-height:650px) and (orientation:landscape) {
-  body.mebi-mobile-landscape #app .mebi-top-shell.has-stage.is-header-expanded { height:auto !important; min-height:0 !important; background:var(--mebi-bg-surface) !important; border-radius:12px; }
+  body.mebi-mobile-landscape #app .mebi-top-shell.has-stage.is-header-expanded { height:auto !important; min-height:0 !important; background:#ffffff !important; border-radius:12px; }
   body.mebi-mobile-landscape #app .has-stage.is-header-expanded > .mebi-topbar { display:flex !important; min-height:42px; height:42px; padding:4px 10px; }
-  body.mebi-mobile-landscape #app .has-stage.is-header-expanded > .mebi-stepper { position:relative !important; inset:auto !important; height:38px !important; }
+  body.mebi-mobile-landscape #app .has-stage.is-header-expanded > .mebi-stepper { position:relative !important; inset:auto !important; height:38px !important; padding:2px 8px !important; }
+  body.mebi-mobile-landscape #app button.mebi-step-item { padding:2px 6px !important; min-height:28px !important; font-size:11px !important; gap:4px !important; }
+  body.mebi-mobile-landscape #app .mebi-step-node { width:18px !important; height:18px !important; font-size:10px !important; }
+  body.mebi-mobile-landscape #app .mebi-step-label { font-size:10.5px !important; }
   body.mebi-mobile-landscape #app .mebi-top-shell.has-stage.is-header-expanded .mebi-stepper-inline-tools { display:none !important; }
   body.mebi-mobile-landscape #app:has(.is-header-expanded) .prediction-card { margin-top:8px; height:calc(100dvh - 108px); max-height:calc(100dvh - 108px); }
   body.mebi-mobile-landscape #app:has(.is-header-expanded) .reagent-gallery { margin-top:8px; max-height:calc(100dvh - 108px); }
   .mebi-stage-toggle { width:28px; height:28px; margin-left:5px; padding:4px; }
 }
 @media(prefers-reduced-motion:no-preference) { .mebi-stage-toggle { transition:background-color .2s; } }
+/* Five stages keep their labels readable on narrow portrait screens. */
+@media(max-width:510px) and (orientation:portrait) {
+  body.lab-3d-active #app .mebi-top-shell.has-stage.is-header-compact > .mebi-stepper { height:auto; min-height:0; flex-wrap:wrap; gap:5px; padding:8px 10px; }
+  #app .mebi-top-shell.is-header-compact .mebi-stepper-track { flex:1 0 100%; width:100%; }
+  #app .mebi-top-shell.is-header-compact .mebi-stepper-inline-tools { margin-left:auto; }
+  #app .mebi-top-shell.is-header-compact .mebi-stage-toggle { margin-left:0; }
+}

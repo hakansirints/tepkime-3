@@ -48,7 +48,7 @@ function advance(ms) {
   now=target;
   if(frameCallback)frameCallback();
 }
-load('data.js'); load('chemistry-visuals.js'); load('svg-models.js'); load('prediction.js'); load('experiment.js'); load('observation.js'); load('explanation.js');
+load('data.js'); load('chemistry-visuals.js'); load('svg-models.js'); load('prediction.js'); load('experiment.js'); load('observation.js'); load('explanation.js'); load('model.js');
 context.LabScene={available:true,sync(){},setTemperature(){}};
 load('app.js');
 const app=context.TepkimeArenasi,data=context.MebiData;
@@ -57,16 +57,16 @@ function fillPrediction(choices) {
   prediction.items.forEach(item=>{app.dispatch('setPredictionChoice',item.key+':'+(choices ? choices[item.key] : 'unsure'));prediction.setReason(app.state,item.key,'Bu belirtiyi önceki bilgilerime göre değerlendiriyorum.');});
   app.render(false);
 }
-const progressLabels=['1. Seç','2. Tahmin','3. Deney','4. Açıkla'];
+const progressLabels=['Seç','Tahmin','Deney','Açıkla','Model'];
 function assertProgress(index) {
   assert.deepEqual(Array.from(appElement.innerHTML.matchAll(/class="mebi-step-label">([^<]+)</g),m=>m[1]),progressLabels);
   const items=Array.from(appElement.innerHTML.matchAll(/class="mebi-step-item ([^"]*)"([^>]*)>/g));
-  assert.equal(items.length,4);
+  assert.equal(items.length,5);
   items.forEach((item,i)=>{
     assert.equal(item[1],i<index?'is-done':i===index?'is-active':'');
     assert.equal(item[2].includes('aria-current="step"'),i===index);
   });
-  assert(appElement.innerHTML.includes('class="mebi-step-line-fill" style="width:'+(index/3*100)+'%;"'));
+  assert(appElement.innerHTML.includes('class="mebi-step-line-fill" style="width:'+(index/4*100)+'%;"'));
 }
 assert.equal(app.state.screen,'menu','Existing opening menu is preserved');
 app.dispatch('goPool');
@@ -87,7 +87,7 @@ app.dispatch('startExperiment');assert.equal(app.state.screen,'pool');
 app.dispatch('clickReagent','NaHCO3');advance(810);
 assert.equal(app.state.selectedSlot1,'NaHCO3');assert(continuationDisabled());
 app.dispatch('clickReagent','HCl');
-app.dispatch('startExperiment');assert.equal(app.state.screen,'pool','Continue waits for fill completion');
+assert(!continuationDisabled(),'Two selections enable continuation immediately');
 advance(810);
 assert.equal(app.state.screen,'pool','Two selections do not auto-advance');
 assertProgress(0);
@@ -110,7 +110,7 @@ for(let trial=0;trial<60;trial++){
   assert.notEqual(app.state.selectedSlot1,app.state.selectedSlot2);
   assert.notEqual(data.getReaction(app.state.selectedSlot1,app.state.selectedSlot2).typeCategory,'none');
   assert.equal(galleryCount(),12);assert.equal(app.state.searchQuery,'');assert.equal(app.state.categoryFilter,'all');
-  assert.equal(app.state.screen,'pool');assert(continuationDisabled());advance(810);assert(!continuationDisabled());
+  assert.equal(app.state.screen,'pool');assert(!continuationDisabled(),'Random selection is immediately ready');advance(810);assert(!continuationDisabled());
 }
 app.dispatch('resetPool');advance(810);
 app.dispatch('clickReagent','HCl');app.dispatch('setFilter','base');app.dispatch('clickReagent','NaOH');advance(810);app.dispatch('startExperiment');

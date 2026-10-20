@@ -3523,7 +3523,6 @@ html, body {
 }
 
 /* Mobil Yatay Görünüm (max-height: 520px) */
-body.mebi-mobile-landscape .welcome-modal-card,
 @media (orientation: landscape) and (max-height: 520px) {
   .welcome-modal-card {
     max-width: min(98vw, 840px) !important;

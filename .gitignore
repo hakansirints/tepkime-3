@@ -25,3 +25,7 @@ test_*.js
 
 # Generated visual verification artifacts
 artifacts/
+
+# Local design previews and machine-specific comparison notes
+output/
+design-qa.md

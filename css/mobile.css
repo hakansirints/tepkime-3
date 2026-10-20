@@ -1,0 +1,154 @@
+/* Mobile-only corrections. Desktop rules and desktop card geometry are untouched. */
+@media (max-width:1024px) and (max-height:650px) and (orientation:landscape) {
+  body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen="card"],[data-screen="model"]) {
+    padding:5px 8px;
+  }
+  body.mebi-mobile-landscape #app .prediction-card:not(.is-collapsed) {
+    --card-pad-x:10px; --card-pad-y:8px; --card-gap:5px;
+    height:calc(100dvh - 64px); max-height:calc(100dvh - 64px); margin-top:43px;
+    gap:5px; min-width:0;
+  }
+  body.mebi-mobile-landscape #app:has(.is-header-expanded) .prediction-card:not(.is-collapsed) {
+    margin-top:8px; height:calc(100dvh - 108px); max-height:calc(100dvh - 108px);
+  }
+  #app .prediction-card:not(.is-collapsed) > .learning-card-header {
+    grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:8px; min-width:0;
+  }
+  .learning-card-header .prediction-pair { width:100%; justify-self:stretch; min-width:0; }
+  .learning-card-header .prediction-material { flex:1 1 0; min-width:0; }
+  .learning-card-header .prediction-material small { display:none; }
+  .learning-card-header .prediction-material strong { font-size:11px; }
+  #app .prediction-card .arena-stage-heading { font-size:11px; line-height:1.3; gap:4px 6px; letter-spacing:.02em; }
+  #app .prediction-card .arena-stage-heading h1 { min-width:0; overflow-wrap:anywhere; }
+  #app .prediction-card > .prediction-content { min-width:0; overflow-x:hidden; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  .prediction-footer { min-width:0; padding-top:5px; gap:4px; }
+  .prediction-actions { min-width:0; }
+  .prediction-actions .mebi-btn { white-space:normal; text-wrap:balance; line-height:1.25; }
+  .prediction-save-group { min-width:0; }
+  .prediction-footer .prediction-saved-status { max-width:none; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:start; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions .prediction-autofill { width:100%; max-width:none; margin:0; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-save-group { display:flex; flex-direction:column; align-items:stretch; gap:3px; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions .mebi-btn { width:100%; min-height:32px; padding:4px 5px; font-size:10px; }
+  .reagent-gallery-toolbar { display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+  .reagent-gallery-tools { width:100%; max-width:none; gap:8px; }
+  .reagent-gallery-heading { min-width:0; }
+  .gallery-search { flex:1 1 0; width:auto; min-width:0; }
+  .gallery-filters { flex:none; gap:2px; }
+  .gallery-filters button { padding:5px 9px; }
+  .gallery-selected-slot { min-width:0; }
+  .gallery-actions { min-width:0; }
+  .gallery-actions button { min-height:34px; white-space:normal; line-height:1.25; }
+  .gallery-selected-slot strong { overflow-wrap:anywhere; }
+  .reagent-gallery-grid { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  #app .observation-footer { display:flex; flex-direction:column; align-items:stretch; gap:4px; }
+  .observation-footer > div:first-child { min-width:0; }
+  .observation-footer > div:first-child strong { white-space:normal; }
+  #app .observation-card:not(.is-comparing) .observation-footer .prediction-actions {
+    display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); width:100%; gap:4px;
+  }
+  #app .observation-card:not(.is-comparing) .observation-footer .prediction-actions .mebi-btn {
+    width:100%; max-width:none; min-width:0; min-height:32px; padding:4px 5px; margin:0; font-size:9px;
+  }
+  #app .observation-card.is-comparing .observation-footer { flex-direction:row; align-items:center; }
+  #app .observation-card.is-comparing .prediction-actions { display:flex; flex-wrap:wrap; }
+  #app .explanation-footer { gap:5px; }
+  #explanationCard .explanation-footer { flex-direction:column; align-items:stretch; }
+  #explanationCard .explanation-feedback { max-width:none; }
+  #explanationCard .explanation-feedback p { font-size:10px; line-height:1.3; }
+  #explanationCard .explanation-footer .prediction-actions {
+    display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); width:100%; gap:4px;
+  }
+  #explanationCard .prediction-actions > * { grid-column:span 2; margin:0; min-width:0; max-width:none; }
+  #explanationCard .prediction-actions > :nth-last-child(-n+2) { grid-column:span 3; }
+  #explanationCard .prediction-actions :is(.mebi-btn,.explanation-test-button) { min-height:30px; font-size:10px; line-height:1.2; padding:4px 6px; white-space:normal; }
+  #modelCard .explanation-feedback { max-width:44%; }
+  #modelCard .prediction-actions { display:flex; flex-wrap:nowrap; gap:4px; }
+  #modelCard .prediction-actions .mebi-btn { min-width:0; padding:5px 8px; }
+  #modelCard .explanation-species { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  #modelCard .explanation-step-heading { flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+  #modelCard .explanation-step-tools { max-width:none; }
+  #modelCard .explanation-species select { min-height:32px; }
+  .lab-hand-guide { max-width:124px !important; font-size:9px !important; }
+  body.mebi-mobile-landscape #app #benchDock.beaker-particle-panel {
+    max-height:calc(100dvh - var(--lab-card-top,var(--lab-top)) - 8px) !important;
+    overflow:hidden; gap:6px;
+  }
+  .beaker-particle-panel > .beaker-particle-scroll {
+    display:flex; flex-direction:column; gap:6px; flex:1 1 auto; min-height:0;
+    overflow:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  }
+  .beaker-particle-panel > .mebi-btn { position:static; flex:none; margin:0; min-height:34px; }
+  .beaker-particle-panel .beaker-particle-live { display:none; }
+  .beaker-particle-panel .beaker-particle-modes button { min-height:32px; padding:5px; }
+  .beaker-particle-panel .beaker-particle-phase { min-height:0; line-height:1.4; }
+  .beaker-particle-panel .beaker-particle-actions button { min-height:30px; }
+  body.lab-3d-active #app[data-screen="collection"] { padding:5px 8px; }
+  body.lab-3d-active #app[data-screen="collection"] > .collection-shell {
+    display:flex; flex-direction:column; gap:8px; padding:10px 12px;
+    width:calc(100% - 24px); max-height:calc(100dvh - 72px); margin:8px auto 0;
+  }
+  body.lab-3d-active #app[data-screen="collection"]:has(.has-stage) > .collection-shell { margin-top:43px; height:calc(100dvh - 64px); max-height:calc(100dvh - 64px); }
+  body.lab-3d-active #app[data-screen="collection"]:has(.is-header-expanded) > .collection-shell { margin-top:8px; height:calc(100dvh - 108px); max-height:calc(100dvh - 108px); }
+  .collection-heading { flex:none; flex-wrap:nowrap !important; margin-bottom:0 !important; gap:8px !important; }
+  .collection-heading h2 { font-size:16px !important; line-height:1.3; }
+  .collection-heading .mebi-badge { font-size:9px; }
+  .collection-heading .mebi-btn { font-size:10px; padding:6px 9px; min-height:32px; white-space:normal; }
+  .collection-shell .collection-grid { flex:1 1 auto; min-height:0; overflow:auto; overscroll-behavior:contain; grid-template-columns:repeat(2,minmax(0,1fr)); align-content:start; margin:0; }
+  .collection-card-eq { overflow-wrap:anywhere; }
+  .collection-footer { flex:none; flex-wrap:nowrap !important; margin-top:0 !important; gap:6px !important; }
+  .collection-footer > div { flex:1; flex-wrap:nowrap !important; gap:6px !important; }
+  .collection-footer .mebi-btn { flex:1; min-width:0; min-height:32px; font-size:9px; line-height:1.2; padding:5px 7px; white-space:normal; }
+  .collection-empty { flex:1 1 auto; min-height:0; overflow:auto; padding:12px 6px !important; }
+  .collection-empty p { font-size:13px !important; margin-bottom:12px !important; }
+  .lab-settings-panel { position:fixed; top:48px; right:8px; max-width:calc(100vw - 24px); max-height:calc(100dvh - 55px); overflow:auto; overscroll-behavior:contain; }
+  .explanation-prediction-dialog { width:calc(100vw - 24px); max-height:calc(100dvh - 16px); }
+  .explanation-prediction-dialog > header { padding:9px 12px; }
+  .explanation-prediction-dialog h2 { font-size:15px; }
+}
+@media (max-width:700px) and (max-height:650px) and (orientation:landscape) {
+  .learning-header-copy .prediction-intro { display:none; }
+  #app .prediction-card:not(.is-collapsed) > .learning-card-header { min-height:46px; }
+  .learning-card-header .prediction-material-image { width:28px; height:24px; }
+  .prediction-pair { gap:4px; }
+  .prediction-none > span { display:none; }
+  .prediction-progress { gap:2px; }
+  #app .prediction-card .prediction-autofill { max-width:105px; }
+  .prediction-saved-status { font-size:9px; }
+  #app .prediction-card .observation-form-layout,#app .prediction-card .observation-compare-layout { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .observation-notes { border-left:0; padding-left:0; }
+  .observation-matrix .learning-choice-col { width:24%; }
+  .learning-matrix .learning-choice-col { width:54px; }
+  #app .learning-matrix .learning-mark { width:36px; height:36px; min-height:36px; }
+  .comparison-result { white-space:normal; }
+  #explanationCard .explanation-interpretation-grid { grid-template-columns:minmax(0,1fr); }
+  #explanationCard .explanation-evidence-list { grid-template-columns:repeat(5,minmax(0,1fr)); }
+  #explanationCard .explanation-evidence-list label { gap:3px; padding:5px; }
+  #explanationCard .explanation-evidence-list strong { font-size:10px; }
+  #modelCard .explanation-map-path { gap:5px; grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr); }
+  #modelCard .explanation-step-tools .mebi-btn,#modelCard .explanation-test-button { min-height:32px; }
+  .gallery-actions button { padding:5px 8px; }
+  .reagent-gallery-grid { grid-auto-rows:112px; }
+  .reagent-card-visual { flex-basis:46px; }
+  .reagent-card-caption { padding:4px 6px; }
+  .reagent-card-caption strong { font-size:13px; }
+  .reagent-card-caption > span:not(.reagent-card-selection),.reagent-card-caption small { font-size:9px; line-height:1.25; }
+  .gallery-selected-slots { gap:4px; }
+  .gallery-selected-slot { padding:4px 5px; }
+  .gallery-selected-slot.is-filled > span { font-size:9px; }
+  .gallery-selected-slot strong { font-size:11px; }
+}
+/* Keep editing from triggering the automatic input zoom on touch phones. */
+@media (pointer:coarse) and (max-width:1024px) {
+  #app :is(.prediction-reason,.observation-textarea,#explanationEditor,.gallery-search input) { font-size:16px; }
+  #app .prediction-card .prediction-reason,#app .observation-card .observation-textarea { height:49px; max-height:49px; line-height:1.35; }
+  #explanationEditor { min-height:100px; height:100px; line-height:1.5; }
+  #app .learning-matrix .learning-mark { width:40px; height:40px; min-height:40px; }
+}
+@media (orientation:landscape) and (max-height:280px) and (max-width:1024px) {
+  .learning-header-copy .prediction-intro { display:none; }
+  .learning-card-header .prediction-material-image { display:none; }
+  #app .prediction-card:not(.is-collapsed) > .learning-card-header { min-height:30px; }
+  .prediction-footer p:empty { display:none; }
+  #app .prediction-card .prediction-actions .mebi-btn { min-height:28px; }
+}

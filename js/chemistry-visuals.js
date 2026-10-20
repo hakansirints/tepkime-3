@@ -6,7 +6,7 @@
     if (!reagent) return { phase: 'empty', color: CLEAR, opacity: 0 };
     return { phase: reagent.solid ? 'powder' : 'solution',
       color: reagent.solid ? CLEAR : (reagent.id === 'Cu(NO3)2' ? BLUE : CLEAR),
-      opacity: reagent.solid ? 1 : (reagent.id === 'Cu(NO3)2' ? 0.62 : 0.14) };
+      opacity: reagent.solid ? 1 : (reagent.id === 'Cu(NO3)2' ? 0.62 : 0.24) };
   }
   // Visual amounts are normalized scene units, not a quantitative chemistry model.
   function mixture(a, b, reaction, transfer, reactionProgress) {
@@ -28,7 +28,7 @@
       else if (reaction.toColor) target = reaction.toColor;
     }
     return { liquid: liquid, powder: powder, color: color, targetColor: target,
-      opacity: copper || (active && reaction.toColor && reaction.typeCategory !== 'ppt') ? 0.62 : 0.14,
+      opacity: copper || (active && reaction.toColor && reaction.typeCategory !== 'ppt') ? 0.62 : 0.24,
       gas: !!(liquid && active && reactionProgress > 0 && reaction.obs.indexOf('gas') !== -1),
       precipitate: !!(liquid && active && reactionProgress > 0 && reaction.obs.indexOf('precipitate') !== -1) };
   }

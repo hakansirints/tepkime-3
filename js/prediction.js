@@ -77,6 +77,18 @@
     if (!items.some(function(item) { return item.key === parts[0]; }) || !/^(yes|no|unsure)$/.test(parts[1])) return false;
     if (state.predictionAnswers[parts[0]].choice !== parts[1]) invalidateSave(state);
     state.predictionAnswers[parts[0]].choice = parts[1];
+    if (parts[0] === 'tempRise' && parts[1] === 'yes') {
+      if (state.predictionAnswers.tempFall && state.predictionAnswers.tempFall.choice === 'yes') {
+        state.predictionAnswers.tempFall.choice = null;
+      }
+    } else if (parts[0] === 'tempFall' && parts[1] === 'yes') {
+      if (state.predictionAnswers.tempRise && state.predictionAnswers.tempRise.choice === 'yes') {
+        state.predictionAnswers.tempRise.choice = null;
+      }
+    }
+    if (state.predictionMessage && state.predictionMessage.indexOf('sıcaklık') !== -1) {
+      state.predictionMessage = '';
+    }
     return true;
   }
   function setReason(state, key, value) {
@@ -209,11 +221,11 @@
     return '<section class="prediction-card" aria-labelledby="predictionTitle"><header class="learning-card-header"><div class="learning-header-copy"><div class="prediction-heading arena-stage-heading"><span class="prediction-eyebrow">' + window.MebiSVG.icon('helpCircle') + ' 2. Tahmin</span><h1 id="predictionTitle">Tepkime Belirtilerini Tahmin Et</h1></div><p class="prediction-intro">Her belirti için kararını seç, düşünceni bir cümleyle açıkla.</p></div>' +
       '<div class="prediction-pair" aria-label="Seçilen maddeler">' + materialHTML(state.selectedSlot1) + '<span aria-hidden="true">+</span>' + materialHTML(state.selectedSlot2) + '</div></header>' +
       '<div class="prediction-content">' + content + '</div><p id="predictionMessage" class="prediction-message" role="alert">' + esc(state.predictionMessage) + '</p>' +
-      '<footer class="prediction-footer"><div class="prediction-progress"><strong id="predictionCompletion" aria-live="polite">' + complete(state) + ' / 5 karar ve gerekçe tamamlandı</strong><p id="predictionSaveHint"' + (state.predictionStorageError ? ' class="is-storage-error"' : '') + '>' + (state.predictionStorageError ? 'Bu oturumda kaydedildi; tarayıcıda kalıcı kayıt yapılamadı.' : 'Deneye geçmek için tahminini kaydet. Değişiklik yaparsan yeniden kaydet.') + '</p></div><div class="prediction-actions">' +
+      '<footer class="prediction-footer"><div class="prediction-actions prediction-actions-full">' +
       '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm prediction-autofill" data-action="autoFillPredictionForTesting">Test İçin Otomatik Doldur</button>' +
-      '<div class="prediction-save-group"><button type="button" id="savePredictionButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="savePrediction" title="Beş kararını ve gerekçeni tamamlayıp kaydet"' + (complete(state) !== 5 || contradiction(state) || saved ? ' disabled' : '') + '>' + window.MebiSVG.icon('save') + ' Tahminini Kaydet</button>' +
-      '<span id="predictionSavedStatus" class="prediction-saved-status" role="status" aria-live="polite">' + (saved ? window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi' : '') + '</span></div>' +
-      '<button type="button" id="beginExperimentButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="beginExperiment" title="' + (saved ? 'Kaydedilen tahminle deneye geç' : 'Önce tahminini kaydet') + '" aria-describedby="predictionSaveHint"' + (!saved ? ' disabled' : '') + '>' + window.MebiSVG.icon('beakerIc') + ' Deney Aşamasına Geç</button></div></footer></section>';
+      '<div class="prediction-save-group">' +
+      '<span id="predictionSavedStatus" class="prediction-saved-status" role="status" aria-live="polite">' + (saved ? window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi' : '') + '</span>' +
+      '<button type="button" id="beginExperimentButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="beginExperiment" title="' + (complete(state) === 5 || saved ? 'Deney aşamasına geç' : 'Önce 5 belirti kararını tamamla') + '"' + (complete(state) !== 5 && !saved ? ' disabled' : '') + '>' + window.MebiSVG.icon('beakerIc') + ' Deney Aşamasına Geç</button></div></div></footer></section>';
   }
   function reviewHTML(state) {
     var record = state.predictionRecord;
@@ -227,9 +239,10 @@
     var beginButton = document.getElementById('beginExperimentButton');
     var savedStatus = document.getElementById('predictionSavedStatus');
     var saved = state.labStep === 'predictionSaved';
+    var isComplete = complete(state) === 5;
     if (count) count.textContent = complete(state) + ' / 5 karar ve gerekçe tamamlandı';
-    if (button) { button.disabled = complete(state) !== 5 || contradiction(state) || saved; button.title = saved ? 'Tahmininiz kaydedildi. Bir yanıtı değiştirirsen yeniden kaydedebilirsin.' : 'Beş kararını ve gerekçeni tamamlayıp kaydet'; }
-    if (beginButton) { beginButton.disabled = !saved; beginButton.title = saved ? 'Kaydedilen tahminle deneye geç' : 'Önce tahminini kaydet'; }
+    if (button) { button.disabled = !isComplete || contradiction(state) || saved; button.title = saved ? 'Tahmininiz kaydedildi. Bir yanıtı değiştirirsen yeniden kaydedebilirsin.' : 'Beş kararını ve gerekçeni tamamlayıp kaydet'; }
+    if (beginButton) { beginButton.disabled = !isComplete && !saved; beginButton.title = (isComplete || saved) ? 'Deney aşamasına geç' : 'Önce 5 belirti kararını tamamla'; }
     if (savedStatus) savedStatus.innerHTML = saved ? window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi' : '';
     if (message) message.textContent = contradiction(state) ? 'Son sıcaklık, ilk sıcaklıktan hem yüksek hem düşük olamaz. Sıcaklık kararlarını gözden geçir.' : state.predictionMessage;
   }

@@ -97,14 +97,9 @@
     return true;
   }
   function finishSelection() {
-    S.isFilling = !!(S.selectedSlot1 || S.selectedSlot2);
-    var token = ++fillToken;
+    ++fillToken;
+    S.isFilling = false;
     render(false);
-    setTimeout(function() {
-      if (token !== fillToken) return;
-      S.isFilling = false;
-      render(false);
-    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 30 : 800);
   }
 
   // Koleksiyonu yerel depolamadan yükle
@@ -120,7 +115,8 @@
   function saveCollectionToStorage() {
     try {
       localStorage.setItem('tepkime_arenasi_collection', JSON.stringify(S.collection));
-    } catch (e) {}
+      return true;
+    } catch (e) { return false; }
   }
 
   function esc(str) {
@@ -132,7 +128,7 @@
 
   /* ----------------- 2. TOPBAR VE STEPPER HTML ----------------- */
   function topbarHTML(showNav, stage) {
-    var totalDiscovered = S.collection.length;
+    var totalDiscovered = S.collection.filter(function(item){return item.reaction!==false;}).length;
     var totalReactions = 36; // Aktif kimyasal tepkime sayısı
     var pct = Math.min(100, Math.round((totalDiscovered / totalReactions) * 100));
 
@@ -210,13 +206,14 @@
 
   function stepperHTML(step, toolsHTML) {
     var steps = [
-      { key: 'pool', label: '1. Seç' },
-      { key: 'predict', label: '2. Tahmin' },
-      { key: 'reacting', label: '3. Deney' },
-      { key: 'card', label: '4. Açıkla' }
+      { key: 'pool', label: 'Seç' },
+      { key: 'predict', label: 'Tahmin' },
+      { key: 'reacting', label: 'Deney' },
+      { key: 'card', label: 'Açıkla' },
+      { key: 'model', label: 'Model' }
     ];
-    var order = { pool: 0, predict: 1, predictionSaved: 1, ready: 2, pouring: 2, reacting: 2, observed: 2, card: 3 };
-    var available = stageIndex(), busy = stageNavigationBusy();
+    var order = { pool: 0, predict: 1, predictionSaved: 1, ready: 2, pouring: 2, reacting: 2, observed: 2, card: 3, model: 4 };
+    var available = availableStageIndex(), busy = stageNavigationBusy();
     var compact = headerIsCompact();
     var idx = S.stageReview ? order[S.stageReview] : (order[step] || 0);
     var pctLine = (idx / (steps.length - 1)) * 100;
@@ -248,11 +245,14 @@
     return html;
   }
   function stageIndex() {
+    if (S.screen === 'model' || S.screen === 'collection' && S.resumeScreen === 'model') return 4;
     if (S.explanationReview && S.screen === 'lab') return 3;
+    if (S.particleInspection && S.particleInspection.returnScreen === 'model') return 4;
     if (S.particleInspection && S.particleInspection.returnScreen === 'card') return 3;
     if (S.screen === 'collection') return S.resumeScreen === 'card' ? 3 : S.resumeScreen === 'lab' ? 2 : 0;
     return S.screen === 'card' ? 3 : S.screen === 'lab' ? (/^(predict|predictionSaved)$/.test(S.labStep) ? 1 : 2) : 0;
   }
+  function availableStageIndex() { return Math.max(stageIndex(),window.MebiModel.canEnter(S)?4:0); }
   function stageNavigationBusy() {
     return !!(S.experiment && (S.experiment.mode !== 'idle' || S.experiment.safetyOpen)) || /^(pouring|reacting)$/.test(S.labStep);
   }
@@ -267,105 +267,41 @@
   /* ----------------- 3. EKRANLAR (SCREENS) ----------------- */
 
   // EKRAN 1: AÇILIŞ MENÜSÜ (Görseldeki Mint Kimya Temalı 16:9 Yatay Kart)
+  function entranceIcon(name) {
+    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg)"></span>';
+  }
+
   function screenMenu() {
-    return '<div class="mebi-card arena-menu-card arena-menu-mint-16-9">' +
-        // Kimya Temalı Arka Plan Çizimleri (Molekül, Baloncuklar, Atom Yörüngeleri)
-        '<div class="arena-mint-decorations" aria-hidden="true">' +
-          '<svg class="mint-decor-hex top-left" viewBox="0 0 120 120">' +
-            '<polygon points="60,10 100,32 100,78 60,100 20,78 20,32" fill="none" stroke="currentColor" stroke-width="2.2"/>' +
-            '<polygon points="60,25 85,39 85,71 60,85 35,71 35,39" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 3"/>' +
-            '<circle cx="60" cy="10" r="3" fill="currentColor"/>' +
-            '<circle cx="100" cy="32" r="3" fill="currentColor"/>' +
-            '<circle cx="100" cy="78" r="3" fill="currentColor"/>' +
-          '</svg>' +
-          '<svg class="mint-decor-bubbles top-right" viewBox="0 0 100 100">' +
-            '<circle cx="28" cy="72" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
-            '<circle cx="68" cy="42" r="11" fill="none" stroke="currentColor" stroke-width="2"/>' +
-            '<circle cx="48" cy="22" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
-            '<circle cx="82" cy="18" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
-          '</svg>' +
-          '<svg class="mint-decor-atom bottom-left" viewBox="0 0 90 90">' +
-            '<circle cx="45" cy="45" r="4.5" fill="currentColor"/>' +
-            '<ellipse cx="45" cy="45" rx="36" ry="13" fill="none" stroke="currentColor" stroke-width="1.8" transform="rotate(32 45 45)"/>' +
-            '<ellipse cx="45" cy="45" rx="36" ry="13" fill="none" stroke="currentColor" stroke-width="1.8" transform="rotate(-32 45 45)"/>' +
-            '<circle cx="76" cy="56" r="3" fill="currentColor"/>' +
-          '</svg>' +
-          '<svg class="mint-decor-hex bottom-right" viewBox="0 0 120 120">' +
-            '<polygon points="60,10 100,32 100,78 60,100 20,78 20,32" fill="none" stroke="currentColor" stroke-width="2"/>' +
-            '<circle cx="20" cy="78" r="3" fill="currentColor"/>' +
-            '<circle cx="60" cy="100" r="3" fill="currentColor"/>' +
-          '</svg>' +
-        '</div>' +
-
-        // Sol Kolon: Erlenmayer, Başlık ve Açıklama
-        '<div class="arena-mint-left">' +
-          '<div class="arena-mint-flask-wrap">' +
-            '<div class="arena-mint-flask-badge">' +
-              '<svg viewBox="0 0 72 84" width="60" height="70" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                '<path d="M30 6V26L10 64C8 68 11 74 16 74H56C61 74 64 68 62 64L42 26V6H30Z" stroke="#059669" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>' +
-                '<line x1="26" y1="6" x2="46" y2="6" stroke="#059669" stroke-width="4.5" stroke-linecap="round"/>' +
-                '<path d="M16 54L22 42C26 40 32 44 38 42C44 40 50 44 56 54" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>' +
-                '<circle cx="26" cy="62" r="3" fill="#10b981"/>' +
-                '<circle cx="36" cy="56" r="2.5" fill="#10b981"/>' +
-                '<circle cx="46" cy="64" r="3.5" fill="#10b981"/>' +
-                '<circle cx="36" cy="16" r="2" fill="#34d399"/>' +
-                '<circle cx="33" cy="2" r="2.5" fill="#34d399"/>' +
-              '</svg>' +
-            '</div>' +
-          '</div>' +
-          '<h1 class="arena-mint-title">Tepkime Arenası</h1>' +
-          '<p class="arena-mint-subtitle">' +
-            'Kimyasal maddeleri seç, deney masasında birleştirerek değişimi tahmin et' +
-          '</p>' +
-        '</div>' +
-
-        // Sağ Kolon: Beyaz Kapsül Buton Paneli
-        '<div class="arena-mint-right">' +
-          '<div class="arena-mint-actions-panel">' +
-            '<button type="button" class="arena-mint-pill-btn is-primary" data-action="goPool" data-arg="fromMenu">' +
-              '<div class="pill-btn-icon-wrap">' +
-                '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                  '<path d="M10 2v7.31L4.35 19.35A2 2 0 0 0 6 22h12a2 2 0 0 0 1.65-2.65L14 9.31V2"/>' +
-                  '<path d="M8.5 2h7"/>' +
-                  '<path d="M14 9.3a6.5 6.5 0 1 1-4 0"/>' +
-                '</svg>' +
-              '</div>' +
-              '<span class="pill-btn-text">Arenaya Gir ve Deneye Başla</span>' +
-            '</button>' +
-
-            '<button type="button" class="arena-mint-pill-btn is-white" data-action="goCollection">' +
-              '<div class="pill-btn-icon-wrap mint-icon">' +
-                '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                  '<circle cx="6" cy="6" r="3"/>' +
-                  '<circle cx="18" cy="8" r="3"/>' +
-                  '<circle cx="12" cy="18" r="3"/>' +
-                  '<line x1="8.5" y1="7.5" x2="15.5" y2="7.5"/>' +
-                  '<line x1="8" y1="8" x2="10.5" y2="15.5"/>' +
-                  '<line x1="16" y1="10" x2="13.5" y2="15.5"/>' +
-                '</svg>' +
-              '</div>' +
-              '<span class="pill-btn-text">Tepkime Koleksiyonum</span>' +
-            '</button>' +
-
-            '<button type="button" class="arena-mint-pill-btn is-white" data-action="openGuideDrawer">' +
-              '<div class="pill-btn-icon-wrap mint-icon">' +
-                '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                  '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>' +
-                  '<path d="M6 6h10"/>' +
-                  '<path d="M6 10h7"/>' +
-                '</svg>' +
-              '</div>' +
-              '<span class="pill-btn-text">Laboratuvar Rehberi</span>' +
-            '</button>' +
-
-            '<div class="arena-mint-reset-wrap">' +
-              '<button type="button" class="arena-mint-reset-link" data-action="resetExperiment">' +
-                'Sıfırla' +
-              '</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
+    var steps = [
+      ['Maddeleri seç', 'flask'],
+      ['Tahmin et ve gerekçelendir', 'chats-circle'],
+      ['Karıştır', 'test-tube'],
+      ['Gözle ve açıkla', 'eye'],
+      ['Tanecikleri ilişkilendir', 'graph']
+    ];
+    var actions = [
+      ['goPool', 'Arenaya Gir ve Deneye Başla', 'flask', 'is-primary'],
+      ['goCollection', 'Tepkime Koleksiyonum', 'graph', 'is-white'],
+      ['openGuideDrawer', 'Laboratuvar Rehberi', 'book-open', 'is-white']
+    ];
+    return '<section class="mebi-card arena-menu-card entrance-card" aria-labelledby="entranceTitle">' +
+      '<div class="entrance-overview"><header class="entrance-brand">' +
+        '<span class="entrance-brand-icon" aria-hidden="true">' + entranceIcon('flask') + '</span>' +
+        '<div><h1 id="entranceTitle">Tepkime Arenası</h1>' +
+        '<p>Kimyasal maddeleri seç, deney masasında birleştirerek değişimi tahmin et</p></div>' +
+      '</header><ol class="entrance-journey">' + steps.map(function(step, index) {
+        return '<li class="entrance-step entrance-step-' + (index + 1) + '">' +
+          '<span class="entrance-step-number" aria-hidden="true">' + (index + 1) + '</span>' +
+          '<span class="entrance-step-icon" aria-hidden="true">' + entranceIcon(step[1]) + '</span>' +
+          '<span class="entrance-step-label">' + step[0] + '</span></li>';
+      }).join('') + '</ol></div>' +
+      '<nav class="entrance-menu" aria-label="Giriş menüsü">' + actions.map(function(action) {
+        return '<button type="button" class="arena-mint-pill-btn ' + action[3] + '" data-action="' + action[0] + '"' +
+          (action[0] === 'goPool' ? ' data-arg="fromMenu"' : '') + '>' +
+          '<span class="pill-btn-icon-wrap mint-icon" aria-hidden="true">' + entranceIcon(action[2]) + '</span>' +
+          '<span class="pill-btn-text">' + action[1] + '</span></button>';
+      }).join('') + '<button type="button" class="arena-mint-reset-link" data-action="resetExperiment">Sıfırla</button></nav>' +
+      '</section>';
   }
 
   // EKRAN 2: MADDE HAVUZU (POOL)
@@ -462,7 +398,7 @@
 
   function screenLab() {
     if (S.particleInspection && window.MebiParticleInspection.eligible(S)) {
-      return topbarHTML(true, S.particleInspection.returnScreen === 'card' ? 'card' : 'observed') + window.MebiParticleInspection.panelHTML(S);
+      return topbarHTML(true, S.particleInspection.returnScreen === 'model' ? 'model' : S.particleInspection.returnScreen === 'card' ? 'card' : 'observed') + window.MebiParticleInspection.panelHTML(S);
     }
     if (S.labStep === 'predict' || S.labStep === 'predictionSaved') {
       return topbarHTML(true, S.labStep) + window.MebiPrediction.render(S);
@@ -688,32 +624,20 @@
     if (!window.MebiExplanation.eligible(S)) return screenLab();
     return topbarHTML(true, 'card') + window.MebiExplanation.render(S);
   }
+  function screenModel() {
+    if (!window.MebiModel.canEnter(S)) return screenCard();
+    return topbarHTML(true,'model') + window.MebiModel.render(S);
+  }
 
   // EKRAN 6: KOLEKSİYON (COLLECTION)
-  function screenCollection() {
+                function screenCollection() {
     var totalDiscovered = S.collection.length;
     var totalReactions = 36;
 
-    var canResume = !!(S.resumeScreen && S.resumeScreen !== 'menu' && S.resumeScreen !== 'collection');
-
-    var resumeBtnFooter = '<button class="mebi-btn mebi-btn-secondary" ' +
-      (canResume ? 'data-action="resumeExperiment"' : 'disabled aria-disabled="true"') +
-      ' title="' + (canResume ? 'Kaldığınız deney aşamasına geri dönün' : 'Devam edilecek aktif bir deney aşaması bulunmuyor') + '">' +
-        '<span class="mebi-btn-badge">' + window.MebiSVG.icon('play') + '</span>' +
-        '<span>Deneye Devam Et</span>' +
-      '</button>';
-
     var bodyHtml = '';
     if (totalDiscovered === 0) {
-      bodyHtml = '<div style="text-align:center;padding:40px 20px;color:var(--mebi-text-secondary);">' +
-        '<p style="font-size:16px;margin-bottom:18px;">Henüz tamamlanmış bir tepkime kartınız bulunmuyor. Madde havuzundan tepken seçerek ilk deneyinizi gerçekleştirin!</p>' +
-        '<div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">' +
-          resumeBtnFooter +
-          '<button class="mebi-btn mebi-btn-secondary" data-action="goPool">' +
-            '<span class="mebi-btn-badge">' + window.MebiSVG.icon('flaskOutline') + '</span>' +
-            '<span>Madde Havuzuna Git</span>' +
-          '</button>' +
-        '</div>' +
+      bodyHtml = '<div class="collection-empty" style="text-align:center;padding:40px 20px;color:var(--mebi-text-secondary);">' +
+        '<p style="font-size:15px;margin:0;">Henüz kaydedilmiş bir deney modeliniz bulunmuyor. Deneylerinizi tamamladığınızda modelleriniz bu alanda listelenecektir.</p>' +
       '</div>';
     } else {
       bodyHtml = '<div class="collection-grid">' +
@@ -726,14 +650,7 @@
           '</div>';
         }).join('') +
       '</div>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;flex-wrap:wrap;gap:12px;">' +
-        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">' +
-          resumeBtnFooter +
-          '<button class="mebi-btn mebi-btn-secondary" data-action="goPool">' +
-            '<span class="mebi-btn-badge">' + window.MebiSVG.icon('flaskIc') + '</span>' +
-            '<span>Yeni Deney Başlat</span>' +
-          '</button>' +
-        '</div>' +
+      '<div class="collection-footer" style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;">' +
         '<button class="mebi-btn mebi-btn-ghost mebi-btn-sm" data-action="clearCollection">' +
           '<span class="mebi-btn-badge">' + window.MebiSVG.icon('reset') + '</span>' +
           '<span>Koleksiyonu Sıfırla</span>' +
@@ -742,22 +659,24 @@
     }
 
     var resumeStage = null;
-    if (canResume) {
-      if (S.resumeScreen === 'card') resumeStage = 'card';
+    if (S.resumeScreen && S.resumeScreen !== 'menu' && S.resumeScreen !== 'collection') {
+      if (S.resumeScreen === 'model') resumeStage = 'model';
+      else if (S.resumeScreen === 'card') resumeStage = 'card';
       else if (S.resumeScreen === 'lab') resumeStage = S.resumeLabStep || 'predict';
       else resumeStage = 'pool';
     }
 
     var html = topbarHTML(true, resumeStage) +
-      '<div class="mebi-card">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">' +
-          '<div>' +
-            '<span class="mebi-badge mebi-badge-success">LABORATUVAR GÜNLÜĞÜ</span>' +
-            '<h2 style="font-size:24px;margin-top:4px;font-weight:800;">Keşfedilen Tepkime Kartları (' + totalDiscovered + ' / ' + totalReactions + ')</h2>' +
+      '<div class="mebi-card collection-shell">' +
+        '<div class="collection-heading" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">' +
+          '<div class="mebi-badge mebi-badge-success collection-title-badge">' +
+            '<span>LABORATUVAR GÜNLÜĞÜ</span>' +
+            '<span class="collection-title-sep">·</span>' +
+            '<span>KAYDEDİLEN DENEY MODELLERİ (' + totalDiscovered + ')</span>' +
           '</div>' +
-          '<button class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="goMenu">' +
-            '<span class="mebi-btn-badge">' + window.MebiSVG.icon('undo') + '</span>' +
-            '<span>Menüye Dön</span>' +
+          '<button class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="closeCollection" title="Laboratuvar Günlüğünü Kapat" aria-label="Laboratuvar Günlüğünü Kapat">' +
+            '<span class="mebi-btn-badge">' + window.MebiSVG.icon('fullscreenExit') + '</span>' +
+            '<span>Kapat</span>' +
           '</button>' +
         '</div>' +
         bodyHtml +
@@ -847,13 +766,14 @@
     closeStageReview: function() { S.stageReview = null; render(false); },
     navigateStage: function(value) {
       var target = Number(value);
-      if (!isFinite(target) || target % 1 || target < 0 || target > stageIndex() || stageNavigationBusy()) return;
+      if (!isFinite(target) || target % 1 || target < 0 || target > availableStageIndex() || stageNavigationBusy()) return;
       S.stageReview = null;
       if (target === 0 && S.screen !== 'pool') S.stageReview = 'pool';
       else if (target === 1 && window.MebiPrediction.started(S)) S.stageReview = 'predict';
       else if (target === 1) { S.screen = 'lab'; S.labStep = S.predictionRecord ? 'predictionSaved' : 'predict'; }
       else if (target === 2) { S.particleInspection = null; S.explanationReview = null; S.screen = 'lab'; }
-      else if (target === 3) S.screen = 'card';
+      else if (target === 3) { S.particleInspection=null;S.explanationReview=null;S.screen='card'; }
+      else if (target === 4) { actions.toModel(); return; }
       render(false);
     },
     cancelExperimentSafety: function() {
@@ -923,18 +843,50 @@
       }
       render();
     },
+    closeCollection: function() {
+      if (window.MebiAudio) window.MebiAudio.playClick();
+      actions.resumeExperiment();
+    },
     goCollection: function() {
       if (window.MebiAudio) window.MebiAudio.playClick();
+      if (S.screen === 'collection') {
+        actions.resumeExperiment();
+        return;
+      }
       if (S.screen !== 'collection') {
-        if (S.screen === 'lab' || S.screen === 'card' || S.screen === 'pool') {
-          S.resumeScreen = S.explanationReview || S.particleInspection?.returnScreen === 'card' ? 'card' : S.screen;
+        if (S.screen === 'lab' || S.screen === 'card' || S.screen === 'model' || S.screen === 'pool') {
+          S.resumeScreen = S.particleInspection ? S.particleInspection.returnScreen : S.explanationReview ? 'card' : S.screen;
           S.resumeLabStep = S.labStep;
         } else {
           S.resumeScreen = null;
           S.resumeLabStep = null;
         }
       }
+      S.stageReview = null;
+      S.particleInspection = null;
+      S.explanationReview = null;
       S.screen = 'collection';
+      render();
+    },
+    viewCollectionItem: function(pair) {
+      if (window.MebiAudio) window.MebiAudio.playClick();
+      if (!pair) return;
+      var parts = pair.split('|');
+      if (parts.length < 2) return;
+      var r1 = parts[0], r2 = parts[1];
+      var reagents = window.MebiData ? window.MebiData.REAGENTS : [];
+      var item1 = reagents.find(function(r) { return r.id === r1 || r.f === r1; });
+      var item2 = reagents.find(function(r) { return r.id === r2 || r.f === r2; });
+      if (!item1 || !item2) return;
+      var rx = window.MebiData.getReaction(item1.id, item2.id);
+      if (!rx) return;
+      S.selectedSlot1 = item1.id;
+      S.selectedSlot2 = item2.id;
+      S.activeReaction = rx;
+      S.stageReview = null;
+      S.particleInspection = null;
+      S.explanationReview = null;
+      S.screen = 'card';
       render();
     },
     resumeExperiment: function() {
@@ -1150,15 +1102,37 @@
     redoPrediction: function() {
       if (window.MebiPrediction.edit(S)) render(false);
     },
-    beginExperiment: function() {
-      if (!window.MebiPrediction.begin(S)) return;
-      HISTORY.length = 0;
-      window.MebiExperiment.reset(S, false);
-      window.MebiObservation.reset(S);
-      S.labView = 'desk';
-      if (window.LabScene && window.LabScene.setView) window.LabScene.setView('desk');
-      if (window.MebiAudio) window.MebiAudio.playClick();
-      render();
+    beginExperiment: function(arg, btn) {
+      if (S.beginExperimentTimer) return;
+      if (S.labStep !== 'predictionSaved') {
+        var ok = window.MebiPrediction.save(S);
+        if (!ok) { render(false); return; }
+      }
+
+      function executeBegin() {
+        if (!window.MebiPrediction.begin(S)) return;
+        HISTORY.length = 0;
+        window.MebiExperiment.reset(S, false);
+        window.MebiObservation.reset(S);
+        S.labView = 'desk';
+        if (window.LabScene && window.LabScene.setView) window.LabScene.setView('desk');
+        if (window.MebiAudio) window.MebiAudio.playClick();
+        render();
+      }
+
+      if (btn) {
+        render(false);
+        var statusEl = document.getElementById('predictionSavedStatus');
+        if (statusEl) statusEl.innerHTML = window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi';
+        var beginBtn = document.getElementById('beginExperimentButton');
+        if (beginBtn) beginBtn.disabled = true;
+        S.beginExperimentTimer = setTimeout(function() {
+          S.beginExperimentTimer = null;
+          executeBegin();
+        }, 2000);
+      } else {
+        executeBegin();
+      }
     },
     requestManualPour: function() {
       if (!window.MebiPrediction.started(S)) return;
@@ -1291,9 +1265,30 @@
         if (tab) tab.focus({ preventScroll:true });
       }
     },
-    setObservationTab: function(value) {
-      if (!window.MebiObservation.setTab(S, value)) return;
+    setObservationTab: function(value, btn) {
+      if (value === 'compare' && btn) {
+        if (S.compareTransitionTimer) return;
+        var ok = window.MebiObservation.save(S);
+        render(false);
+        if (!ok) return;
+        var statusEl = document.getElementById('observationSavedStatus');
+        if (statusEl) statusEl.innerHTML = window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi';
+        var compBtn = document.getElementById('compareObservationButton');
+        if (compBtn) compBtn.disabled = true;
+        S.compareTransitionTimer = setTimeout(function() {
+          S.compareTransitionTimer = null;
+          window.MebiObservation.setTab(S, 'compare');
+          render(false);
+          var dock = document.getElementById('benchDock');
+          if (dock) dock.scrollTop = 0;
+          var panel = document.getElementById('observationPanel');
+          if (panel) panel.scrollTop = 0;
+        }, 2000);
+        return;
+      }
+      var ok = window.MebiObservation.setTab(S, value);
       render(false);
+      if (!ok) return;
       var dock = document.getElementById('benchDock');
       if (dock) dock.scrollTop = 0;
       var panel = document.getElementById('observationPanel');
@@ -1309,20 +1304,39 @@
     },
     saveExplanation: function() {
       if (S.screen !== 'card') return;
-      if (window.MebiExplanation.save(S)) {
-        var rx = S.activeReaction;
-        if (rx && rx.typeCategory !== 'none' && !S.collection.some(function(item) { return item.eq === rx.eq; })) {
-          S.collection.push({r1:window.MebiData.getReagent(S.selectedSlot1).f,r2:window.MebiData.getReagent(S.selectedSlot2).f,type:rx.canonical,eq:rx.eq,explanationId:S.observation.record.id});
-          saveCollectionToStorage();
-        }
-      }
+      window.MebiExplanation.save(S);
       render(false);
     },
+    toModel: function() {
+      if (!window.MebiExplanation.eligible(S)) return;
+      if (!window.MebiExplanation.save(S)) { S.screen='card'; render(false); return; }
+      S.stageReview=null; S.particleInspection=null; S.explanationReview=null; S.screen='model'; render(false);
+      var panel=document.querySelector('.model-content');if(panel)panel.scrollTop=0;
+    },
+    backToExplanation: function() {
+      if (S.screen!=='model') return;
+      S.screen='card';window.MebiExplanation.setStep(S,2);render(false);
+    },
+    saveModel: function() {
+      if(S.screen!=='model')return;
+      if(window.MebiModel.save(S)){
+        var rx=S.activeReaction,draft=window.MebiModel.get(S),pair=[S.selectedSlot1,S.selectedSlot2].sort().join('|');
+        var item={r1:window.MebiData.getReagent(S.selectedSlot1).f,r2:window.MebiData.getReagent(S.selectedSlot2).f,type:rx.canonical,eq:window.MebiModel.summary(S),pair:pair,reaction:rx.typeCategory!=='none',explanationId:S.observation.record.id,model:{type:'particle-relationships',record:draft.revisions[draft.revisions.length-1]}};
+        var index=S.collection.findIndex(function(c){return c.pair===pair||c.eq===rx.eq;});
+        if(index<0)S.collection.push(item);else S.collection[index]=item;
+        if(!saveCollectionToStorage()) draft.storageError=true;
+      }
+      render(false);
+      var feedback=document.getElementById('modelStatus');if(feedback)feedback.scrollIntoView({block:'nearest'});
+    },
+    checkModel: function() { if(S.screen==='model')window.MebiModel.check(S); },
+    checkModelDock: function() { if(window.MebiAudio)window.MebiAudio.playClick(); if(window.MebiModel && window.MebiModel.checkDock)window.MebiModel.checkDock(S); },
+    autoFillModelForTesting: function() { if(S.screen==='model'&&window.MebiModel.autoFillForTesting(S))render(false); },
     setExplanationStep: function(value) {
       if (S.screen !== 'card' || !window.MebiExplanation.setStep(S, value)) return;
       render(false);
       var content = document.querySelector('.explanation-content'); if(content)content.scrollTop=0;
-      var heading = document.getElementById('explanationStepTitle'); if(heading)heading.focus({preventScroll:true});
+      var heading = document.getElementById('explanationTitle'); if(heading)heading.focus({preventScroll:true});
     },
     autoFillExplanationForTesting: function() {
       if (S.screen === 'card' && window.MebiExplanation.autoFillForTesting(S)) render(false);
@@ -1337,13 +1351,15 @@
       var scroll = S.explanationReview.scroll;
       S.explanationReview = null; S.screen = 'card'; render(false);
       var content = document.querySelector('.explanation-content'); if(content)content.scrollTop=scroll;
-      var heading = document.getElementById('explanationStepTitle'); if(heading)heading.focus({preventScroll:true});
+      var heading = document.getElementById('explanationTitle'); if(heading)heading.focus({preventScroll:true});
     },
-    checkExplanation: function() { if (S.screen === 'card') window.MebiExplanation.check(S); },
     toCard: function() {
       if (S.screen !== 'lab' || S.labStep !== 'observed' || !window.MebiObservation.get(S).record) return;
       if (window.MebiAudio) window.MebiAudio.playClick();
-
+      var obs = window.MebiObservation.get(S);
+      if (obs && obs.reflection && obs.reflection.trim()) {
+        window.MebiObservation.saveReflection(S);
+      }
       S.screen = 'card';
       render();
     },
@@ -1351,17 +1367,14 @@
       if (!window.MebiParticleInspection.eligible(S) || !window.LabScene || !window.LabScene.available || !/^(before|reaction)$/.test(view)) return;
       var previous = S.particleInspection;
       if (S.screen === 'card') { var draft = window.MebiExplanation.get(S); draft.visits++; window.MebiExplanation.persist(S); }
-      S.particleInspection = {view:view,micro:true,time:0,revision:(previous ? previous.revision : 0)+1,returnScreen:previous ? previous.returnScreen : S.screen,cardScroll:previous ? previous.cardScroll : (document.querySelector('.explanation-content')?.scrollTop || 0)};
-      if(previous?.lens)S.particleInspection.lens={...previous.lens,focus:{...previous.lens.focus}};
-      var lens=window.MebiParticleInspection.settings(S);if(view==='reaction')lens.vessel=0;
+      S.particleInspection = {view:view,micro:true,time:0,revision:(previous ? previous.revision : 0)+1,returnScreen:previous ? previous.returnScreen : S.screen,cardScroll:previous ? previous.cardScroll : (document.querySelector('.explanation-content,.model-content')?.scrollTop || 0)};
       S.screen='lab'; S.labStep='observed'; render(false);
     },
-    setParticleLensStage: function(value) {if(S.particleInspection)window.MebiParticleInspection.stage(S,value);},
     closeParticleInspection: function() {
       var inspection=S.particleInspection;if(!inspection)return;
-      S.particleInspection=null;S.screen=inspection.returnScreen==='card'?'card':'lab';
+      S.particleInspection=null;S.screen=['card','model'].includes(inspection.returnScreen)?inspection.returnScreen:'lab';
       if(S.screen==='lab')window.MebiObservation.showLab(S,false);render(false);
-      if(S.screen==='card'){var panel=document.querySelector('.explanation-content');if(panel)panel.scrollTop=inspection.cardScroll||0;var target=document.getElementById('explanationEditor')||document.getElementById('explanationStepTitle');if(target)target.focus({preventScroll:true});}
+      if(['card','model'].includes(S.screen)){var panel=document.querySelector('.explanation-content,.model-content');if(panel)panel.scrollTop=inspection.cardScroll||0;var target=document.getElementById('modelStepTitle')||document.getElementById('explanationEditor')||document.getElementById('explanationTitle');if(target)target.focus({preventScroll:true});}
     },
     toggleParticleNormal: function() {var p=S.particleInspection;if(!p)return;p.micro=!p.micro;window.MebiParticleInspection.paint(S);},
     seekParticleInspection: function(value) {var p=S.particleInspection;if(!p||p.view!=='reaction')return;p.time=Math.max(0,Math.min(16,Number(value)||0));p.revision++;window.MebiParticleInspection.paint(S);},
@@ -1413,6 +1426,8 @@
             S.activeReaction = null;
             S.prediction = [];
           }
+        } else if (S.screen === 'model') {
+          S.screen = 'card';
         } else if (S.screen === 'card') {
           S.screen = 'lab';
           S.labStep = 'observed';
@@ -1434,8 +1449,8 @@
 
   function dispatch(action, arg, btn) {
     if (!actions[action]) return;
-    if (/^(goMenu|goPool|changeReactants|resumeExperiment)$/.test(action)) S.stageReview = null;
-    if (!/^(navigateStage|closeStageReview|toggleStageHeader|cancelExperimentSafety|setObservationChoice|autoFillObservationForTesting|saveObservation|setObservationTab|saveObservationReflection|showObservationDesk|openObservationCard|toggleSafetyCheck|toggleAllSafetyChecks|acceptExperimentSafety|openParticleInspection|closeParticleInspection|setParticleLensStage|toggleParticleNormal|seekParticleInspection|backToObservation|saveExplanation|checkExplanation|setExplanationStep|autoFillExplanationForTesting|reviewExplanationExperiment|closeExplanationExperiment)$/.test(action) && action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
+    if (/^(goMenu|goPool|changeReactants|resumeExperiment|goCollection|viewCollectionItem)$/.test(action)) S.stageReview = null;
+    if (!/^(navigateStage|closeStageReview|toggleStageHeader|cancelExperimentSafety|setObservationChoice|autoFillObservationForTesting|saveObservation|setObservationTab|saveObservationReflection|showObservationDesk|openObservationCard|toggleSafetyCheck|toggleAllSafetyChecks|acceptExperimentSafety|openParticleInspection|closeParticleInspection|toggleParticleNormal|seekParticleInspection|backToObservation|saveExplanation|toModel|saveModel|checkModel|checkModelDock|autoFillModelForTesting|backToExplanation|setExplanationStep|autoFillExplanationForTesting|reviewExplanationExperiment|closeExplanationExperiment)$/.test(action) && action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
       HISTORY.push(JSON.stringify(S));
       if (HISTORY.length > 40) HISTORY.shift();
     }
@@ -1448,6 +1463,7 @@
     pool: screenPool,
     lab: screenLab,
     card: screenCard,
+    model: screenModel,
     collection: screenCollection
   };
 
@@ -1509,6 +1525,7 @@
     window.MebiPrediction.wireInputs(S);
     window.MebiObservation.wireInputs(S);
     window.MebiExplanation.wire(S);
+    window.MebiModel.wire(S);
     if(window.MebiParticleInspection)window.MebiParticleInspection.wire(S);
     var si = document.getElementById('poolSearchInput');
     if (si) {

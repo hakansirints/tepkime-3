@@ -135,7 +135,7 @@ const output=path.join(os.tmpdir(),'tepkime-prediction-qa');fs.mkdirSync(output,
   await page.evaluate(()=>MebiUI.openWelcomeModal());
   await page.locator('#welcomeStep1').waitFor({state:'visible',timeout:3000});
   assert.equal(await page.locator('.welcome-tab-btn').count(),5);assert.equal(await page.locator('[data-guide-view]').count(),0);
-  const guideTitles=['Maddeleri seç','Tahmin et ve gerekçelendir','Karıştır','Gözle ve açıkla','Tanecik düzeyinde açıkla'];
+  const guideTitles=['Maddeleri seç','Tahmin et ve gerekçelendir','Karıştır','Gözle ve açıkla','Tanecikleri ilişkilendir'];
   for(let i=1;i<=5;i++){
    await page.locator('.welcome-tab-btn[data-step="'+i+'"]').click();
    assert.equal(await page.locator('#welcomeStep'+i+' .welcome-step-title').textContent(),guideTitles[i-1]);

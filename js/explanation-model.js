@@ -39,4 +39,4 @@ function notationAliases(){
   return aliases;
 }
 window.MebiExplanationModel = {build, thumbnail, notationAliases};
-if (window.TepkimeArenasi?.state.screen === 'card') window.TepkimeArenasi.render(false);
+if (['card','model'].includes(window.TepkimeArenasi?.state.screen)) window.TepkimeArenasi.render(false);

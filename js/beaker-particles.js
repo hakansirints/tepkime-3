@@ -1,14 +1,56 @@
-import {buildModel,template} from './particle-models.js?v=1.1';
-import {createParticleLens} from './particle-lens.js?v=1.3';
+import {buildModel,template,COLORS,symbol,unique} from './particle-models.js?v=1.1';
 
-/* Shared 3D atom coordinates for the lens; laboratory vessels stay macroscopic. */
-export function createBeakerParticles({THREE,scene,renderer,camera,main,secondary,secondaryHome,setTemperature}){
+/* One batched layer in the existing WebGL scene. No label is drawn inside a beaker. */
+export function createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature}){
  const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),ease=v=>{v=clamp(v);return v*v*(3-2*v)},mix=(a,b,u)=>a+(b-a)*u;
- let model=null,enabled=false,pairKey='',command=-1,time=0,motion=0,last=performance.now(),lastDraw=-1,stamp='',view='before',graph=null,lastTemperature=null;
- const w=new THREE.Vector3(),rot=new THREE.Quaternion(),euler=new THREE.Euler();
+ let model=null,enabled=false,pairKey='',command=-1,time=0,motion=0,last=performance.now(),lastDraw=-1,stamp='',view='before',atomMesh=null,bondMesh=null,resources=[],graph=null,cameraSnapshot=null,lastPhase='',legendKey='',lastTemperature=null;
+ const v=new THREE.Vector3(),w=new THREE.Vector3(),dir=new THREE.Vector3(),up=new THREE.Vector3(0,1,0),rot=new THREE.Quaternion(),euler=new THREE.Euler(),helper=new THREE.Object3D();
  let positions=[],summary=null,atomScales=[],hiddenAtoms=new Set();
- const lens=createParticleLens({THREE,camera,main,secondary});
- let lensGroups=[],atomOrigins=[];
+ let legendHost=null,legendLayoutValid=false,legendWidth=0,legendHeight=0;
+ const legendCamera=new THREE.Matrix4(),legendProjection=new THREE.Matrix4();
+ let glassBindings=[],glassMaterials=[],surfaces=[];
+ const surfaceTint=new THREE.Color(0xc5e6eb);
+ function prepareVessels(){
+   const copies=new Map();
+   for(const vessel of[main,secondary]){
+     vessel.group.traverse(object=>{
+       const original=object.material;if(!original||!original.transmission)return;
+       if(!copies.has(original)){
+         // Transmission refracts the already-rendered atom silhouettes into dark halos.
+         const clear=original.clone();clear.transmission=0;clear.transparent=true;clear.opacity=object.name==='beaker-glass-100ml'?.085:.32;clear.envMapIntensity=.4;
+         clear.onBeforeCompile=()=>{};copies.set(original,clear);glassMaterials.push(clear);
+       }
+       glassBindings.push({object,vessel,original,clear:copies.get(original)});
+     });
+     const radius=vessel.innerRadius-.004,geometry=new THREE.RingGeometry(.0001,radius,48,8);
+     const material=new THREE.MeshPhysicalMaterial({color:0xc5e6eb,transparent:true,opacity:.20,roughness:.19,metalness:0,clearcoat:.35,envMap:vessel.group.getObjectByName('beaker-glass-100ml').material.envMap,envMapIntensity:.45,side:THREE.DoubleSide,depthWrite:false});
+     const mesh=new THREE.Mesh(geometry,material);mesh.name='particle-liquid-surface';mesh.rotation.x=-Math.PI/2;mesh.visible=false;vessel.group.add(mesh);
+     surfaces.push({vessel,mesh,radius,stamp:''});
+   }
+ }
+ function vesselAppearance(micro,sourceNormal=false,fraction=0){
+   for(const binding of glassBindings)binding.object.material=micro&&(binding.vessel===main||!sourceNormal)?binding.clear:binding.original;
+   for(const layer of surfaces){
+     const {vessel,mesh,radius}=layer,isSource=vessel===secondary;
+     const level=isSource?(window.MebiData.getReagent(model.pair[1]).solid?0:depth(window.MebiExperiment.defaults.solutionMl*(1-fraction))):mixedDepth(fraction);
+     mesh.visible=micro&&!(isSource&&sourceNormal)&&level>.005;
+     if(!mesh.visible)continue;
+     mesh.position.y=vessel.floor+level+.002;mesh.material.color.copy(vessel.liquid.material.color).lerp(surfaceTint,.5);
+     const key=motion+'|'+level;if(layer.stamp===key)continue;layer.stamp=key;
+     const positions=mesh.geometry.attributes.position;
+     for(let i=0;i<positions.count;i++){
+       const x=positions.getX(i),y=positions.getY(i),edge=Math.max(0,1-(x*x+y*y)/(radius*radius));
+       positions.setZ(i,Math.sin(x*22+motion*1.2)*Math.cos(y*19-motion*.9)*.005*edge);
+     }
+     positions.needsUpdate=true;mesh.geometry.computeVertexNormals();mesh.geometry.computeBoundingBox();
+   }
+ }
+ function restoreVessels(){
+   for(const binding of glassBindings)binding.object.material=binding.original;
+   for(const material of glassMaterials)material.dispose();
+   for(const {vessel,mesh}of surfaces){vessel.group.remove(mesh);mesh.geometry.dispose();mesh.material.dispose()}
+   glassBindings=[];glassMaterials=[];surfaces=[];
+ }
  function active(state){return !!(state?.particleInspection&&state.screen==='lab'&&!state.stageReview&&state.labStep==='observed'&&window.MebiParticleInspection.eligible(state))}
  function project(p){const a=p.clone().project(camera);return{x:(a.x+1)*innerWidth/2,y:(1-a.y)*innerHeight/2}}
  function depth(ml){return ml*Math.pow(main.height/6.68,3)/(Math.PI*Math.pow(main.innerRadius-.002,2))}
@@ -17,10 +59,14 @@ export function createBeakerParticles({THREE,scene,renderer,camera,main,secondar
  function extent(kind,scale=1){const t=template(kind);return{radius:Math.max(...t.atoms.map(a=>Math.hypot(...a.position)+a.radius))*scale,bottom:Math.max(...t.atoms.map(a=>a.radius-a.position[1]))*scale+.008}}
  function hash(n){const v=Math.sin(n*127.13+78.233)*43758.5453;return v-Math.floor(v)}
  function noise(seed,t){const i=Math.floor(t),u=ease(t-i);return mix(hash(seed+i*17),hash(seed+(i+1)*17),u)-.5}
- function clear(){lens.stop();lensGroups=[];atomOrigins=[];model=graph=null;positions=[];pairKey='';stamp=''}
- function stop(){if(!enabled)return;enabled=false;clear();}
+ function clear(){for(const mesh of[atomMesh,bondMesh]){if(mesh){scene.remove(mesh);mesh.dispose()}}for(const r of resources)r.dispose();resources=[];atomMesh=bondMesh=null;model=graph=null;positions=[];pairKey='';legendKey='';stamp='';activeHoverSpecies=null;activeSparkles=[];lastSparkleSpawn=0;}
+ function stop(){
+   if(!enabled)return;enabled=false;restoreVessels();clear();
+   if(cameraSnapshot){camera.near=cameraSnapshot.near;controls.minDistance=cameraSnapshot.minDistance;controls.zoomToCursor=cameraSnapshot.zoomToCursor;camera.updateProjectionMatrix();controls.update();cameraSnapshot=null}
+   const legends=document.getElementById('beakerParticleLegends');if(legends)legends.hidden=true;
+ }
  function compile(){
-   const atoms=[];for(const p of model.initial){p.atomIDs=template(p.kind).atoms.map(atom=>{atoms.push({element:atom.element,radius:atom.radius});atomOrigins.push(p.source);return atoms.length-1})}
+   const atoms=[];for(const p of model.initial){p.atomIDs=template(p.kind).atoms.map(atom=>{atoms.push({element:atom.element,radius:atom.radius});return atoms.length-1})}
    const parentPools=new Map(model.initial.map(p=>{const pools={};p.atomIDs.forEach(id=>(pools[atoms[id].element]??=[]).push(id));return[p.id,pools]}));
    for(const p of model.dissolved)p.atomIDs=template(p.kind).atoms.map(atom=>parentPools.get(p.parent)[atom.element].shift());
    for(const event of model.events){const pools={};for(const p of event.reactants)for(const id of p.atomIDs)(pools[atoms[id].element]??=[]).push(id);for(const p of event.products)p.atomIDs=template(p.kind).atoms.map(atom=>pools[atom.element].shift());if(Object.values(pools).some(ids=>ids.length))throw new Error('Reaction atom mapping failed')}
@@ -29,14 +75,18 @@ export function createBeakerParticles({THREE,scene,renderer,camera,main,secondar
    for(const p of model.dissolved){const parent=model.initial[p.parent];p.rank=parent.rank;p.order=parent.order;p.seed=parent.seed+(p.kind===parent.kind?0:p.id*.31)}
    model.products.forEach((p,i)=>{p.order=i;p.seed=p.id*19+3});
    for(const event of model.events){let arrival=0;for(const p of event.reactants)if(p.source===1){let a=0,b=1;for(let i=0;i<18;i++){const mid=(a+b)/2;if(window.MebiExperiment.sample(mid,!!window.MebiData.getReagent(model.pair[1]).solid).fraction<p.rank+.04)a=mid;else b=mid}arrival=Math.max(arrival,b*5)}event.start=Math.max(2.8+event.index/Math.max(1,model.events.length)*5,arrival+.15);event.duration=1.3}
+   const geometry=new THREE.SphereGeometry(1,innerHeight<650||innerWidth<950?8:12,innerHeight<650||innerWidth<950?6:8),bondGeometry=new THREE.CylinderGeometry(1,1,1,6),material=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.38,metalness:.05}),bondMaterial=new THREE.MeshStandardMaterial({color:0xb2b9b7,roughness:.65});
+   atomMesh=new THREE.InstancedMesh(geometry,material,atoms.length);bondMesh=new THREE.InstancedMesh(bondGeometry,bondMaterial,Math.max(1,atoms.length*3));atomMesh.name='laboratory-particle-atoms';bondMesh.name='laboratory-particle-bonds';
+   resources=[geometry,bondGeometry,material,bondMaterial];for(const mesh of[atomMesh,bondMesh]){mesh.castShadow=mesh.receiveShadow=false;mesh.frustumCulled=false;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);scene.add(mesh)}
+   atoms.forEach((a,i)=>atomMesh.setColorAt(i,new THREE.Color(COLORS[a.element])));atomMesh.instanceColor.needsUpdate=true;
    positions=atoms.map(()=>new THREE.Vector3());atomScales=new Float32Array(atoms.length).fill(1);hiddenAtoms.clear();return{atoms};
  }
  function sync(state){
    const wanted=active(state);if(!wanted){stop();return}
-   if(!enabled){enabled=true;last=performance.now();lastTemperature=null}
+   if(!enabled){enabled=true;prepareVessels();cameraSnapshot={near:camera.near,minDistance:controls.minDistance,zoomToCursor:controls.zoomToCursor};camera.near=.0015;controls.minDistance=.015;controls.zoomToCursor=true;camera.updateProjectionMatrix();controls.update();last=performance.now();lastTemperature=null}
    const key=state.selectedSlot1+'|'+state.selectedSlot2+'|'+state.experiment.run;
    if(pairKey!==key){clear();model=buildModel(state.selectedSlot1,state.selectedSlot2,[state.selectedSlot1,state.selectedSlot2].map(id=>window.MebiExperiment.initialAmount(id)));graph=compile();pairKey=key;command=-1;motion=0}
-   const p=state.particleInspection;if(command!==p.revision||view!==p.view){view=p.view;time=p.time||0;command=p.revision;stamp=''}
+   const p=state.particleInspection;if(command!==p.revision||view!==p.view){view=p.view;time=p.time||0;command=p.revision;stamp='';lastPhase='';legendKey=''}
  }
  function displayState(state){
    sync(state);if(!enabled)return state;
@@ -46,7 +96,7 @@ export function createBeakerParticles({THREE,scene,renderer,camera,main,secondar
    if(!view||path===0||path>=1){secondary.group.position.copy(secondaryHome);secondary.group.rotation.set(0,0,0)}
    return{...state,labStep:view==='reaction'&&time>2.5?'observed':'predict',particleReplayProgress:view==='reaction'?ease((time-2.8)/6):0,experiment:{...state.experiment,mode:path>0&&path<1?'particle-replay':'idle',path,transfer:view==='reaction'?pose.fraction:0,flow:pose.fraction>0&&path<.8?1:0}};
  }
- function center(p,fraction,clock){
+ function center(p,fraction,flow,clock){
    const vessel=p.source?secondary:main,h=p.source?depth(window.MebiExperiment.defaults.solutionMl*(1-fraction)):mixedDepth(fraction),seed=p.seed||p.id*19+3;
    const size=extent(p.kind),radius=size.radius,safe=Math.max(.10,vessel.innerRadius-radius-.018);
    let x,y,z;
@@ -77,39 +127,112 @@ export function createBeakerParticles({THREE,scene,renderer,camera,main,secondar
    return main.group.localToWorld(local);
  }
  function particleAtoms(p,position,clock){const t=template(p.kind),moving=p.phase!=='solid',salt=p.product&&['AgCl','AgI','CuI'].includes(p.kind),solidIndex=salt?model.products.filter(x=>x.phase==='solid').indexOf(p):0,parity=(Math.floor(solidIndex/3)%3+Math.floor(solidIndex/9))%2;euler.set(moving?clock*.31+p.seed:0,moving?clock*.37+p.seed*.7:salt?parity*Math.PI:0,moving?clock*.25:0);rot.setFromEuler(euler);return t.atoms.map(a=>new THREE.Vector3(...a.position).applyQuaternion(rot).multiplyScalar(main.group.scale.x*solidScale(p)).add(position))}
+ let bondCount=0;
+ function drawBonds(p,coords,weight=1){if(weight<.015||p.atomIDs.some(id=>hiddenAtoms.has(id)))return;const t=template(p.kind);for(const[a,b,order=1]of t.bonds)for(let index=0;index<order;index++){
+   v.copy(coords[b]).sub(coords[a]);const length=v.length();dir.copy(v).normalize();w.crossVectors(dir,Math.abs(dir.z)<.9?new THREE.Vector3(0,0,1):up).normalize().multiplyScalar((index-(order-1)/2)*.0045*main.group.scale.x);
+   helper.position.copy(coords[a]).add(coords[b]).multiplyScalar(.5).add(w);helper.quaternion.setFromUnitVectors(up,dir);helper.scale.set(.0045*main.group.scale.x*weight,length,.0045*main.group.scale.x*weight);helper.updateMatrix();bondMesh.setMatrixAt(bondCount++,helper.matrix);
+ }}
+ function sampleSVG(kind){const t=template(kind),project=a=>[20+(a.position[0]+a.position[2]*.28)*170,16-(a.position[1]-a.position[2]*.22)*170];let html='<svg viewBox="0 0 40 32" role="img" aria-label="'+symbol(kind)+' modeli">';for(const[a,b,order=1]of t.bonds){const[x1,y1]=project(t.atoms[a]),[x2,y2]=project(t.atoms[b]);for(let i=0;i<order;i++)html+='<line x1="'+x1+'" y1="'+(y1+(i-(order-1)/2)*2)+'" x2="'+x2+'" y2="'+(y2+(i-(order-1)/2)*2)+'" stroke="#9ba8a6" stroke-width="2"/>'}for(const a of [...t.atoms].sort((a,b)=>a.position[2]-b.position[2])){const[x,y]=project(a),r=Math.max(2,a.radius*175);html+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+COLORS[a.element]+'" stroke="#65716a55" stroke-width=".4"/><circle cx="'+(x-r*.25)+'" cy="'+(y-r*.3)+'" r="'+r*.35+'" fill="#ffffff" opacity=".28"/>'}return html+'</svg>'}
+ let activeHoverSpecies=null,activeSparkles=[],lastSparkleSpawn=0;
+ function setHoverSpecies(kind,source){if(kind){activeHoverSpecies={kind:kind,source:source};lastSparkleSpawn=0;}else{activeHoverSpecies=null;}}
+ function wireLegendHovers(container,source){if(!container)return;container.querySelectorAll('.beaker-particle-key[data-species]').forEach(function(el){el.addEventListener('pointerenter',function(){setHoverSpecies(el.dataset.species,source);el.classList.add('is-glowing');});el.addEventListener('pointerleave',function(){setHoverSpecies(null,null);el.classList.remove('is-glowing');});});}
+ function legendHTML(title,items){return '<h4>'+title+'</h4>'+(items.length?unique(items).map(p=>'<div class="beaker-particle-key" data-species="'+p.kind+'">'+sampleSVG(p.kind)+'<span>'+symbol(p.kind)+'<small>'+ (p.phase==='solid'?'katı · örgü kesiti':p.phase==='gas'?'gaz':p.kind==='H2O'?'su':'suda')+'</small></span></div>').join(''):'<p class="beaker-particle-empty">Yeni ürün oluşmaz.</p>')}
+ function legends(fraction){
+   const host=document.getElementById('beakerParticleLegends');if(!host)return;host.hidden=false;
+   if(legendHost!==host){legendHost=host;legendKey='';legendLayoutValid=false}
+   const left=host.querySelector('[data-particle-legend="left"]'),right=host.querySelector('[data-particle-legend="right"]'),mixture=view==='reaction'&&fraction>=.9999;
+   const key=(mixture?'mixture':'before')+'|'+pairKey;
+   if(key!==legendKey){
+     legendKey=key;legendLayoutValid=false;left.classList.toggle('is-merged',mixture);
+     left.innerHTML=mixture?legendHTML('Karışımda kalanlar',model.spectators)+legendHTML('Karışım ürünleri',model.products):legendHTML('1. beher',model.initial.filter(p=>p.source===0));
+     right.innerHTML=legendHTML('2. beher',model.initial.filter(p=>p.source===1));
+     wireLegendHovers(left,mixture?null:0);wireLegendHovers(right,1);
+   }
+   // Follow the actual transfer in both playback and timeline scrubbing.
+   const fade=view==='reaction'?ease(fraction):0,hidden=fade>=.9999;
+   if(right.hidden!==hidden){right.hidden=hidden;legendLayoutValid=false;}
+   right.style.opacity=String(1-fade);right.setAttribute('aria-hidden',String(hidden));
+   if(legendLayoutValid&&legendWidth===innerWidth&&legendHeight===innerHeight&&legendCamera.equals(camera.matrixWorld)&&legendProjection.equals(camera.projectionMatrix))return;
+   legendLayoutValid=true;legendWidth=innerWidth;legendHeight=innerHeight;legendCamera.copy(camera.matrixWorld);legendProjection.copy(camera.projectionMatrix);
+   const top=(document.querySelector('.mebi-top-shell')?.getBoundingClientRect().bottom||70)+10,dock=document.getElementById('benchDock')?.getBoundingClientRect(),bottom=innerHeight-10;
+   const corners=vessel=>{const points=[];for(const x of[-vessel.radius,vessel.radius])for(const y of[0,vessel.height])for(const z of[-vessel.radius,vessel.radius]){const point=new THREE.Vector3(x,y,z);points.push(project(vessel===main?vessel.group.localToWorld(point):point.multiplyScalar(secondary.group.scale.x).add(secondaryHome)))}return points};
+   const first=corners(main),second=corners(secondary),firstLeft=Math.min(...first.map(p=>p.x)),firstRight=Math.max(...first.map(p=>p.x)),secondLeft=Math.min(...second.map(p=>p.x)),secondRight=Math.max(...second.map(p=>p.x)),firstTop=Math.min(...first.map(p=>p.y)),firstBottom=Math.max(...first.map(p=>p.y));
+   for(const node of[left,right])node.style.maxHeight=Math.max(80,bottom-top)+'px';
+   const width=left.getBoundingClientRect().width,rightWidth=parseFloat(getComputedStyle(right).width)||width,gap=innerHeight<650?6:8,maxRight=dock?dock.left-8:innerWidth-8;
+   const leftX=mixture?(firstRight+secondLeft-width)/2:firstLeft-width+48;
+   const rightX=secondRight-40;
+   const height=Math.max(left.getBoundingClientRect().height,right.hidden?0:right.getBoundingClientRect().height),y=Math.max(top,Math.min(firstTop+(firstBottom-firstTop)*.3,bottom-height));
+   left.style.left=Math.max(6,Math.min(leftX,maxRight-width))+'px';
+   right.style.left=Math.max(6,Math.min(rightX,maxRight-rightWidth))+'px';left.style.top=right.style.top=y+'px';
+
+ }
  function update(state,display){
    if(!enabled)return;const p=state.particleInspection;if(!p)return;
-   const visible=p.micro;
-   if(!visible){lens.update({state,model,display,view,time});last=performance.now();const value=Math.round((state.activeReaction.tempInit+(state.currentTemp-state.activeReaction.tempInit)*(view==='reaction'?ease((time-3)/8):0))*10)/10;if(lastTemperature!==value){lastTemperature=value;setTemperature(value)}window.MebiParticleInspection.paint(state,{phase:'Mercek gizli · Canlı deney sürüyor',time,notes:model.notes});return}
+   const visible=p.micro;atomMesh.visible=bondMesh.visible=visible;
+   const lowDetail=innerHeight<650||innerWidth<950;if(graph.lowDetail!==lowDetail){const geometry=new THREE.SphereGeometry(1,lowDetail?8:12,lowDetail?6:8);atomMesh.geometry.dispose();atomMesh.geometry=geometry;resources[0]=geometry;graph.lowDetail=lowDetail}
+   if(!visible){vesselAppearance(false);last=performance.now();const host=document.getElementById('beakerParticleLegends');if(host)host.hidden=true;if(lastTemperature!==state.currentTemp){lastTemperature=state.currentTemp;setTemperature(state.currentTemp)}window.MebiParticleInspection.paint(state,{phase:'Deneyin normal görünümü',time,notes:model.notes});return}
    main.group.updateMatrixWorld(true);secondary.group.updateMatrixWorld(true);
    const sourceNormal=view==='reaction'&&display.experiment.path>0&&display.experiment.path<1;
-   const f=display.experiment.transfer,now=performance.now(),key=view+'|'+time+'|'+motion+'|'+f,shouldDraw=key!==stamp&&(innerHeight>=650&&innerWidth>=950||now-lastDraw>=33);
-   if(shouldDraw){stamp=key;lastDraw=now;atomScales.fill(1);hiddenAtoms.clear();
-     for(const item of model.initial){const coords=particleAtoms(item,center(item,f,motion),motion);item.atomIDs.forEach((id,i)=>positions[id].copy(coords[i]))}
-     if(view!=='before'){
-       const dissolution=ease((time-1.5)/2);
-       for(const item of model.dissolved){const coords=particleAtoms(item,center(item,f,motion),motion);item.atomIDs.forEach((id,i)=>{if(item.dissolving){w.copy(coords[i]);coords[i].copy(positions[id]).lerp(w,dissolution)}positions[id].copy(coords[i])})}
-       for(const event of model.events){const u=ease((time-event.start)/event.duration);if(u===0)continue;for(const item of event.products){const coords=particleAtoms(item,productCenter(item,motion),motion);item.atomIDs.forEach((id,i)=>{positions[id].lerp(coords[i],u);atomScales[id]=mix(1,solidScale(item),u)});}}
-     }
-     if(view==='before'||time<2.5)lensGroups=model.initial;
+   vesselAppearance(true,sourceNormal,display.experiment.transfer);
+   for(const vessel of(sourceNormal?[main]:[main,secondary])){vessel.liquid.material.opacity=.065;vessel.surface.visible=vessel.powder.visible=vessel.grains.visible=vessel.sediment.visible=false}
+   for(const name of['precipitate-flakes']){const item=scene.getObjectByName(name);if(item)item.visible=false}
+   const isSparkling=!!activeHoverSpecies||activeSparkles.length>0,f=display.experiment.transfer,now=performance.now(),key=view+'|'+time+'|'+motion+'|'+f,shouldDraw=(key!==stamp||isSparkling)&&(innerHeight>=650&&innerWidth>=950||now-lastDraw>=25);
+   if(shouldDraw){stamp=key;lastDraw=now;bondCount=0;atomScales.fill(1);hiddenAtoms.clear();
+     // The source and its stream remain macroscopic; reveal its atoms only inside the receiver.
+     if(sourceNormal&&f<.9999)for(const item of model.initial)if(item.source===1&&f<item.rank+.04)for(const id of item.atomIDs)hiddenAtoms.add(id);
+     const initialCoords=new Map();for(const item of model.initial){const coords=particleAtoms(item,center(item,f,0,motion),motion);initialCoords.set(item.id,coords);item.atomIDs.forEach((id,i)=>positions[id].copy(coords[i]))}
+     if(view==='before'){for(const item of model.initial)drawBonds(item,initialCoords.get(item.id))}
      else{
-       const consumed=new Set(),products=[];
-       for(const event of model.events){const u=ease((time-event.start)/event.duration);if(u>=.5){event.reactants.forEach(item=>consumed.add(item.id));products.push(...event.products.map(item=>({...item,bondWeight:(u-.5)*2})));}}
-       lensGroups=[...model.dissolved.filter(item=>!consumed.has(item.id)),...products];
+       const dissolution=ease((time-1.5)/2),dissolvedCoords=new Map();
+       for(const item of model.dissolved){const coords=particleAtoms(item,center(item,f,0,motion),motion);dissolvedCoords.set(item.id,coords);item.atomIDs.forEach((id,i)=>{if(item.dissolving){w.copy(coords[i]);coords[i].copy(positions[id]).lerp(w,dissolution)}positions[id].copy(coords[i])})}
+       const inReaction=new Set();for(const event of model.events){const u=ease((time-event.start)/event.duration);if(u===0)continue;for(const item of event.reactants){inReaction.add(item.id);if(u<.5)drawBonds(item,dissolvedCoords.get(item.id),1-u*2)}for(const item of event.products){const coords=particleAtoms(item,productCenter(item,motion),motion);item.atomIDs.forEach((id,i)=>{positions[id].lerp(coords[i],u);atomScales[id]=mix(1,solidScale(item),u)});if(u>=.5)drawBonds(item,item.atomIDs.map(id=>positions[id]),(u-.5)*2)}}
+       for(const item of model.dissolved)if(!inReaction.has(item.id))drawBonds(item,dissolvedCoords.get(item.id));
      }
+     let colorUpdated=false;
+     const candidates=view==='before'?model.initial:[...model.spectators,...model.products,...model.dissolved];
+     if(activeHoverSpecies&&now-lastSparkleSpawn>170){
+       lastSparkleSpawn=now;
+       const matching=candidates.filter(function(item){return item.kind===activeHoverSpecies.kind&&(activeHoverSpecies.source==null||item.source===activeHoverSpecies.source);});
+       if(matching.length>0){
+         const chosen=matching[Math.floor(Math.random()*matching.length)];
+         activeSparkles.push({atomIDs:chosen.atomIDs,start:now,duration:650+Math.random()*300});
+       }
+     }
+     if(activeSparkles.length>0){
+       const remainingSparkles=[];
+       for(let si=0;si<activeSparkles.length;si++){
+         const sp=activeSparkles[si],elapsed=now-sp.start;
+         if(elapsed<sp.duration){
+           remainingSparkles.push(sp);
+           const u=elapsed/sp.duration,intensity=Math.sin(u*Math.PI)*0.85;
+           for(let ai=0;ai<sp.atomIDs.length;ai++){
+             const id=sp.atomIDs[ai];
+             atomScales[id]*=(1+0.32*intensity);
+             const baseCol=new THREE.Color(COLORS[graph.atoms[id].element]);
+             atomMesh.setColorAt(id,baseCol.clone().lerp(new THREE.Color(0xffffff),intensity*0.88));
+             colorUpdated=true;
+           }
+         }
+       }
+       activeSparkles=remainingSparkles;
+     }else if(!activeHoverSpecies){
+       graph.atoms.forEach(function(a,i){atomMesh.setColorAt(i,new THREE.Color(COLORS[a.element]));});
+       colorUpdated=true;
+     }
+     if(colorUpdated)atomMesh.instanceColor.needsUpdate=true;
+     graph.atoms.forEach((atom,index)=>{helper.position.copy(positions[index]);helper.rotation.set(0,0,0);helper.scale.setScalar(hiddenAtoms.has(index)?0:atom.radius*main.group.scale.x*atomScales[index]);helper.updateMatrix();atomMesh.setMatrixAt(index,helper.matrix)});atomMesh.instanceMatrix.needsUpdate=true;bondMesh.count=bondCount;bondMesh.instanceMatrix.needsUpdate=true;
    }
    const noReaction=!model.events.length,phase=view==='before'?'Dökülmeden önce · İki ayrı beher':time<1.1?'Aktarım başlıyor':time<3?'İkinci beher birinciye aktarılıyor':noReaction?'Tanecikler karışıyor; yeni kimyasal ürün oluşmuyor':time<9?'Atomlar ve iyonlar yeniden düzenleniyor':time<15.95?'Ürünler oluşuyor; gaz yükselir, katı çökelir':'Son durum · Tanecik hareketi sürer';
-   window.MebiParticleInspection.paint(state,{phase,time,notes:model.notes});
-   lens.update({state,model,display,view,time,motion,groups:lensGroups,positions,atoms:graph.atoms,scales:atomScales,hiddenAtoms,origins:atomOrigins});
-   const value=state.activeReaction.tempInit+(state.currentTemp-state.activeReaction.tempInit)*(view==='reaction'?ease((time-3)/8):0),rounded=Math.round(value*10)/10;if(lastTemperature!==rounded){lastTemperature=rounded;setTemperature(rounded)}
-   summary={macroAtomsVisible:!!scene.getObjectByName('laboratory-particle-atoms'),mergedLegend:view==='reaction'&&time>=5,sourceNormal,hiddenSourceAtoms:hiddenAtoms.size,visibleAtoms:graph.atoms.length-hiddenAtoms.size,solidParticleScale:1.4,vesselVisuals:[main,secondary].map(vessel=>({opacity:vessel.liquid.material.opacity,powder:vessel.powder.visible,liquid:vessel.liquid.visible})),pair:model.pair,startingAmounts:model.amounts,view,time,motion,atoms:graph.atoms.length,initialParticles:model.initial.length,finalParticles:model.spectators.length+model.products.length,balanced:model.balanced,initialInventory:model.startInventory,finalInventory:model.endInventory,gasProducts:model.products.filter(x=>x.phase==='gas').length,solidProducts:model.products.filter(x=>x.phase==='solid').length,recipe:!!model.recipe,drawCalls:renderer.info.render.calls,geometries:renderer.info.memory.geometries,notes:model.notes,beakerUUIDs:[main.group.uuid,secondary.group.uuid]};
+   if(lastPhase!==phase){lastPhase=phase;window.MebiParticleInspection.paint(state,{phase,time,notes:model.notes})}else window.MebiParticleInspection.paint(state,{phase,time,notes:model.notes});
+   legends(display.experiment.transfer);const value=state.activeReaction.tempInit+(state.currentTemp-state.activeReaction.tempInit)*(view==='reaction'?ease((time-3)/8):0),rounded=Math.round(value*10)/10;if(lastTemperature!==rounded){lastTemperature=rounded;setTemperature(rounded)}
+   summary={mergedLegend:view==='reaction'&&window.MebiExperiment.sample(clamp(time/5),!!window.MebiData.getReagent(model.pair[1]).solid).fraction>=.9999,sourceNormal,hiddenSourceAtoms:hiddenAtoms.size,visibleAtoms:graph.atoms.length-hiddenAtoms.size,solidParticleScale:1.4,vesselVisuals:[main,secondary].map(vessel=>({opacity:vessel.liquid.material.opacity,powder:vessel.powder.visible,liquid:vessel.liquid.visible})),pair:model.pair,view,time,motion,macroAtomsVisible:atomMesh.visible,startingAmounts:model.amounts,atoms:graph.atoms.length,initialParticles:model.initial.length,finalParticles:model.spectators.length+model.products.length,balanced:model.balanced,initialInventory:model.startInventory,finalInventory:model.endInventory,gasProducts:model.products.filter(x=>x.phase==='gas').length,solidProducts:model.products.filter(x=>x.phase==='solid').length,recipe:!!model.recipe,drawCalls:renderer.info.render.calls,geometries:renderer.info.memory.geometries,notes:model.notes,beakerUUIDs:[main.group.uuid,secondary.group.uuid]};
  }
  function getSummary(){
    if(!enabled||!model||!summary)return null;
    const bounds=vessel=>{const points=[];for(const x of[-vessel.radius,vessel.radius])for(const y of[0,vessel.height])for(const z of[-vessel.radius,vessel.radius])points.push(project(vessel.group.localToWorld(new THREE.Vector3(x,y,z))));return{left:Math.min(...points.map(p=>p.x)),right:Math.max(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),bottom:Math.max(...points.map(p=>p.y))}};
    let outsideVessel=0;const tested=view==='before'?model.initial:time>=15.95?[...model.spectators,...model.products]:[];for(const item of tested){if(item.phase==='gas')continue;const vessel=view==='before'&&item.source?secondary:main;for(const id of item.atomIDs){const local=vessel.group.worldToLocal(positions[id].clone()),radius=graph.atoms[id].radius*atomScales[id];if(Math.hypot(local.x,local.z)+radius>vessel.innerRadius+.003||local.y-radius<vessel.floor-.003||local.y+radius>vessel.rimHeight+.003)outsideVessel++}}
    const cameraInBeakers=[main,secondary].map(vessel=>{const local=vessel.group.worldToLocal(camera.position.clone());return Math.hypot(local.x,local.z)<vessel.innerRadius&&local.y>vessel.floor&&local.y<vessel.rimHeight});
-   return{...summary,time,motion,lens:lens.getSummary(),glassTransmission:[main,secondary].map(v=>v.group.getObjectByName('beaker-glass-100ml').material.transmission),outsideVessel,cameraInBeakers,beakerBounds:[bounds(main),bounds(secondary)]};
+   return{...summary,time,motion,macroAtomsVisible:atomMesh.visible,glassTransmission:[main,secondary].map(v=>v.group.getObjectByName('beaker-glass-100ml').material.transmission),liquidSurfaces:surfaces.map(({mesh})=>({visible:mesh.visible,height:mesh.position.y,waveRange:mesh.geometry.boundingBox?mesh.geometry.boundingBox.max.z-mesh.geometry.boundingBox.min.z:0})),outsideVessel,cameraInBeakers,beakerBounds:[bounds(main),bounds(secondary)]};
  }
- return{sync,displayState,update,stop,pickLens:lens.pick,moveLens:lens.move,selectLens:lens.select,get enabled(){return enabled},getSummary};
+ return{sync,displayState,update,stop,get enabled(){return enabled},getSummary};
 }

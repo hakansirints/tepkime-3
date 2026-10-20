@@ -235,7 +235,7 @@
       ? 'Tüm güvenlik kuralları onaylandı, deneye başlayabilirsiniz.'
       : 'Devam etmek için lütfen 4 güvenlik uyarısının tamamını işaretleyerek onaylayın (' + checkedCount + '/4).';
     return '<div class="experiment-safety-backdrop">' +
-      '<section class="experiment-safety-card" role="dialog" aria-modal="true" aria-labelledby="experimentSafetyTitle" aria-describedby="experimentSafetyNote">' +
+      '<section class="experiment-safety-card' + (allDone ? ' is-all-approved' : '') + '" role="dialog" aria-modal="true" aria-labelledby="experimentSafetyTitle" aria-describedby="experimentSafetyNote">' +
         '<header class="experiment-safety-header">' +
           '<div class="experiment-safety-header-main">' +
             '<div class="experiment-safety-header-icon" aria-hidden="true">' + safetyIconSVG('headerWarn') + '</div>' +
@@ -307,6 +307,10 @@
     var checks = Array.isArray(e.safetyChecks) && e.safetyChecks.length === 4 ? e.safetyChecks : [false, false, false, false];
     var checkedCount = checks.filter(Boolean).length;
     var allDone = checkedCount === 4;
+    var safetyCard = existing.querySelector('.experiment-safety-card');
+    if (safetyCard) {
+      safetyCard.classList.toggle('is-all-approved', allDone);
+    }
     var acceptTitle = allDone
       ? 'Tüm güvenlik kuralları onaylandı, deneye başlayabilirsiniz.'
       : 'Devam etmek için lütfen 4 güvenlik uyarısının tamamını işaretleyerek onaylayın (' + checkedCount + '/4).';
