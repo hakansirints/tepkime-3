@@ -655,3 +655,17 @@ body.lab-3d-active #app :is(.lab-reagent-panel,.bench-dock) { --mebi-bg-surface:
     padding: 3px 2px !important;
   }
 }
+
+@keyframes benchAttentionGlow {
+  0%, 100% {
+    box-shadow: 0 5px 24px rgba(36, 53, 44, 0.08), 0 0 0 0 rgba(2, 132, 199, 0);
+    border-color: var(--mebi-border);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(2, 132, 199, 0.35), 0 0 0 4px rgba(2, 132, 199, 0.45);
+    border-color: #0284c7;
+  }
+}
+.lab-3d-active #app .bench-dock.is-attention-pulse {
+  animation: benchAttentionGlow 1.4s ease-in-out 4;
+}

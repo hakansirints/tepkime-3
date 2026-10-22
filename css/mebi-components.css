@@ -1194,6 +1194,48 @@ body.mebi-landscape-required .mebi-orientation-overlay .mebi-orientation-card {
   color: #f59e0b;
 }
 
+.mebi-orientation-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0 16px;
+}
+
+.mebi-orientation-fullscreen-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 12px 24px !important;
+  min-height: 48px !important;
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: var(--mebi-radius-md, 14px) !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.38), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  text-decoration: none !important;
+}
+
+.mebi-orientation-fullscreen-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.48), 0 3px 6px rgba(0, 0, 0, 0.15) !important;
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+}
+
+.mebi-orientation-fullscreen-btn:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+}
+
+.mebi-orientation-fullscreen-btn svg {
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
 .mebi-orientation-actions {
   display: flex;
   align-items: center;

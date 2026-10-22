@@ -5,8 +5,9 @@
   // Temporary QA control for the combined explanation card.
   var TEST_TOOLS_ENABLED = true;
   var writingPrompt='“... gözledim. Bunun, taneciklerin ... değişimiyle ilişkili olduğunu düşünüyorum; çünkü ... .” Gözlemini ve bu gözlemin nedenine ilişkin düşünceni birlikte yaz.';
-  var changeTypes = [['chemical','Kimyasal değişim','Yeni madde oluştuğunu düşünüyorum.'],['physical','Fiziksel değişim','Yeni madde oluşmadığını düşünüyorum.'],['unsure','Henüz karar veremedim','Tanecikleri inceleyerek kararımı geliştireceğim.']];
-  function hasDecision(draft) { return changeTypes.some(function(item){return item[0]===draft.changeType;}); }
+  var changeTypes = [['chemical','Kimyasal değişim','Yeni madde oluştuğunu düşünüyorum.'],['physical','Fiziksel değişim','Yeni madde oluşmadığını düşünüyorum.']];
+  function isNonReaction(state) { return !!(window.MebiNonReaction && window.MebiNonReaction.scenario(state)); }
+  function hasDecision(draft,state) { return changeTypes.some(function(item){return item[0]===draft.changeType;}) || (draft.changeType==='unsure' && isNonReaction(state)); }
   function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   function eligible(state) { return !!(state.predictionRecord && state.observation && state.observation.record && state.poured && state.labStep === 'observed'); }
   function entries() { var data = JSON.parse(window.localStorage.getItem(KEY) || '{}'); return data && typeof data === 'object' && !Array.isArray(data) ? data : {}; }
@@ -29,7 +30,7 @@
     // Observation choices belong to the immutable observation record, not this draft.
     var answers=state.observation && state.observation.record && state.observation.record.answers || {};
     state.explanation.evidence=window.MebiPrediction.items.filter(function(item){return answers[item.key]==='yes';}).map(function(item){return item.key;});
-    if (!hasDecision(state.explanation)) {state.explanation.changeType='';state.explanation.step=1;}
+    if (!hasDecision(state.explanation,state)) {state.explanation.changeType='';state.explanation.step=1;}
     return state.explanation;
   }
   // Persist only text, line breaks, subscript and superscript. Pasted HTML never executes.
@@ -71,40 +72,43 @@
     var text=products ? names('reactant')+' tanecikleri yeniden düzenlenerek '+products+' oluşturur. ' : 'Bu modelde yeni kimyasal ürün oluşumu gösterilmiyor. ';
     text+='Gözlem kaydımla ilişkim: '+record.note+' Modelde atom türleri ve toplam yük korunur.';
     draft.html=esc(text);
-    get(state);draft.error=false;draft.message='Bu kartın test içeriği dolduruldu; inceleyip düzenleyebilirsin.';persist(state);return true;
+    get(state);draft.error=false;draft.message='';persist(state);return true;
   }
   function status(state) {
-    var draft=get(state), el=document.getElementById('explanationStatus');
+    var draft=get(state), el=document.getElementById('explanationStatus'), nonReaction=isNonReaction(state);
     if (el) {
       el.setAttribute('role',draft.error?'alert':'status');
       el.setAttribute('aria-live',draft.error?'assertive':'polite');
-      el.textContent=draft.storageError ? 'Bu oturumda korunuyor; tarayıcıya kaydedilemedi.' : draft.message || (draft.revisions.length ? draft.revisions.length + ' açıklama kaydı · Taslağın otomatik saklanır.' : 'Taslağın bu tarayıcıda otomatik saklanır.');
+      el.textContent=nonReaction ? '' : draft.storageError ? 'Bu oturumda korunuyor; tarayıcıya kaydedilemedi.' : (draft.message && draft.message.indexOf('Açıklaman kaydedildi') < 0 ? draft.message : '');
     }
-    var feedback=document.getElementById('explanationFeedback');if(feedback)feedback.classList.toggle('is-error',!!draft.error);
-    var group=document.getElementById('explanationDecisionGroup');if(group){var invalid=!!draft.error&&!hasDecision(draft);group.classList.toggle('is-invalid',invalid);group.setAttribute('aria-invalid',String(invalid));}
+    var feedback=document.getElementById('explanationFeedback');if(feedback)feedback.classList.toggle('is-error',!nonReaction&&!!draft.error);
+    var attempted=nonReaction ? !!draft.validationAttempted : !!draft.error;
+    var group=document.getElementById('explanationDecisionGroup');if(group){var invalid=attempted&&!hasDecision(draft,state);group.classList.toggle('is-invalid',invalid);group.setAttribute('aria-invalid',String(invalid));}
+    if(nonReaction){var editor=document.getElementById('explanationEditor');if(editor){var empty=attempted&&!plain(draft.html);editor.classList.toggle('is-invalid',empty);editor.setAttribute('aria-invalid',String(empty));}}
   }
   function save(state) {
     if (!eligible(state)) return false;
     var draft=get(state);draft.error=true;
-    if (!hasDecision(draft)) draft.message='Değişime ilişkin ilk yorumunu seç. Emin değilsen “Henüz karar veremedim” seçeneğini kullanabilirsin.';
+    if(isNonReaction(state))draft.validationAttempted=true;
+    if (!hasDecision(draft,state)) draft.message=isNonReaction(state)?'Yeni madde oluşumuna ilişkin yorumunu veya henüz karar veremediğini seç.':'Değişime ilişkin ilk yorumunu seç (Kimyasal veya Fiziksel değişim).';
     else if (!plain(draft.html)) draft.message='Taneciklerin değişimini ve gözleminle ilişkisini kendi cümlelerinle açıkla.';
     else {
       var record={html:cleanHTML(draft.html),evidence:draft.evidence.slice(),changeType:draft.changeType,createdAt:new Date().toISOString(),visits:draft.visits};
       var last=draft.revisions[draft.revisions.length-1];
       if (!last || last.html!==record.html || last.changeType!==record.changeType || JSON.stringify(last.evidence)!==JSON.stringify(record.evidence)) draft.revisions.push(record);
-      draft.error=false;draft.message='Açıklaman kaydedildi. 3B modeli inceleyip açıklamanı geliştirebilirsin.';persist(state);status(state);return true;
+      draft.error=false;draft.message='';persist(state);status(state);return true;
     }
     status(state);return false;
   }
   function decide(state,value) {
-    if (!eligible(state) || !changeTypes.some(function(item){return item[0]===value;})) return;
+    if (!eligible(state) || !(changeTypes.some(function(item){return item[0]===value;}) || (value==='unsure' && isNonReaction(state)))) return;
     var draft=get(state);draft.changeType=value;
     draft.message='';draft.error=false;persist(state);
   }
   function testButton() {
     return TEST_TOOLS_ENABLED ? '<button type="button" class="explanation-test-button" data-explanation-test data-action="autoFillExplanationForTesting" title="Geçici test aracı: yalnızca bu kartı doldurur">'+window.MebiSVG.icon('flaskOutline')+'<span>Test İçin Doldur</span></button>' : '';
   }
-    function changeIconSVG(type) {
+  function changeIconSVG(type) {
     if (type === 'chemical') {
       return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
     }
@@ -114,139 +118,27 @@
     return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
   }
 
-    function changeIconSVG(type) {
-    if (type === 'chemical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
+  function predictionDialogHTML(state) {
+    if (window.MebiObservation && window.MebiObservation.reviewModalHTML) {
+      return window.MebiObservation.reviewModalHTML(state);
     }
-    if (type === 'physical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-physical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M14 6.5h7m-3.5-3.5 3.5 3.5-3.5 3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 17.5H3m3.5-3.5L3 17.5l3.5 3.5"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
-  }
-
-    function changeIconSVG(type) {
-    if (type === 'chemical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
-    }
-    if (type === 'physical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-physical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M14 6.5h7m-3.5-3.5 3.5 3.5-3.5 3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 17.5H3m3.5-3.5L3 17.5l3.5 3.5"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
-  }
-
-    function changeIconSVG(type) {
-    if (type === 'chemical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
-    }
-    if (type === 'physical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-physical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M14 6.5h7m-3.5-3.5 3.5 3.5-3.5 3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 17.5H3m3.5-3.5L3 17.5l3.5 3.5"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
-  }
-
-    function changeIconSVG(type) {
-    if (type === 'chemical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
-    }
-    if (type === 'physical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-physical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M14 6.5h7m-3.5-3.5 3.5 3.5-3.5 3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 17.5H3m3.5-3.5L3 17.5l3.5 3.5"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
-  }
-
-    function changeIconSVG(type) {
-    if (type === 'chemical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
-    }
-    if (type === 'physical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-physical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M14 6.5h7m-3.5-3.5 3.5 3.5-3.5 3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 17.5H3m3.5-3.5L3 17.5l3.5 3.5"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
-  }
-
-    function changeIconSVG(type) {
-    if (type === 'chemical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
-    }
-    if (type === 'physical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-physical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M14 6.5h7m-3.5-3.5 3.5 3.5-3.5 3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 17.5H3m3.5-3.5L3 17.5l3.5 3.5"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
-  }
-
-    function changeIconSVG(type) {
-    if (type === 'chemical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-chemical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2h6M10 2v6.2L4.8 18a2 2 0 0 0 1.8 3h10.8a2 2 0 0 0 1.8-3L14 8.2V2"/><circle cx="9.5" cy="16" r="1.1" fill="currentColor"/><circle cx="14" cy="14.5" r="1.3" fill="currentColor"/><path d="M17.5 4l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z" fill="currentColor"/></svg>';
-    }
-    if (type === 'physical') {
-      return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-physical" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M14 6.5h7m-3.5-3.5 3.5 3.5-3.5 3.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M10 17.5H3m3.5-3.5L3 17.5l3.5 3.5"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" class="change-type-icon change-type-unsure" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4.8c0 1.8-2.6 2.2-2.6 3.7"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>';
-  }
-
-  function predictionDialogHTML(record) {
-    var obsLabels = { yes:'Gözledim', no:'Gözlemedim', unsure:'Emin Değilim' };
-    var predLabels = { yes:'Evet', no:'Hayır', unsure:'Kararsızım' };
-    var tempInit = Number(record.temperature && record.temperature.initial).toLocaleString('tr-TR', { minimumFractionDigits:1, maximumFractionDigits:1 });
-    var tempFinal = Number(record.temperature && record.temperature.final).toLocaleString('tr-TR', { minimumFractionDigits:1, maximumFractionDigits:1 });
-    var delta = (Number(record.temperature && record.temperature.final) - Number(record.temperature && record.temperature.initial)).toLocaleString('tr-TR', { minimumFractionDigits:1, maximumFractionDigits:1 });
-
-    return '<button type="button" class="explanation-prediction-trigger" aria-haspopup="dialog" aria-controls="explanationPredictionDialog">' +
-      window.MebiSVG.icon('helpCircle') + 'İlk tahminim ve gerekçelerim</button>' +
-      '<dialog id="explanationPredictionDialog" class="explanation-prediction-dialog" aria-labelledby="explanationPredictionTitle">' +
-        '<header>' +
-          '<div class="explanation-prediction-heading">' +
-            '<span class="explanation-prediction-emblem" aria-hidden="true">' + window.MebiSVG.icon('helpCircle') + '</span>' +
-            '<div>' +
-              '<span class="explanation-prediction-eyebrow">İLK DÜŞÜNCELERİM VE GÖZLEMLERİM</span>' +
-              '<h2 id="explanationPredictionTitle">Tahmin, Gerekçe ve Gözlem Kaydı</h2>' +
-            '</div>' +
-          '</div>' +
-          '<form method="dialog"><button type="submit" aria-label="Tahmin penceresini kapat" autofocus>×</button></form>' +
-        '</header>' +
-        '<div class="explanation-prediction-body">' +
-          '<section class="explanation-dialog-section explanation-section-predictions">' +
-            '<h3 class="explanation-dialog-subtitle">1. Bölüm: Tahmin ve Gerekçeler</h3>' +
-            '<div class="explanation-prediction-grid">' +
-              window.MebiPrediction.items.map(function(item) {
-                var answer = record.prediction.answers[item.key];
-                return '<article class="explanation-prediction-item is-' + item.key + '">' +
-                  '<div class="explanation-prediction-item-heading">' +
-                    '<span class="explanation-prediction-item-icon" aria-hidden="true">' + window.MebiSVG.icon(item.icon) + '</span>' +
-                    '<strong>' + esc(item.label) + '</strong>' +
-                    '<span class="explanation-prediction-answer is-' + answer.choice + '">' + (predLabels[answer.choice] || 'Kararsızım') + '</span>' +
-                  '</div>' +
-                  '<p class="explanation-prediction-reason">' + esc(answer.reason) + '</p>' +
-                '</article>';
-              }).join('') +
-            '</div>' +
-          '</section>' +
-          '<section class="explanation-dialog-section explanation-section-observations">' +
-            '<h3 class="explanation-dialog-subtitle">2. Bölüm: Kaydettiğim Gözlemlerim</h3>' +
-            '<div class="explanation-observation-grid">' +
-              window.MebiPrediction.items.map(function(item) {
-                var answer = record.answers[item.key];
-                return '<article class="explanation-prediction-item is-' + item.key + '">' +
-                  '<div class="explanation-prediction-item-heading">' +
-                    '<span class="explanation-prediction-item-icon" aria-hidden="true">' + window.MebiSVG.icon(item.icon) + '</span>' +
-                    '<strong>' + esc(item.label) + '</strong>' +
-                    '<span class="explanation-prediction-answer is-' + answer + '">' + (obsLabels[answer] || 'Emin Değilim') + '</span>' +
-                  '</div>' +
-                '</article>';
-              }).join('') +
-            '</div>' +
-            '<div class="explanation-dialog-note">' +
-              '<div class="explanation-dialog-temp"><span>İlk Sıcaklık: <strong>' + tempInit + ' °C</strong></span><span>Son Sıcaklık: <strong>' + tempFinal + ' °C</strong></span><span>ΔT: <strong>' + delta + ' °C</strong></span></div>' +
-              '<strong>Gözlem Notum:</strong>' +
-              '<blockquote>' + esc(record.note) + '</blockquote>' +
-            '</div>' +
-          '</section>' +
-        '</div>' +
-      '</dialog>';
+    return '';
   }
 
   function evidenceHTML(state) {
-    var draft=get(state),record=state.observation.record;
+    var draft=get(state);
+    var actionButtons = '<div class="explanation-decision-actions">' +
+      '<button type="button" class="explanation-writing-btn explanation-replay-link" data-action="reviewExplanationExperiment">' +
+        window.MebiSVG.icon('eye') + '<span>Deneyi Tekrar Gözle</span>' +
+      '</button>' +
+      '<button type="button" class="explanation-writing-btn explanation-prediction-trigger" data-action="openPredictionDialog">' +
+        window.MebiSVG.icon('helpCircle') + '<span>Tahmin ve Gerekçelerim</span>' +
+      '</button>' +
+      '<button type="button" class="explanation-writing-btn explanation-particle-btn" data-action="openParticleInspection" data-arg="before">' +
+        window.MebiSVG.icon('eye') + '<span>3 Boyutlu Tanecik Modelini İncele</span>' +
+      '</button>' +
+    '</div>';
+
     var decision='<fieldset class="explanation-decision is-horizontal" id="explanationDecisionGroup" aria-describedby="explanationStatus">' +
       '<legend><span class="explanation-legend-icon" aria-hidden="true">' + window.MebiSVG.icon('atom') + '</span>Bu değişim kimyasal mı, fiziksel mi?</legend>' +
       '<div class="explanation-change-options is-horizontal">' + changeTypes.map(function(item){
@@ -256,13 +148,9 @@
           '<span class="explanation-change-icon-badge is-' + item[0] + '" aria-hidden="true">' + changeIconSVG(item[0]) + '</span>' +
           '<span class="explanation-change-content"><strong>'+item[1]+'</strong><small>'+item[2]+'</small></span>' +
         '</label>';
-      }).join('') + '</div></fieldset>';
+      }).join('') + '</div>' + actionButtons + '</fieldset>';
 
     return '<section class="explanation-evidence">' +
-      '<div class="explanation-evidence-heading">' +
-        '<button type="button" class="explanation-replay-link" data-action="reviewExplanationExperiment">' + window.MebiSVG.icon('eye') + '<span>Deneyi Tekrar Gözle</span></button>' +
-        predictionDialogHTML(record) +
-      '</div>' +
       '<div class="explanation-interpretation-grid is-horizontal">' + decision + '</div>' +
     '</section>';
   }
@@ -271,18 +159,60 @@
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 7 9 11M13 7 4 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><text x="16" y="'+(kind==='subscript'?'22':'9')+'" fill="currentColor" font-size="9" font-family="inherit" font-weight="550">2</text></svg>';
   }
   function writingHTML(state) {
-    var draft=get(state);
-    return '<section class="explanation-writing" aria-labelledby="explanationWritingTitle"><h2 id="explanationWritingTitle">Açıklamam</h2>'+
-      '<div id="explanationEditor" class="explanation-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="explanationTitle" aria-describedby="explanationEditorHelp" data-placeholder="'+esc(writingPrompt)+'" aria-placeholder="'+esc(writingPrompt)+'" data-empty="'+!plain(draft.html)+'" spellcheck="false">'+cleanHTML(draft.html)+'</div>'+
-      '<div class="explanation-writing-tools" role="group" aria-label="Kimyasal yazım araçları"><div class="explanation-format-buttons">'+[['subscript','Alt simge','Ctrl+='],['superscript','Üst simge','Ctrl+Shift+='],['normal','Normal yazı','Ctrl+Boşluk']].map(function(item){return '<button type="button" data-explanation-format="'+item[0]+'" aria-label="'+item[1]+'" aria-pressed="'+(item[0]==='normal')+'" title="'+item[1]+' ('+item[2]+')">'+formatIcon(item[0])+'</button>';}).join('')+'</div><span id="explanationFormatState">Normal yazı</span><span class="explanation-format-hint" id="explanationEditorHelp">Seçili metni biçimlendir veya simgeyi açıp yazmaya devam et.</span></div>'+
-      (draft.revisions.length ? '<details class="explanation-history"><summary>Önceki açıklamalarım ('+draft.revisions.length+')</summary>'+draft.revisions.map(function(r,i){return '<article><strong>'+ (i+1)+'. açıklamam</strong><div>'+cleanHTML(r.html)+'</div></article>';}).join('')+'</details>' : '')+
-      '<p class="explanation-scale-note">Tanecik çizimleri şematiktir; sayı, boyut ve süreler temsilidir. Model, gözlemini açıklamak için bir araçtır.</p></section>';
+    var draft=get(state), record=state.observation.record;
+    return '<section class="explanation-writing" aria-labelledby="explanationWritingTitle">' +
+      '<div class="explanation-writing-header">' +
+        '<h2 id="explanationWritingTitle">Açıklamam</h2>' +
+      '</div>' +
+      '<div id="explanationEditor" class="explanation-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="explanationWritingTitle" aria-describedby="explanationEditorHelp" data-placeholder="'+esc(writingPrompt)+'" aria-placeholder="'+esc(writingPrompt)+'" data-empty="'+!plain(draft.html)+'" spellcheck="false">'+cleanHTML(draft.html)+'</div>' +
+      '<div class="explanation-writing-tools" role="group" aria-label="Kimyasal yazım araçları">' +
+        '<div class="explanation-format-buttons">' +
+          [['subscript','Alt simge','Ctrl+='],['superscript','Üst simge','Ctrl+Shift+='],['normal','Normal yazı','Ctrl+Boşluk']].map(function(item){return '<button type="button" data-explanation-format="'+item[0]+'" aria-label="'+item[1]+'" aria-pressed="'+(item[0]==='normal')+'" title="'+item[1]+' ('+item[2]+')">'+formatIcon(item[0])+'</button>';}).join('') +
+        '</div>' +
+        '<span class="explanation-format-status-group">' +
+          '<span id="explanationFormatState">Normal yazı</span> ' +
+          '<span class="explanation-format-hint" id="explanationEditorHelp">(Seçili metni biçimlendir veya simgeyi açıp yazmaya devam et.)</span>' +
+        '</span>' +
+      '</div>' +
+    '</section>';
   }
   function render(state) {
     var draft=get(state);
-    return '<section class="prediction-card explanation-card explanation-unified" id="explanationCard" aria-labelledby="explanationTitle"><header class="learning-card-header"><div class="learning-header-copy"><div class="prediction-heading arena-stage-heading"><span class="prediction-eyebrow">'+window.MebiSVG.icon('beakerIc')+' 4. Açıkla</span><h1 id="explanationTitle" tabindex="-1">Açıklamamı yazıyorum</h1></div><p class="prediction-intro">Gözlemini yorumla ve değişimin nedenini tanecik düzeyinde açıkla.</p></div>'+window.MebiObservation.pairHTML(state)+'</header><div class="prediction-content explanation-content"><section class="explanation-combined">'+evidenceHTML(state)+writingHTML(state)+'</section></div><footer class="prediction-footer explanation-footer"><div id="explanationFeedback" class="explanation-feedback"><span class="explanation-error-icon" aria-hidden="true">!</span><p id="explanationStatus" role="status" aria-live="polite"></p></div><div class="prediction-actions"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="backToObservation">← Karşılaştırmaya Dön</button><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="openParticleInspection" data-arg="before">'+window.MebiSVG.icon('eye')+' 3 Boyutlu Tanecik Modellerini İncele</button>'+testButton()+'<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="saveExplanation">'+(draft.revisions.length?'Geliştirdiğim Açıklamayı Kaydet':'Açıklamamı Kaydet')+'</button><button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="toModel">Model Aşamasına Geç →</button></div></footer></section>';
+    if (isNonReaction(state)) return window.MebiNonReaction.explanationHTML(state,cleanHTML(draft.html));
+    return '<section class="prediction-card explanation-card explanation-unified" id="explanationCard" aria-labelledby="explanationTitle">' +
+      '<header class="learning-card-header">' +
+        '<div class="learning-header-copy">' +
+          '<div class="prediction-heading arena-stage-heading">' +
+            '<span class="prediction-eyebrow">'+window.MebiSVG.icon('beakerIc')+' 4. Açıkla</span>' +
+            '<h1 id="explanationTitle" tabindex="-1">Açıklamamı yazıyorum</h1>' +
+          '</div>' +
+          '<p class="prediction-intro">Gözlemini yorumla ve değişimin nedenini tanecik düzeyinde açıkla.</p>' +
+        '</div>' +
+        window.MebiObservation.pairHTML(state) +
+      '</header>' +
+      '<div class="prediction-content explanation-content">' +
+        '<section class="explanation-combined">' +
+          evidenceHTML(state) +
+          writingHTML(state) +
+        '</section>' +
+      '</div>' +
+      '<footer class="prediction-footer explanation-footer">' +
+        '<div id="explanationFeedback" class="explanation-feedback">' +
+          '<span class="explanation-error-icon" aria-hidden="true">!</span>' +
+          '<p id="explanationStatus" role="status" aria-live="polite"></p>' +
+        '</div>' +
+        '<div class="prediction-actions">' +
+          '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="backToObservation">← Gözlem Kartına Dön</button>' +
+          testButton() +
+          '<span id="explanationSavedStatus" class="prediction-saved-status" role="status" aria-live="polite"></span>' +
+          '<button type="button" id="toModelButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="toModel">' +
+            window.MebiSVG.icon('save') + ' Kaydet ve Model Aşamasına Geç' +
+          '</button>' +
+        '</div>' +
+      '</footer>' +
+    '</section>' + predictionDialogHTML(state);
   }
-  var cleanupSelection=null;
+    var cleanupSelection=null;
   function wire(state) {
     if(cleanupSelection){cleanupSelection();cleanupSelection=null;}
     if(!document.getElementById('explanationCard'))return;

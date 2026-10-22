@@ -21,10 +21,10 @@
 }
 .prediction-material { flex:0 1 auto; min-width:0; display:flex; align-items:center; gap:8px; }
 .prediction-pair > span { flex:none; color:#64748b !important; }
-.prediction-material-image { width:66px; height:46px; flex:none; border-radius:7px; overflow:hidden; }
-.prediction-material-image.is-powder { background:#354b5b; }
-.prediction-material-image.is-clear { background:#9da8ae; }
-.prediction-material-image.is-blue { background:#e8dcc6; }
+.prediction-material-image { width:66px; height:46px; flex:none; border-radius:7px; overflow:hidden; background:linear-gradient(#43576b,#293b4d); }
+.prediction-material-image.is-powder,
+.prediction-material-image.is-clear,
+.prediction-material-image.is-blue { background:linear-gradient(#43576b,#293b4d); }
 .prediction-material-image img { width:100%; height:100%; object-fit:contain; display:block; }
 .prediction-material strong { display:block; font-size:15px; font-weight:800; color:#0f172a !important; }
 .prediction-material small { display:block; color:#64748b !important; font-size:11px; overflow-wrap:anywhere; }

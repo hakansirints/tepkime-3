@@ -1,27 +1,45 @@
 /* Observation peek only: prediction and observation no longer minimize or drag. */
-#app .observation-card.floating-card-enabled > header { padding-right:156px; }
-.observation-peek-toggle { position:absolute; top:8px; right:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:6px 12px; border:0; border-radius:var(--mebi-radius-full); color:var(--mebi-primary); background:var(--mebi-primary-light); font:inherit; font-size:11px; font-weight:700; cursor:pointer; }
-.observation-peek-toggle svg { width:17px; height:17px; flex:none; }
-.observation-peek-toggle:hover { box-shadow:0 2px 0 var(--mebi-base-card); }
-#app .observation-card.is-collapsed { height:auto!important; min-height:44px; max-height:none!important; padding:4px 6px 4px 10px!important; gap:0; justify-content:center; opacity:.44; border:1px solid var(--mebi-glass-border); border-radius:13px; background:var(--mebi-glass-clear); box-shadow:0 2px 12px #172c2520; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); transition:opacity .18s ease,background-color .18s ease; }
-#app .observation-card.is-collapsed:hover,#app .observation-card.is-collapsed:has(:focus-visible) { opacity:1; background:var(--mebi-glass-regular); }
-#app .observation-card.is-collapsed > :not(header):not(.observation-peek-toggle) { display:none!important; }
+#app .observation-card.floating-card-enabled > header { padding-right:180px; }
+.observation-peek-toggle { position:absolute; top:8px; right:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:34px; padding:6px 14px; border:0; border-radius:var(--mebi-radius-full); color:#ffffff; background:#0284c7; font:inherit; font-size:12px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(2,132,199,0.35); transition:all 0.15s ease; }
+.observation-peek-toggle svg { width:16px; height:16px; flex:none; }
+.observation-peek-toggle:hover { background:#0369a1; transform:translateY(-1px); }
+#app .observation-card.is-collapsed { height:auto!important; min-height:46px; max-height:none!important; padding:6px 10px 6px 14px!important; gap:0; justify-content:center; opacity:1!important; border:1px solid #e2e8f0; border-radius:18px; background:#ffffff; box-shadow:0 4px 20px rgba(15,23,42,0.1); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); transition:opacity .18s ease,background-color .18s ease,box-shadow .2s ease; }
+[data-theme="dark"] #app .observation-card.is-collapsed { background:var(--mebi-bg-surface-solid); border-color:var(--mebi-border); color:var(--mebi-text-main); }
+#app .observation-card.is-collapsed:hover,#app .observation-card.is-collapsed:has(:focus-visible) { opacity:1; background:#ffffff; box-shadow:0 6px 24px rgba(15,23,42,0.14); }
+#app .observation-card.is-collapsed > :not(header):not(.observation-peek-toggle):not(.observation-auto-open) { display:none!important; }
 .observation-card.is-collapsed .prediction-intro { display:none; }
 .observation-card.is-collapsed .prediction-heading { margin-bottom:0; }
 #app .prediction-card[data-floating-ghost] { z-index:41; pointer-events:none!important; overflow:hidden; }
-[data-theme="dark"] .observation-peek-toggle { color:var(--mebi-text-main); }
+[data-theme="dark"] .observation-peek-toggle { color:#ffffff; background:#0284c7; }
 @media(pointer:coarse) { .observation-peek-toggle { top:3px; right:3px; min-height:40px; } }
 @media(prefers-reduced-motion:reduce) { #app .observation-card.is-collapsed { transition:none; } }
+
+/* Attention pulse / glowing shimmer when beaker pouring finishes */
+#app .observation-card.is-collapsed.is-attention-pulse {
+  animation: cardAttentionGlow 1.8s ease-in-out infinite !important;
+  border-color: #0284c7 !important;
+}
+
+@keyframes cardAttentionGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7), 0 4px 20px rgba(15, 23, 42, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(2, 132, 199, 0), 0 0 28px rgba(2, 132, 199, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(2, 132, 199, 0), 0 4px 20px rgba(15, 23, 42, 0.12);
+  }
+}
 
 /* Strip snapshots animate independently of the centered live strip's transform. */
 #app .observation-card[data-peek-strip] { padding:4px 6px 4px 10px; border:1px solid var(--mebi-glass-border); border-radius:13px; background:var(--mebi-glass-clear); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
 #app .observation-card[data-peek-strip] > :not(header):not(.observation-peek-toggle) { display:none; }
-#app .observation-card:is(.is-collapsed,[data-peek-strip]) > .learning-card-header { display:block; min-width:0; padding-right:144px; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) > .learning-card-header { display:block; min-width:0; padding-right:160px; }
 #app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-heading { flex-wrap:nowrap; min-width:0; margin:0; }
-#app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-heading h1 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-heading h1 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px; }
 #app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-intro,#app .observation-card:is(.is-collapsed,[data-peek-strip]) .prediction-pair { display:none; }
-#app .observation-card:is(.is-collapsed,[data-peek-strip]) .observation-peek-toggle { top:50%; right:5px; transform:translateY(-50%); min-height:32px; background:transparent; border-radius:9px; color:var(--mebi-text-main); }
-#app .observation-card:is(.is-collapsed,[data-peek-strip]) .observation-peek-toggle:hover { background:var(--mebi-bg-subtle); box-shadow:none; }
+#app .observation-card:is(.is-collapsed,[data-peek-strip]) .observation-peek-toggle { top:50%; right:8px; transform:translateY(-50%); min-height:34px; border-radius:999px; }
 @media(max-height:650px) and (orientation:landscape) {
  #app[data-screen="lab"] .observation-card.is-collapsed { right:max(var(--activity-page-inset, 18px), calc((100vw - var(--activity-card-width)) / 2))!important; left:auto!important; transform:none!important; width:min(380px,max(220px,calc(100vw - 2 * (var(--experiment-card-width) + var(--experiment-edge) + 8px))))!important; }
  #app .observation-card:is(.is-collapsed,[data-peek-strip]) > .learning-card-header { padding-right:38px; }
@@ -31,6 +49,13 @@
 }
 
 #app .observation-card.is-collapsed > .learning-card-header { padding-right:0; }
-#app .observation-card.is-collapsed { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:8px; align-items:center; }
+#app .observation-card.is-collapsed { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; align-items:center; }
 #app .observation-card.is-collapsed > .observation-peek-toggle { position:static; transform:none; grid-column:2; grid-row:1; }
 #app .observation-card.is-collapsed > .learning-card-header { grid-column:1; grid-row:1; }
+
+#app .observation-card.is-collapsed:has(.observation-auto-open) { grid-template-columns:minmax(0,1fr) auto 32px; column-gap:8px; }
+#app .observation-card.is-collapsed > .observation-auto-open { display:block; grid-column:3; grid-row:1; width:32px; height:32px; }
+.observation-auto-open svg { display:block; width:32px; height:32px; transform:rotate(-90deg); fill:none; stroke-width:3; }
+.observation-auto-track { stroke:color-mix(in srgb,#0284c7 18%,transparent); }
+.observation-auto-progress { stroke:#0284c7; stroke-linecap:round; stroke-dasharray:100; stroke-dashoffset:100; animation:observationAutoOpen 5s linear forwards; animation-delay:var(--auto-open-elapsed,0ms); }
+@keyframes observationAutoOpen { to { stroke-dashoffset:0; } }

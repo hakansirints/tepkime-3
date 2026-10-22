@@ -14,6 +14,8 @@ Tarayıcı `http://127.0.0.1:8173/index.html` adresinde açılır. Sunucuyu durd
 
 Uygulama statik HTML, CSS ve JavaScript dosyalarından oluşur; derleme veya sunucu tarafı uygulaması gerektirmez. Three.js ve lisansı `js/vendor/three/` içinde bulunur. ES modülleri nedeniyle dosyaları bir HTTP sunucusu üzerinden açın.
 
+GitHub Pages yayını `main` dalının kökünden yapılır. Yayınlamadan önce `node scripts/version-assets.cjs` çalıştırın. Bu komut CSS, JavaScript, modül bağımlılıkları ve madde görsellerinin adreslerini içerikten üretilen ortak sürümle günceller; tarayıcı eski sürümün dosyalarını yeni sayfayla karıştırmaz. Yayın sürümü `index.html` içindeki `app-version` meta alanından doğrulanabilir.
+
 ## Özellikler
 
 - 12 madde, 66 farklı eşleşme ve her iki seçim sırasının desteği.

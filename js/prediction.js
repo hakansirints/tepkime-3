@@ -183,7 +183,7 @@
   function materialHTML(id) {
     var reagent = window.MebiData.getReagent(id);
     var kind = reagent.solid ? 'powder' : reagent.id === 'Cu(NO3)2' ? 'blue' : 'clear';
-    return '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=4" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz' : 'suda') + '</small></span></div>';
+    return '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=910bef9ae690" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz' : 'suda') + '</small></span></div>';
   }
   function answersHTML(answers) {
     return items.map(function(item) { return '<div class="prediction-summary-row"><strong>' + item.label + '</strong><span class="prediction-answer">' + label(answers[item.key].choice) + '</span><p>' + esc(answers[item.key].reason) + '</p></div>'; }).join('');
@@ -217,7 +217,7 @@
         return '<tr class="prediction-row"><th scope="row"><div class="prediction-label"><span class="prediction-icon">' + window.MebiSVG.icon(item.icon) + '</span><div><strong>' + item.label + '</strong><small>' + esc(item.detail) + '</small></div></div></th>' + options.map(function(option) {
           return '<td class="prediction-choices"><button type="button" class="learning-mark" data-prediction-control="' + item.key + '-' + option.value + '" data-action="setPredictionChoice" data-arg="' + item.key + ':' + option.value + '" aria-label="' + item.label + ': ' + option.label + '" title="' + option.label + '" aria-pressed="' + (answer.choice === option.value) + '"><span class="learning-tick" aria-hidden="true">' + window.MebiSVG.icon('check') + '</span></button></td>';
         }).join('') + '<td><label class="prediction-reason-label"><span class="sr-only">' + item.label + ' için kısa gerekçem</span><textarea class="prediction-reason" data-prediction-control="reason-' + item.key + '" data-reason-key="' + item.key + '" rows="2" maxlength="240" placeholder="' + item.prompt + '">' + esc(answer.reason) + '</textarea></label></td></tr>';
-      }).join('') + '</tbody></table><div class="prediction-none"><label><input type="checkbox" data-prediction-control="none" data-action="togglePredictionNone"' + (allNo(state) ? ' checked' : '') + '>Hiçbiri: Belirgin bir değişim beklemiyorum</label><span>Beş kararı da “Hayır” yapar; gerekçelerini korur.</span></div>';
+      }).join('') + '</tbody></table><div class="prediction-none"><label><input type="checkbox" data-prediction-control="none" data-action="togglePredictionNone"' + (allNo(state) ? ' checked' : '') + '>Hiçbiri: Belirgin bir değişim beklemiyorum</label></div>';
     return '<section class="prediction-card" aria-labelledby="predictionTitle"><header class="learning-card-header"><div class="learning-header-copy"><div class="prediction-heading arena-stage-heading"><span class="prediction-eyebrow">' + window.MebiSVG.icon('helpCircle') + ' 2. Tahmin</span><h1 id="predictionTitle">Tepkime Belirtilerini Tahmin Et</h1></div><p class="prediction-intro">Her belirti için kararını seç, düşünceni bir cümleyle açıkla.</p></div>' +
       '<div class="prediction-pair" aria-label="Seçilen maddeler">' + materialHTML(state.selectedSlot1) + '<span aria-hidden="true">+</span>' + materialHTML(state.selectedSlot2) + '</div></header>' +
       '<div class="prediction-content">' + content + '</div><p id="predictionMessage" class="prediction-message" role="alert">' + esc(state.predictionMessage) + '</p>' +
@@ -225,7 +225,7 @@
       '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm prediction-autofill" data-action="autoFillPredictionForTesting">Test İçin Otomatik Doldur</button>' +
       '<div class="prediction-save-group">' +
       '<span id="predictionSavedStatus" class="prediction-saved-status" role="status" aria-live="polite">' + (saved ? window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi' : '') + '</span>' +
-      '<button type="button" id="beginExperimentButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="beginExperiment" title="' + (complete(state) === 5 || saved ? 'Deney aşamasına geç' : 'Önce 5 belirti kararını tamamla') + '"' + (complete(state) !== 5 && !saved ? ' disabled' : '') + '>' + window.MebiSVG.icon('beakerIc') + ' Deney Aşamasına Geç</button></div></div></footer></section>';
+      '<button type="button" id="beginExperimentButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="beginExperiment" title="' + (complete(state) === 5 || saved ? 'Deney aşamasına geç' : 'Önce 5 belirti kararını tamamla') + '"' + (complete(state) !== 5 && !saved ? ' disabled' : '') + '>' + window.MebiSVG.icon('save') + ' Kaydet ve Deney Aşamasına Geç</button></div></div></footer></section>';
   }
   function reviewHTML(state) {
     var record = state.predictionRecord;

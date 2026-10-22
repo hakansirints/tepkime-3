@@ -151,7 +151,7 @@
     return '<div class="observation-temperature" aria-label="Sanal deney sıcaklık verileri"><span>İlk: <strong>' + number(t.initial) + ' °C</strong></span><span>Son: <strong>' + number(t.final) + ' °C</strong></span><span>ΔT: <strong>' + number(t.final - t.initial) + ' °C</strong></span></div>';
   }
   function observationLabel(value) { return value === 'yes' ? 'Gözledim' : value === 'no' ? 'Gözlemedim' : 'Emin Değilim'; }
-  function comparisonHTML(state) {
+  function comparisonHTML(state, reviewOnly) {
     var o = get(state), record = o.record;
     return '<div class="observation-compare-layout"><div class="comparison-table-wrap"><h2 class="comparison-section-title">Tahminim ve Gözlemim</h2><table class="learning-matrix observation-comparison-table"><caption class="sr-only">İlk tahminin ve kaydettiğin gözlemin karşılaştırması.</caption><thead><tr><th scope="col">Belirti</th><th scope="col">İlk Tahminim</th><th scope="col">Gözlemim</th><th scope="col">Karşılaştırma</th></tr></thead><tbody>' + items().map(function(item) {
       var prediction = record.prediction.answers[item.key], answer = record.answers[item.key];
@@ -162,8 +162,8 @@
       var statusIcon = status === 'different' ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>' : window.MebiSVG.icon(status === 'match' ? 'check' : 'helpCircle');
       return '<tr class="observation-comparison-row" data-comparison="' + status + '"><th scope="row">' + item.label + '<details class="observation-reason"><summary>İlk gerekçem</summary><div>' + esc(prediction.reason) + '</div></details></th><td>' + predictionLabel + '</td><td>' + observationLabel(answer) + '</td><td><span class="comparison-result is-' + status + '" aria-label="' + esc(result) + '" title="' + esc(result) + '">' + statusIcon + '<span>' + statusLabel + '</span></span></td></tr>';
     }).join('') + '</tbody></table></div><div class="observation-notes comparison-evidence">' + temperatureHTML(state) + '<div class="observation-saved-note"><strong>' + window.MebiSVG.icon('eye') + 'Kaydettiğim Gözlem</strong><blockquote>' + esc(record.note) + '</blockquote></div>' +
-      '<div class="comparison-reflection"><label class="observation-label" for="observationReflection">' + window.MebiSVG.icon('helpCircle') + 'Tahminimde Ne Değişti? <span>(İsteğe bağlı)</span></label><textarea id="observationReflection" class="observation-textarea" rows="3" maxlength="400" data-observation-control="reflection" placeholder="Hangi tahmininle gözlemin farklıydı? Hangi bulguya dayandın?">' + esc(o.reflection) + '</textarea>' +
-      '<p class="observation-saved" id="observationReflectionStatus" role="status">' + (o.reflectionSaved ? 'Karşılaştırma notun kaydedildi.' : '') + '</p></div></div></div>';
+      (reviewOnly ? '' : '<div class="comparison-reflection"><label class="observation-label" for="observationReflection">' + window.MebiSVG.icon('helpCircle') + 'Tahminimde Ne Değişti? <span>(İsteğe bağlı)</span></label><textarea id="observationReflection" class="observation-textarea" rows="3" maxlength="400" data-observation-control="reflection" placeholder="Hangi tahmininle gözlemin farklıydı? Hangi bulguya dayandın?">' + esc(o.reflection) + '</textarea>' +
+      '<p class="observation-saved" id="observationReflectionStatus" role="status">' + (o.reflectionSaved ? 'Karşılaştırma notun kaydedildi.' : '') + '</p></div>') + '</div></div>';
   }
   function formHTML(state) {
     var o = get(state);
@@ -180,12 +180,39 @@
   function pairHTML(state) {
     return '<div class="prediction-pair" aria-label="Deneyde karıştırılan maddeler">' + [state.selectedSlot1,state.selectedSlot2].map(function(id, index) {
       var reagent = window.MebiData.getReagent(id), kind = reagent.solid ? 'powder' : reagent.id === 'Cu(NO3)2' ? 'blue' : 'clear';
-      return (index ? '<span aria-hidden="true">+</span>' : '') + '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=4" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz · ' + window.MebiExperiment.initialAmount(reagent).solidGrams.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' g' : 'suda · ' + window.MebiExperiment.defaults.solutionMl + ' mL') + '</small></span></div>';
+      return (index ? '<span aria-hidden="true">+</span>' : '') + '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=910bef9ae690" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz · ' + window.MebiExperiment.initialAmount(reagent).solidGrams.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' g' : 'suda · ' + window.MebiExperiment.defaults.solutionMl + ' mL') + '</small></span></div>';
     }).join('') + '</div>';
   }
   function deskHTML(state) {
-    return '<aside class="bench-dock" id="benchDock"><header class="dock-header"><span class="dock-badge">3. Deney · Gözlem</span><h3 class="dock-title">Karışımı İncele</h3><p class="dock-subtext">Deney masasında karışımı yeniden inceleyebilirsin. Gözlem ve karşılaştırma işlemleri ana gözlem kartındadır.</p></header>' + '<button type="button" class="mebi-btn mebi-btn-primary dock-btn-full" data-action="openObservationCard">Gözlem Kartına Dön →</button>' + window.MebiExperiment.actionsHTML() + '</aside>';
+    var attentionClass = state && state.benchAttention ? ' is-attention-pulse' : '';
+    return '<aside class="bench-dock' + attentionClass + '" id="benchDock"><header class="dock-header"><span class="dock-badge">3. Deney · Gözlem</span><h3 class="dock-title">Karışımı İncele</h3><p class="dock-subtext">Deney masasında karışımı yeniden inceleyebilirsin. Gözlem ve karşılaştırma işlemleri ana gözlem kartındadır.</p></header>' + '<button type="button" class="mebi-btn mebi-btn-primary dock-btn-full" data-action="openObservationCard">Deney Gözlem Kartını Aç →</button>' + window.MebiExperiment.actionsHTML() + '</aside>';
   }
+  function reviewModalHTML(state) {
+    var o = get(state), record = o.record;
+    if (!record) return '';
+    return '<dialog id="explanationPredictionDialog" class="explanation-prediction-dialog mebi-comparison-dialog prediction-card observation-card is-comparing is-modal-view" aria-labelledby="predictionReviewTitle">' +
+        '<header class="learning-card-header">' +
+          '<button type="button" class="modal-close-btn-topright" data-action="closePredictionDialog" aria-label="Kapat" title="Kapat">✕</button>' +
+          '<div class="learning-header-copy">' +
+            '<div class="prediction-heading arena-stage-heading">' +
+              '<span class="prediction-eyebrow">' + window.MebiSVG.icon('beakerIc') + ' 3. Deney</span>' +
+              '<h1 id="predictionReviewTitle">Tahminim ve Gözlemim</h1>' +
+            '</div>' +
+            '<p class="prediction-intro">İlk tahminin ile kendi gözlem kaydını karşılaştır.</p>' +
+          '</div>' +
+          pairHTML(state) +
+        '</header>' +
+        '<div id="observationPanelModal" class="prediction-content">' +
+          comparisonHTML(state, true) +
+        '</div>' +
+        '<footer class="prediction-footer observation-footer">' +
+          '<div class="prediction-actions">' +
+            '<button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="closePredictionDialog">Açıklama Aşamasına Devam Et</button>' +
+          '</div>' +
+        '</footer>' +
+    '</dialog>';
+  }
+
   function render(state) {
     var o = get(state), comparing = o.tab === 'compare' && o.record;
     var message = o.storageError ? 'Bu oturumda kaydedildi; tarayıcıda kalıcı kayıt yapılamadı.' : o.message || 'Emin Değilim geçerli bir yanıttır.';
@@ -193,8 +220,8 @@
       '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="autoFillObservationForTesting">Test İçin Otomatik Doldur</button></div>';
     var rightActions = comparing ?
       '<div class="prediction-actions"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="setObservationTab" data-arg="observe" data-observation-control="back-observe">Gözlem Kartına Dön</button>' +
-      '<button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="toCard">Açıkla Aşamasına Geç</button></div>' :
-      '<div class="prediction-actions"><span id="observationSavedStatus" class="prediction-saved-status" role="status" aria-live="polite"></span><button type="button" id="compareObservationButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="setObservationTab" data-arg="compare" data-observation-control="compare">Tahmin ve Gözlemi Karşılaştır →</button></div>';
+      '<button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="toCard">Açıklama Aşamasına Devam Et</button></div>' :
+      '<div class="prediction-actions"><span id="observationSavedStatus" class="prediction-saved-status" role="status" aria-live="polite"></span><button type="button" id="saveAndProceedButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="saveObservationAndProceed">' + window.MebiSVG.icon('save') + ' Gözlemi Kaydet ve Açıkla Aşamasına Geç →</button></div>';
     var centerInfo = !comparing && o.storageError ?
       '<div><p class="is-storage-error">Bu oturumda kaydedildi; tarayıcıda kalıcı kayıt yapılamadı.</p></div>' : '';
 
@@ -225,5 +252,5 @@
   }
 
   window.MebiObservation = { pairHTML:pairHTML, reset:reset, get:get, editable:editable, complete:complete, setChoice:setChoice, setNote:setNote, save:save,
-    setTab:setTab, showLab:showLab, setReflection:setReflection, saveReflection:saveReflection, autoFillForTesting:autoFillForTesting, render:render, deskHTML:deskHTML, wireInputs:wireInputs };
+    setTab:setTab, showLab:showLab, setReflection:setReflection, saveReflection:saveReflection, autoFillForTesting:autoFillForTesting, render:render, deskHTML:deskHTML, reviewModalHTML:reviewModalHTML, wireInputs:wireInputs };
 })(window);

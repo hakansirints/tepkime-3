@@ -403,46 +403,442 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
   border: 1px solid #e2e8f0 !important;
   color: #64748b !important;
 }
-#app .experiment-safety-card {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 20px !important;
-  box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.2) !important;
+/* ==========================================================================
+   PEDAGOJİK DİNAMİK GÜVENLİK PROTOKOLÜ KARTI (Soft Kehribar -> Soft Zümrüt Yeşili)
+   ========================================================================== */
+
+/* Yumuşak Geçiş Animasyonları */
+#app .experiment-safety-card,
+#app .experiment-safety-header,
+#app .experiment-safety-footer,
+#app .experiment-safety-note,
+#app .experiment-safety-row,
+#app .experiment-safety-header-icon,
+#app .experiment-safety-progress-pill,
+#app .experiment-safety-check-all,
+#app .experiment-safety-accept {
+  transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease !important;
 }
-#app .experiment-safety-header {
-  background: #f8fafc !important;
-  border-bottom: 1px solid #f1f5f9 !important;
+
+/* Erişilebilirlik ve Focus Stilleri */
+#app .experiment-safety-row:focus-visible {
+  outline: 2px solid #f59e0b !important;
+  outline-offset: 1px !important;
+}
+#app .experiment-safety-row.is-checked:focus-visible,
+#app .experiment-safety-card.is-all-approved .experiment-safety-row:focus-visible {
+  outline: 2px solid #10b981 !important;
+  outline-offset: 1px !important;
+}
+[data-theme="dark"] #app .experiment-safety-row.is-checked:focus-visible,
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-row:focus-visible {
+  outline-color: #34d399 !important;
+}
+
+/* 1. AYDINLIK MOD — SEÇİMLER YAPILMADAN ÖNCE (0/4..3/4: DİKKAT VE İNCELEME KEHRİBARI) */
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) {
+  background: #fffdf7 !important;
+  border: 1.5px solid #fed7aa !important;
+  border-left: 5px solid #d97706 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 45px -12px rgba(217, 119, 6, 0.16), 0 0 0 1px rgba(217, 119, 6, 0.05) !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) > .experiment-safety-header {
+  background: #fef3c7 !important;
+  border-bottom: 1px solid #fde68a !important;
+  box-shadow: inset 0 -1px 0 #fde68a !important;
   border-radius: 19px 19px 0 0 !important;
 }
-#app .experiment-safety-footer {
-  background: #f8fafc !important;
-  border-top: 1px solid #f1f5f9 !important;
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-header-icon {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+  color: #d97706 !important;
+  border-radius: 11px !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-badges .mebi-badge-sunken {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  color: #b45309 !important;
+  border-radius: 6px !important;
+  font-weight: 750 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-progress-pill {
+  background: #ffffff !important;
+  border: 1px solid #fed7aa !important;
+  color: #b45309 !important;
+  font-weight: 750 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-check-all {
+  background: #ffffff !important;
+  border: 1px solid #fed7aa !important;
+  color: #b45309 !important;
+  font-weight: 700 !important;
+}
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-check-all:hover {
+  background: #fef3c7 !important;
+  border-color: #f59e0b !important;
+  color: #92400e !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) {
+  background: #ffffff !important;
+  border: 1px solid #fed7aa !important;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.05) !important;
+}
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked):hover {
+  background: #fffbf2 !important;
+  border-color: #f59e0b !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) .experiment-safety-icon-badge {
+  background: #fff7ed !important;
+  color: #d97706 !important;
+  border: 1px solid rgba(245, 158, 11, 0.2) !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) .experiment-safety-status-tag {
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: #b45309 !important;
+  border: 1px solid rgba(245, 158, 11, 0.18) !important;
+  font-weight: 700 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) .experiment-safety-check-box {
+  background: #ffffff !important;
+  border: 1.5px solid #fed7aa !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-note {
+  background: #ffffff !important;
+  border: 1px solid #fed7aa !important;
+  border-left: 4px solid #f59e0b !important;
+  color: #92400e !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.04) !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-note-icon {
+  color: #d97706 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card:not(.is-all-approved) > .experiment-safety-footer {
+  background: #fef3c7 !important;
+  border-top: 1px solid #fde68a !important;
   border-radius: 0 0 19px 19px !important;
 }
-#app .experiment-safety-note {
-  background: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
-  border-left: 3px solid #0284c7 !important;
-  color: #0f172a !important;
+
+/* 2. AYDINLIK MOD — SEÇİMLERDEN SONRA (4/4 TAMAMLANDI: GÜVENLİ VE HAZIR ZÜMRÜT YEŞİLİ) */
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved {
+  background: #f2faf5 !important;
+  border: 1.5px solid #a7f3d0 !important;
+  border-left: 5px solid #059669 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 45px -12px rgba(16, 185, 129, 0.18), 0 0 0 1px rgba(16, 185, 129, 0.06) !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved > .experiment-safety-header {
+  background: #dcfce7 !important;
+  border-bottom: 1px solid #bbf7d0 !important;
+  box-shadow: inset 0 -1px 0 #bbf7d0 !important;
+  border-radius: 19px 19px 0 0 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved .experiment-safety-header-icon {
+  background: #dcfce7 !important;
+  border: 1px solid #86efac !important;
+  color: #166534 !important;
+  border-radius: 11px !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved .experiment-safety-badges .mebi-badge-sunken {
+  background: #dcfce7 !important;
+  border: 1px solid #86efac !important;
+  color: #166534 !important;
+  border-radius: 6px !important;
+  font-weight: 750 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved .experiment-safety-progress-pill {
+  background: #16a34a !important;
+  border: 1px solid #15803d !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved .experiment-safety-check-all {
+  background: #ffffff !important;
+  border: 1px solid #86efac !important;
+  color: #166534 !important;
+  font-weight: 700 !important;
+}
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved .experiment-safety-check-all:hover {
+  background: #dcfce7 !important;
+  border-color: #16a34a !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-row.is-checked {
+  background: #ffffff !important;
+  border: 1px solid #86efac !important;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.06) !important;
+}
+:root:not([data-theme="dark"]) #app .experiment-safety-row.is-checked:hover {
+  background: #f0fdf4 !important;
+  border-color: #16a34a !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-row.is-checked .experiment-safety-icon-badge {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-row.is-checked .experiment-safety-warn-corner {
+  background: #dcfce7 !important;
+  border-color: #86efac !important;
+  color: #166534 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-row.is-checked .experiment-safety-status-tag {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+  font-weight: 700 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-row.is-checked .experiment-safety-check-box {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved .experiment-safety-note {
+  background: #ffffff !important;
+  border: 1px solid #86efac !important;
+  border-left: 4px solid #10b981 !important;
+  color: #166534 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.05) !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved .experiment-safety-note-icon {
+  color: #10b981 !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-card.is-all-approved > .experiment-safety-footer {
+  background: #dcfce7 !important;
+  border-top: 1px solid #bbf7d0 !important;
+  border-radius: 0 0 19px 19px !important;
+}
+
+:root:not([data-theme="dark"]) #app .experiment-safety-accept.is-ready {
+  background: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+}
+:root:not([data-theme="dark"]) #app .experiment-safety-accept.is-ready:hover {
+  background: #047857 !important;
+}
+
+/* 3. KARANLIK MOD — SEÇİMLER YAPILMADAN ÖNCE (0/4..3/4: SICAK KOYU KEHRİBAR) */
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) {
+  background: #191511 !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.28) !important;
+  border-left: 5px solid #f59e0b !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) > .experiment-safety-header {
+  background: #231b14 !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2) !important;
+  box-shadow: inset 0 -1px 0 rgba(245, 158, 11, 0.2) !important;
+  border-radius: 19px 19px 0 0 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-header-icon {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
+  border-radius: 11px !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-badges .mebi-badge-sunken {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-progress-pill {
+  background: #2a2016 !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-check-all {
+  background: #231b14 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
+}
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-check-all:hover {
+  background: #2d231a !important;
+  border-color: #f59e0b !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) {
+  background: #1f1914 !important;
+  border: 1px solid rgba(245, 158, 11, 0.18) !important;
+}
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked):hover {
+  background: #27201a !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) .experiment-safety-icon-badge {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) .experiment-safety-status-tag {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-row:not(.is-checked) .experiment-safety-check-box {
+  background: #261f18 !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-note {
+  background: #1f1914 !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  border-left: 4px solid #f59e0b !important;
+  color: #fde68a !important;
   border-radius: 10px !important;
 }
-#app .experiment-safety-card.is-all-approved .experiment-safety-note {
-  background: #f0fdf4 !important;
-  border: 1px solid #86efac !important;
-  border-left: 3px solid #16a34a !important;
-  color: #166534 !important;
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) .experiment-safety-note-icon {
+  color: #fbbf24 !important;
 }
-#app .experiment-safety-card.is-all-approved .experiment-safety-note-icon {
-  color: #16a34a !important;
+
+[data-theme="dark"] #app .experiment-safety-card:not(.is-all-approved) > .experiment-safety-footer {
+  background: #231b14 !important;
+  border-top: 1px solid rgba(245, 158, 11, 0.2) !important;
+  border-radius: 0 0 19px 19px !important;
 }
-#app .experiment-safety-card.is-all-approved .experiment-safety-header-icon {
-  background: #dcfce7 !important;
-  color: #166534 !important;
+
+/* 4. KARANLIK MOD — SEÇİMLERDEN SONRA (4/4 TAMAMLANDI: DERİN KOYU ZÜMRÜT) */
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved {
+  background: #101915 !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.32) !important;
+  border-left: 5px solid #10b981 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7) !important;
 }
-#app .experiment-safety-card.is-all-approved .experiment-safety-badges .mebi-badge-sunken {
-  background: #dcfce7 !important;
-  color: #166534 !important;
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved > .experiment-safety-header {
+  background: #14241d !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.24) !important;
+  box-shadow: inset 0 -1px 0 rgba(16, 185, 129, 0.24) !important;
+  border-radius: 19px 19px 0 0 !important;
 }
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-header-icon {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+  border-radius: 11px !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-badges .mebi-badge-sunken {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-progress-pill {
+  background: #059669 !important;
+  border: 1px solid #10b981 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-check-all {
+  background: #172c23 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-check-all:hover {
+  background: #1e382d !important;
+  border-color: #34d399 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-row.is-checked {
+  background: #13221b !important;
+  border: 1px solid rgba(16, 185, 129, 0.28) !important;
+}
+[data-theme="dark"] #app .experiment-safety-row.is-checked:hover {
+  background: #192b23 !important;
+  border-color: rgba(52, 211, 153, 0.5) !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-row.is-checked .experiment-safety-icon-badge {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-row.is-checked .experiment-safety-warn-corner {
+  background: rgba(16, 185, 129, 0.25) !important;
+  border-color: rgba(52, 211, 153, 0.4) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-row.is-checked .experiment-safety-status-tag {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border: 1px solid rgba(52, 211, 153, 0.4) !important;
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-row.is-checked .experiment-safety-check-box {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-note {
+  background: #13221b !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border-left: 4px solid #10b981 !important;
+  color: #a7f3d0 !important;
+  border-radius: 10px !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-note-icon {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved > .experiment-safety-footer {
+  background: #14241d !important;
+  border-top: 1px solid rgba(16, 185, 129, 0.24) !important;
+  border-radius: 0 0 19px 19px !important;
+}
+
+[data-theme="dark"] #app .experiment-safety-accept.is-ready {
+  background: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.5) !important;
+}
+[data-theme="dark"] #app .experiment-safety-accept.is-ready:hover {
+  background: #10b981 !important;
+}
+
 #app .hand-guide-pill {
   background: #ffffff !important;
   border: 1.5px solid #0284c7 !important;
@@ -750,13 +1146,58 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
 }
 
 #app .particle-inspection-model-dock .explanation-species-card {
-  flex: 0 0 115px !important;
+  flex: 0 0 118px !important;
   min-width: 110px !important;
-  max-width: 125px !important;
+  max-width: 130px !important;
   padding: 5px 6px 7px !important;
-  background: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
   border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+#app .particle-inspection-model-dock .species-card-symbol strong {
+  font-size: 13px !important;
+  color: #0f172a !important;
+}
+
+#app .particle-inspection-model-dock .species-card-visual.is-formula-only {
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 2px !important;
+}
+
+#app .particle-inspection-model-dock .species-card-visual.is-formula-only .species-card-arrow,
+#app .particle-inspection-model-dock .species-card-visual.is-formula-only .species-card-model {
+  display: none !important;
+}
+
+#app .particle-inspection-model-dock .species-card-visual.is-formula-only .species-card-symbol {
+  flex: 1 1 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0 2px !important;
+}
+
+#app .particle-inspection-model-dock .species-card-visual.is-formula-only .species-card-symbol strong {
+  font-size: 12.5px !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.015em !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  text-align: center !important;
+  display: inline-block !important;
+}
+
+#app .particle-inspection-model-dock .species-card-arrow {
+  color: #0284c7 !important;
+}
+
+#app .particle-inspection-model-dock .species-card-model svg {
+  height: 32px !important;
+  max-width: 52px !important;
 }
 
 #app .particle-inspection-model-dock .explanation-species-card > .explanation-particle-badge svg {
@@ -790,9 +1231,18 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
   color: #f1f5f9 !important;
 }
 
+[data-theme="dark"] #app .explanation-species-card,
 [data-theme="dark"] #app .particle-inspection-model-dock .explanation-species-card {
   background: #1e293b !important;
   border-color: #334155 !important;
+}
+
+[data-theme="dark"] #app .particle-inspection-model-dock .species-card-symbol strong {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] #app .particle-inspection-model-dock .species-card-arrow {
+  color: #38bdf8 !important;
 }
 
 [data-theme="dark"] #app .particle-inspection-model-dock .explanation-species-card select {
@@ -828,7 +1278,8 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
   gap: 6px !important;
 }
 
-#app .model-dock-return-link {
+#app .model-dock-return-link,
+#app .model-dock-check-btn {
   background: transparent !important;
   border: 1px solid #bae6fd !important;
   border-radius: 8px !important;
@@ -845,66 +1296,78 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
   transition: all 0.15s ease !important;
 }
 
-#app .model-dock-return-link:hover {
+#app .model-dock-return-link:hover,
+#app .model-dock-check-btn:hover {
   background: #f0f9ff !important;
   border-color: #0284c7 !important;
   color: #0369a1 !important;
 }
 
-[data-theme="dark"] #app .model-dock-return-link {
+[data-theme="dark"] #app .model-dock-return-link,
+#app .model-dock-check-btn {
   border-color: #0369a1 !important;
   color: #38bdf8 !important;
 }
 
-[data-theme="dark"] #app .model-dock-return-link:hover {
+[data-theme="dark"] #app .model-dock-return-link:hover,
+#app .model-dock-check-btn:hover {
   background: rgba(2, 132, 199, 0.15) !important;
   border-color: #38bdf8 !important;
 }
 
 /* Rollerimi Gözden Geçir - Doğru / Yanlış Kart Durumları */
+#app .explanation-species-card,
 #app .particle-inspection-model-dock .explanation-species-card {
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
+#app .explanation-species-card.is-correct,
 #app .particle-inspection-model-dock .explanation-species-card.is-correct {
   background: #f0fdf4 !important;
   border-color: #86efac !important;
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2) !important;
 }
 
+#app .explanation-species-card.is-correct select,
 #app .particle-inspection-model-dock .explanation-species-card.is-correct select {
   border-color: #86efac !important;
   background: #ffffff !important;
 }
 
+#app .explanation-species-card.is-incorrect,
 #app .particle-inspection-model-dock .explanation-species-card.is-incorrect {
   background: #fef2f2 !important;
   border-color: #fca5a5 !important;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
 }
 
+#app .explanation-species-card.is-incorrect select,
 #app .particle-inspection-model-dock .explanation-species-card.is-incorrect select {
   border-color: #fca5a5 !important;
   background: #ffffff !important;
 }
 
+[data-theme="dark"] #app .explanation-species-card.is-correct,
 [data-theme="dark"] #app .particle-inspection-model-dock .explanation-species-card.is-correct {
   background: rgba(34, 197, 94, 0.16) !important;
   border-color: #22c55e !important;
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25) !important;
 }
 
+[data-theme="dark"] #app .explanation-species-card.is-correct select,
 [data-theme="dark"] #app .particle-inspection-model-dock .explanation-species-card.is-correct select {
   border-color: #22c55e !important;
   background: #0f172a !important;
 }
 
+[data-theme="dark"] #app .explanation-species-card.is-incorrect,
 [data-theme="dark"] #app .particle-inspection-model-dock .explanation-species-card.is-incorrect {
   background: rgba(239, 68, 68, 0.16) !important;
   border-color: #ef4444 !important;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
 }
 
+[data-theme="dark"] #app .explanation-species-card.is-incorrect select,
 [data-theme="dark"] #app .particle-inspection-model-dock .explanation-species-card.is-incorrect select {
   border-color: #ef4444 !important;
   background: #0f172a !important;
@@ -955,7 +1418,8 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
   cursor: grabbing !important;
 }
 
-#app .model-dock-return-link {
+#app .model-dock-return-link,
+#app .model-dock-check-btn {
   cursor: pointer !important;
 }
 
@@ -963,3 +1427,582 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
   bottom: auto !important;
   transform: none !important;
 }
+
+
+/* ==========================================================================
+   KARANLIK MOD (DARK THEME) TAM KAPSAMLI DÜZELTME (image7.png FIX)
+   ========================================================================== */
+[data-theme="dark"] #app .mebi-top-shell {
+  background: #1e1e24 !important;
+  border-color: #38383e !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] #app .mebi-top-shell > .mebi-topbar {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .mebi-top-shell > .mebi-stepper {
+  background: #1e1e24 !important;
+  border-color: #38383e !important;
+}
+[data-theme="dark"] #app .mebi-stepper {
+  background: #1e1e24 !important;
+}
+[data-theme="dark"] #app .mebi-stepper-track {
+  background: #26262c !important;
+  border-color: #38383e !important;
+}
+[data-theme="dark"] #app button.mebi-step-item {
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app button.mebi-step-item:hover {
+  color: #f4f4f5 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+[data-theme="dark"] #app button.mebi-step-item.is-active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+[data-theme="dark"] #app button.mebi-step-item.is-active .mebi-step-node {
+  background: #ffffff !important;
+  color: #0284c7 !important;
+}
+[data-theme="dark"] #app button.mebi-step-item.is-done .mebi-step-node {
+  background: rgba(2, 132, 199, 0.28) !important;
+  color: #38bdf8 !important;
+}
+[data-theme="dark"] #app .mebi-stage-toggle {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app .mebi-stage-toggle:hover {
+  background: #383842 !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .mebi-brand span {
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .mebi-progress-wrapper {
+  background: #2b2b32 !important;
+  border-color: #38383e !important;
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app .mebi-progress-bar-mini {
+  background: #38383e !important;
+}
+[data-theme="dark"] #app .mebi-topbar-tools .mebi-btn {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .mebi-topbar-tools .mebi-btn:hover {
+  background: #383842 !important;
+}
+
+/* Ayarlar Paneli */
+[data-theme="dark"] #app .lab-settings-panel {
+  background: #222228 !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7) !important;
+}
+[data-theme="dark"] #app .lab-settings-panel h3,
+[data-theme="dark"] #app .lab-settings-panel h4,
+[data-theme="dark"] #app .lab-settings-heading {
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .lab-settings-panel .mebi-btn-secondary {
+  background: #2b2b32 !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .lab-settings-panel .mebi-segmented-button {
+  background: #18181b !important;
+  border-color: #38383e !important;
+}
+[data-theme="dark"] #app .lab-settings-panel .mebi-segmented-button button {
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app .lab-settings-panel .mebi-segmented-button button.is-active {
+  background: #2b2b32 !important;
+  color: #38bdf8 !important;
+}
+
+/* Kart Yüzeyleri, Başlık ve Altlıklar */
+[data-theme="dark"] #app[data-screen="pool"] .reagent-gallery,
+[data-theme="dark"] #app .prediction-card:not(.is-collapsed),
+[data-theme="dark"] #app .explanation-card:not(.is-collapsed),
+[data-theme="dark"] #app #modelCard {
+  background: #1e1e24 !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.65) !important;
+}
+
+[data-theme="dark"] #app .prediction-card:not(.is-collapsed) > :is(.learning-card-header,.explanation-header) {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  box-shadow: inset 0 -1px 0 #38383e !important;
+}
+
+[data-theme="dark"] #app .prediction-card:not(.is-collapsed) > :is(.prediction-footer,.observation-footer,.explanation-footer) {
+  background: #26262c !important;
+  border-color: #38383e !important;
+}
+
+[data-theme="dark"] #app :is(#predictionTitle,#observationTitle,#explanationTitle,#predictionReviewTitle,#modelTitle) {
+  color: #f4f4f5 !important;
+}
+
+[data-theme="dark"] #app :is(.prediction-intro,.dock-subtext) {
+  color: #a1a1aa !important;
+}
+
+/* Reaktif Çifti Kartı */
+[data-theme="dark"] #app .prediction-pair {
+  background: #26262c !important;
+  border-color: #38383e !important;
+}
+[data-theme="dark"] #app .prediction-material strong {
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .prediction-material small {
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app .prediction-pair > span {
+  color: #71717a !important;
+}
+
+/* Footer Butonları */
+[data-theme="dark"] #app :is(.prediction-footer,.observation-footer,.explanation-footer) :is(.mebi-btn-secondary,.prediction-autofill,[data-explanation-test],[data-model-test]) {
+  background: #2b2b32 !important;
+  border-color: #3f3f46 !important;
+  color: #e4e4e7 !important;
+}
+[data-theme="dark"] #app :is(.prediction-footer,.observation-footer,.explanation-footer) :is(.mebi-btn-secondary,.prediction-autofill,[data-explanation-test],[data-model-test]):hover:not(:disabled) {
+  background: #383842 !important;
+  color: #ffffff !important;
+  border-color: #52525b !important;
+}
+
+/* Tahmin Tablosu / Seçenekler */
+[data-theme="dark"] #app .prediction-row {
+  border-top-color: #2e2e36 !important;
+}
+[data-theme="dark"] #app .prediction-label strong {
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .prediction-label small {
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app .prediction-columns {
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app .prediction-choices button {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #d4d4d8 !important;
+}
+[data-theme="dark"] #app .prediction-choices button:hover {
+  background: #32323a !important;
+  color: #ffffff !important;
+}
+[data-theme="dark"] #app .prediction-choices button[aria-pressed="true"] {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #0369a1 !important;
+}
+[data-theme="dark"] #app .learning-tick {
+  background: #26262c !important;
+  border-color: #3f3f46 !important;
+}
+[data-theme="dark"] #app .learning-mark[aria-pressed="true"] .learning-tick {
+  background: #0284c7 !important;
+  border-color: #0284c7 !important;
+}
+
+/* Input ve Textarea'lar */
+[data-theme="dark"] #app :is(.prediction-card,.explanation-card) :is(.prediction-reason,.observation-textarea) {
+  background: #18181b !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+  box-shadow: inset 0 0 0 1.5px #38383e !important;
+}
+[data-theme="dark"] #app :is(.prediction-card,.explanation-card) :is(.prediction-reason,.observation-textarea):focus {
+  background: #1e1e24 !important;
+  box-shadow: inset 0 0 0 2px #0284c7, 0 0 0 3px rgba(2, 132, 199, 0.25) !important;
+}
+[data-theme="dark"] #app :is(.prediction-card,.explanation-card) :is(.prediction-reason,.observation-textarea)::placeholder {
+  color: #71717a !important;
+}
+
+/* Hiçbiri Kontrolü */
+[data-theme="dark"] #app .prediction-none {
+  border-top-color: #2e2e36 !important;
+}
+[data-theme="dark"] #app .prediction-none label {
+  color: #f4f4f5 !important;
+}
+
+/* Gözlem Seçenekleri ve Notları */
+[data-theme="dark"] #app .observation-options button {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #d4d4d8 !important;
+}
+[data-theme="dark"] #app .observation-options button[aria-pressed="true"] {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+[data-theme="dark"] #app .observation-label {
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .observation-note-meta {
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app .observation-saved-note {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .observation-saved-note blockquote {
+  color: #f4f4f5 !important;
+}
+
+/* Açıklama ve Model Kartı Elemanları */
+[data-theme="dark"] #app .explanation-species-card,
+[data-theme="dark"] #app .model-species-card {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .explanation-species select,
+[data-theme="dark"] #app .model-species-card select {
+  background: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .explanation-editor {
+  background: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .explanation-observation {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .explanation-evidence-list label {
+  background: #26262c !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .explanation-evidence-list label strong {
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app .explanation-evidence-list label:has(input:checked) {
+  background: rgba(2, 132, 199, 0.18) !important;
+  border-color: #0284c7 !important;
+}
+[data-theme="dark"] #app .explanation-map {
+  background: rgba(2, 132, 199, 0.08) !important;
+  border-color: #0369a1 !important;
+}
+
+/* Masa Yan Dock Paneli */
+[data-theme="dark"] #app :is(#benchDock,.beaker-particle-panel) {
+  background: #1e1e24 !important;
+  border-color: #38383e !important;
+  color: #f4f4f5 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme="dark"] #app :is(#benchDock,.beaker-particle-panel) .dock-title {
+  color: #f4f4f5 !important;
+}
+[data-theme="dark"] #app :is(#benchDock,.beaker-particle-panel) .dock-subtext {
+  color: #a1a1aa !important;
+}
+[data-theme="dark"] #app :is(#benchDock,.beaker-particle-panel) .dock-badge {
+  background: rgba(2, 132, 199, 0.2) !important;
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  color: #38bdf8 !important;
+}
+
+
+/* ==========================================================================
+   AŞAMALARA ÖZEL SOFT PEDAGOJİK RENK KODLAMASI VE GEÇİŞ HİSSİYATI
+   ========================================================================== */
+
+/* 1. Ortak Kart Açılış ve Yumuşak Yükselme Animasyonu (Kullanıcı etkileşimlerinde kart flash/yenileme yapmaması için inline buton tetiklemeleri hariç tutulmuştur) */
+
+/* 2. Aşama 2: TAHMİN KARTI (Sorgulama Modu - Sıcak Fildişi & Kehribar Dokunuşu) */
+:root:not([data-theme="dark"]) #app .prediction-card:not(.observation-card):not(.explanation-card):not(.model-card):not(.is-collapsed) {
+  background: #fdfbf7 !important;
+  border-color: #ede4d4 !important;
+  border-left: 5px solid #d97706 !important;
+}
+:root:not([data-theme="dark"]) #app .prediction-card:not(.observation-card):not(.explanation-card):not(.model-card):not(.is-collapsed) > .learning-card-header {
+  background: #f7f2e7 !important;
+  border-bottom: 1px solid #ede4d4 !important;
+  box-shadow: inset 0 -1px 0 #ede4d4 !important;
+}
+:root:not([data-theme="dark"]) #app .prediction-card:not(.observation-card):not(.explanation-card):not(.model-card):not(.is-collapsed) > .prediction-footer {
+  background: #f7f2e7 !important;
+  border-top: 1px solid #ede4d4 !important;
+}
+:root:not([data-theme="dark"]) #app .prediction-card:not(.observation-card):not(.explanation-card):not(.model-card) .prediction-eyebrow {
+  background: rgba(217, 119, 6, 0.1) !important;
+  color: #b45309 !important;
+  border: 1px solid rgba(217, 119, 6, 0.22) !important;
+  border-radius: 8px !important;
+  padding: 3px 8px !important;
+  width: fit-content !important;
+}
+
+/* 3. Aşama 3: DENEY VE GÖZLEM KARTI (Analitik Gözlem Modu - Serin Buz Mavisi) */
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard):not(.is-comparing):not(.is-collapsed) {
+  background: #f3f8fd !important;
+  border-color: #dbe7f3 !important;
+  border-left: 5px solid #0284c7 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard):not(.is-comparing):not(.is-collapsed) > .learning-card-header {
+  background: #e8f2fa !important;
+  border-bottom: 1px solid #dbe7f3 !important;
+  box-shadow: inset 0 -1px 0 #dbe7f3 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard):not(.is-comparing):not(.is-collapsed) > .observation-footer {
+  background: #e8f2fa !important;
+  border-top: 1px solid #dbe7f3 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard):not(.is-comparing) .prediction-eyebrow {
+  background: rgba(2, 132, 199, 0.1) !important;
+  color: #0284c7 !important;
+  border: 1px solid rgba(2, 132, 199, 0.22) !important;
+  border-radius: 8px !important;
+  padding: 3px 8px !important;
+  width: fit-content !important;
+}
+
+/* 3. Aşama 3 (Karşılaştırma Modu - Tahminim ve Gözlemim - Soft Berrak Turkuaz) */
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard).is-comparing:not(.is-collapsed) {
+  background: #f0faf8 !important;
+  border-color: #ccede5 !important;
+  border-left: 5px solid #0d9488 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard).is-comparing:not(.is-collapsed) > .learning-card-header {
+  background: #e2f5f1 !important;
+  border-bottom: 1px solid #ccede5 !important;
+  box-shadow: inset 0 -1px 0 #ccede5 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard).is-comparing:not(.is-collapsed) > .observation-footer {
+  background: #e2f5f1 !important;
+  border-top: 1px solid #ccede5 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.observation-card, #observationCard).is-comparing .prediction-eyebrow {
+  background: rgba(13, 148, 136, 0.1) !important;
+  color: #0d9488 !important;
+  border: 1px solid rgba(13, 148, 136, 0.22) !important;
+  border-radius: 8px !important;
+  padding: 3px 8px !important;
+  width: fit-content !important;
+}
+
+/* 4. Aşama 4: AÇIKLA KARTI (Sentez & Neden-Sonuç Modu - Soft Adaçayı / Nane Yeşili) */
+:root:not([data-theme="dark"]) #app :is(.explanation-unified, #explanationCard):not(.model-card):not(.is-collapsed) {
+  background: #f2faf5 !important;
+  border-color: #d8ecdf !important;
+  border-left: 5px solid #059669 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.explanation-unified, #explanationCard):not(.model-card):not(.is-collapsed) > .learning-card-header {
+  background: #e7f5ec !important;
+  border-bottom: 1px solid #d8ecdf !important;
+  box-shadow: inset 0 -1px 0 #d8ecdf !important;
+}
+:root:not([data-theme="dark"]) #app :is(.explanation-unified, #explanationCard):not(.model-card):not(.is-collapsed) > .explanation-footer {
+  background: #e7f5ec !important;
+  border-top: 1px solid #d8ecdf !important;
+}
+:root:not([data-theme="dark"]) #app :is(.explanation-unified, #explanationCard):not(.model-card) .prediction-eyebrow {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.22) !important;
+  border-radius: 8px !important;
+  padding: 3px 8px !important;
+  width: fit-content !important;
+}
+
+/* 5. Aşama 5: MODEL KARTI (Soyutlama & Mikroskobik Tanecik Modelleme Modu - Soft Lavanta / Lila) */
+:root:not([data-theme="dark"]) #app :is(.model-card, #modelCard):not(.is-collapsed) {
+  background: #f8f6fe !important;
+  border-color: #e7e0f7 !important;
+  border-left: 5px solid #7c3aed !important;
+}
+:root:not([data-theme="dark"]) #app :is(.model-card, #modelCard):not(.is-collapsed) > .learning-card-header {
+  background: #f0ebfa !important;
+  border-bottom: 1px solid #e7e0f7 !important;
+  box-shadow: inset 0 -1px 0 #e7e0f7 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.model-card, #modelCard):not(.is-collapsed) > .explanation-footer {
+  background: #f0ebfa !important;
+  border-top: 1px solid #e7e0f7 !important;
+}
+:root:not([data-theme="dark"]) #app :is(.model-card, #modelCard) .prediction-eyebrow {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #7c3aed !important;
+  border: 1px solid rgba(124, 58, 237, 0.22) !important;
+  border-radius: 8px !important;
+  padding: 3px 8px !important;
+  width: fit-content !important;
+}
+
+/* ==========================================================================
+   KARANLIK MOD İÇİN SOFT VURGU VE KENARLIK AYARLARI
+   ========================================================================== */
+[data-theme="dark"] #app .prediction-card:not(.observation-card):not(.explanation-card):not(.model-card):not(.is-collapsed) {
+  border-left: 5px solid #f59e0b !important;
+}
+[data-theme="dark"] #app .prediction-card:not(.observation-card):not(.explanation-card):not(.model-card) .prediction-eyebrow {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+[data-theme="dark"] #app :is(.observation-card, #observationCard):not(.is-comparing):not(.is-collapsed) {
+  border-left: 5px solid #38bdf8 !important;
+}
+[data-theme="dark"] #app :is(.observation-card, #observationCard):not(.is-comparing) .prediction-eyebrow {
+  background: rgba(56, 189, 248, 0.16) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+[data-theme="dark"] #app :is(.observation-card, #observationCard).is-comparing:not(.is-collapsed) {
+  border-left: 5px solid #2dd4bf !important;
+}
+[data-theme="dark"] #app :is(.observation-card, #observationCard).is-comparing .prediction-eyebrow {
+  background: rgba(45, 212, 191, 0.16) !important;
+  color: #2dd4bf !important;
+  border-color: rgba(45, 212, 191, 0.3) !important;
+}
+
+[data-theme="dark"] #app :is(.explanation-unified, #explanationCard):not(.model-card):not(.is-collapsed) {
+  border-left: 5px solid #34d399 !important;
+}
+[data-theme="dark"] #app :is(.explanation-unified, #explanationCard):not(.model-card) .prediction-eyebrow {
+  background: rgba(52, 211, 153, 0.16) !important;
+  color: #34d399 !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+[data-theme="dark"] #app :is(.model-card, #modelCard):not(.is-collapsed) {
+  border-left: 5px solid #a78bfa !important;
+}
+[data-theme="dark"] #app :is(.model-card, #modelCard) .prediction-eyebrow {
+  background: rgba(167, 139, 250, 0.16) !important;
+  color: #a78bfa !important;
+  border-color: rgba(167, 139, 250, 0.3) !important;
+}
+
+/* --- İSTEM GÜNCELLEMELERİ (Item 5: Laboratuvar Günlüğü Soft Renkler ve Filtre) --- */
+.collection-filter-bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+.collection-filter-btn {
+  min-height: 30px !important;
+  padding: 4px 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  font: inherit !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.collection-filter-btn:hover:not(.is-active) {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+.collection-filter-btn.is-active {
+  background: #0284c7 !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+}
+
+/* Soft colors by reaction category */
+#app .collection-shell .collection-card.is-ppt {
+  background: #f0fdf4 !important;
+  border: 1.5px solid #bbf7d0 !important;
+}
+#app .collection-shell .collection-card.is-ppt .collection-card-num { color: #059669 !important; }
+#app .collection-shell .collection-card.is-ppt .collection-card-type { color: #047857 !important; }
+
+#app .collection-shell .collection-card.is-acidbase {
+  background: #fff1f2 !important;
+  border: 1.5px solid #fecdd3 !important;
+}
+#app .collection-shell .collection-card.is-acidbase .collection-card-num { color: #e11d48 !important; }
+#app .collection-shell .collection-card.is-acidbase .collection-card-type { color: #be123c !important; }
+
+#app .collection-shell .collection-card.is-redox {
+  background: #f0f9ff !important;
+  border: 1.5px solid #bae6fd !important;
+}
+#app .collection-shell .collection-card.is-redox .collection-card-num { color: #0284c7 !important; }
+#app .collection-shell .collection-card.is-redox .collection-card-type { color: #0369a1 !important; }
+
+#app .collection-shell .collection-card.is-complex {
+  background: #f5f3ff !important;
+  border: 1.5px solid #ddd6fe !important;
+}
+#app .collection-shell .collection-card.is-complex .collection-card-num { color: #7c3aed !important; }
+#app .collection-shell .collection-card.is-complex .collection-card-type { color: #6d28d9 !important; }
+
+#app .collection-shell .collection-card.is-none {
+  background: #fafaf9 !important;
+  border: 1.5px solid #e7e5e4 !important;
+}
+#app .collection-shell .collection-card.is-none .collection-card-num { color: #78716c !important; }
+#app .collection-shell .collection-card.is-none .collection-card-type { color: #57534e !important; }
+
+/* Dark mode soft tints */
+[data-theme="dark"] #app .collection-shell .collection-card.is-ppt { background: #064e3b33 !important; border-color: #065f46 !important; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-acidbase { background: #88133733 !important; border-color: #9f1239 !important; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-redox { background: #0c4a6e33 !important; border-color: #0369a1 !important; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-complex { background: #3b076433 !important; border-color: #581c87 !important; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-none { background: #1c191733 !important; border-color: #292524 !important; }
+
+/* Dark settings target the controls actually rendered by the toolbar. */
+[data-theme="dark"] #app .lab-settings-panel button {color:#e2e8f0!important;background:#30323d!important;border-color:#505362!important;box-shadow:none!important;}
+[data-theme="dark"] #app .lab-settings-panel button:hover {background:#404454!important;}
+[data-theme="dark"] #app .lab-settings-panel button[aria-pressed="true"] {color:#bae6fd!important;background:#16435b!important;border-color:#38bdf8!important;}
+[data-theme="dark"] #app .lab-settings-panel .lab-settings-label {color:#c4c8d4!important;}
+[data-theme="dark"] #app .lab-settings-panel .lab-settings-section {border-color:#454753;}
+
+/* Material gallery: keep every surface and caption in the selected theme. */
+[data-theme="dark"] #app .reagent-gallery :is(.reagent-gallery-toolbar,.reagent-gallery-footer) {background:#26262c!important;border-color:#454550!important;box-shadow:none!important;}
+[data-theme="dark"] #app .reagent-gallery .reagent-gallery-eyebrow {color:#f1f5f9!important;}
+[data-theme="dark"] #app .reagent-gallery .gallery-heading-icon {color:#7dd3fc!important;background:#16435b!important;border-color:#326783!important;}
+[data-theme="dark"] #app .reagent-gallery .reagent-gallery-card {background:#292b35!important;border-color:#505362!important;color:#f1f5f9!important;}
+[data-theme="dark"] #app .reagent-gallery .reagent-gallery-card.is-selected {background:#123b52!important;border-color:#38bdf8!important;box-shadow:inset 0 0 0 2px #38bdf8,0 4px 12px #0004!important;}
+[data-theme="dark"] #app .reagent-gallery .reagent-card-caption strong {color:#f1f5f9!important;}
+[data-theme="dark"] #app .reagent-gallery .reagent-card-caption > span:not(.reagent-card-selection):not(.reagent-card-history),
+[data-theme="dark"] #app .reagent-gallery .reagent-card-caption small {color:#c4c8d4!important;}
+[data-theme="dark"] #app .reagent-gallery :is(.gallery-search input,.gallery-selected-slot,.gallery-clear,.gallery-test) {background:#30323d!important;color:#e2e8f0!important;border-color:#505362!important;}
+[data-theme="dark"] #app .reagent-gallery .gallery-search input::placeholder {color:#b4b9c8;}
+[data-theme="dark"] #app .reagent-gallery :is(.gallery-selected-slot b,.gallery-selection-status,.gallery-empty) {color:#c4c8d4!important;}
+[data-theme="dark"] #app .reagent-gallery .gallery-selected-slot.is-filled {background:#16435b!important;border-color:#326783!important;}
+[data-theme="dark"] #app .reagent-gallery .gallery-selected-slot.is-filled > span {color:#bae6fd!important;}
+[data-theme="dark"] #app .reagent-gallery .gallery-filters button {color:#d3d8e3!important;}
+[data-theme="dark"] #app .reagent-gallery .gallery-filters button:hover:not([aria-pressed="true"]) {background:#404454!important;color:#fff!important;}
+[data-theme="dark"] #app .reagent-gallery .gallery-filters button[aria-pressed="true"] {background:#0369a1!important;color:#fff!important;}

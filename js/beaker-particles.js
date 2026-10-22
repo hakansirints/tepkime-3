@@ -1,4 +1,4 @@
-import {buildModel,template,COLORS,symbol,unique} from './particle-models.js?v=1.1';
+import {buildModel,template,COLORS,symbol,unique} from './particle-models.js?v=910bef9ae690';
 
 /* One batched layer in the existing WebGL scene. No label is drawn inside a beaker. */
 export function createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature}){
@@ -158,8 +158,21 @@ export function createBeakerParticles({THREE,scene,renderer,camera,controls,main
    const corners=vessel=>{const points=[];for(const x of[-vessel.radius,vessel.radius])for(const y of[0,vessel.height])for(const z of[-vessel.radius,vessel.radius]){const point=new THREE.Vector3(x,y,z);points.push(project(vessel===main?vessel.group.localToWorld(point):point.multiplyScalar(secondary.group.scale.x).add(secondaryHome)))}return points};
    const first=corners(main),second=corners(secondary),firstLeft=Math.min(...first.map(p=>p.x)),firstRight=Math.max(...first.map(p=>p.x)),secondLeft=Math.min(...second.map(p=>p.x)),secondRight=Math.max(...second.map(p=>p.x)),firstTop=Math.min(...first.map(p=>p.y)),firstBottom=Math.max(...first.map(p=>p.y));
    for(const node of[left,right])node.style.maxHeight=Math.max(80,bottom-top)+'px';
-   const width=left.getBoundingClientRect().width,rightWidth=parseFloat(getComputedStyle(right).width)||width,gap=innerHeight<650?6:8,maxRight=dock?dock.left-8:innerWidth-8;
-   const leftX=mixture?(firstRight+secondLeft-width)/2:firstLeft-width+48;
+   const width=left.getBoundingClientRect().width,rightWidth=parseFloat(getComputedStyle(right).width)||width,gap=innerHeight<650?6:8;
+   const isRightDock=dock&&dock.left>innerWidth*0.4&&dock.top<innerHeight*0.6;
+   const maxRight=isRightDock?(dock.left-8):(innerWidth-8);
+   let b1Right=firstRight,b2Left=secondLeft;
+   if(window.LabScene&&typeof window.LabScene.getCameraFraming==='function'){
+     try{
+       const framing=window.LabScene.getCameraFraming();
+       if(framing&&framing.beakers&&framing.beakers.length>=2){
+         b1Right=framing.beakers[0].right;
+         b2Left=framing.beakers[1].left;
+       }
+     }catch(err){}
+   }
+   const midBetween=(b1Right+b2Left)/2;
+   const leftX=mixture?(midBetween-width/2):firstLeft-width+48;
    const rightX=secondRight-40;
    const height=Math.max(left.getBoundingClientRect().height,right.hidden?0:right.getBoundingClientRect().height),y=Math.max(top,Math.min(firstTop+(firstBottom-firstTop)*.3,bottom-height));
    left.style.left=Math.max(6,Math.min(leftX,maxRight-width))+'px';

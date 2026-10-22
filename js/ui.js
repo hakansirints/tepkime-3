@@ -453,10 +453,61 @@
     // Yatay ekran kalkanı butonları
     var closeOriBtn = document.getElementById('btnCloseOrientation');
     var dismissOriBtn = document.getElementById('btnDismissOrientation');
+    var fsRotateBtn = document.getElementById('btnFullscreenAndRotate');
     var oriOverlay = document.getElementById('mebiOrientationOverlay');
 
     if (closeOriBtn) closeOriBtn.addEventListener('click', closeOrientationOverlay);
     if (dismissOriBtn) dismissOriBtn.addEventListener('click', closeOrientationOverlay);
+
+    if (fsRotateBtn) {
+      fsRotateBtn.addEventListener('click', function() {
+        if (window.MebiAudio) window.MebiAudio.playClick();
+
+        // 1. Tam ekrana geç
+        var docEl = document.documentElement;
+        var rfs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+        var fsPromise = null;
+        if (rfs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+          try {
+            fsPromise = rfs.call(docEl);
+          } catch (err) {
+            console.warn('Tam ekran hatası:', err);
+          }
+        }
+
+        // 2. Ekranı yataya çevirmeyi dene
+        function tryRotate() {
+          try {
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock('landscape').catch(function(err) {
+                console.warn('Yatay ekran kilidi desteklenmiyor veya reddedildi:', err);
+              });
+            } else if (screen.lockOrientation) {
+              screen.lockOrientation('landscape');
+            } else if (screen.webkitLockOrientation) {
+              screen.webkitLockOrientation('landscape');
+            } else if (screen.mozLockOrientation) {
+              screen.mozLockOrientation('landscape');
+            }
+          } catch (e) {
+            console.warn('Ekran çevirme hatası:', e);
+          }
+
+          var isPortrait = (window.innerHeight > window.innerWidth) || (window.matchMedia && window.matchMedia('(orientation: portrait)').matches);
+          if (!isPortrait) {
+            closeOrientationOverlay();
+          }
+        }
+
+        if (fsPromise && typeof fsPromise.then === 'function') {
+          fsPromise.then(function() {
+            setTimeout(tryRotate, 60);
+          }).catch(tryRotate);
+        } else {
+          tryRotate();
+        }
+      });
+    }
 
     if (oriOverlay) {
       oriOverlay.addEventListener('click', function(e) {
@@ -521,12 +572,96 @@
     }
   });
 
+  /* ----------------- 7. KUTLAMA KONFETİ MOTORU ----------------- */
+  function fireConfetti() {
+    var canvas = document.getElementById('mebiConfettiCanvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'mebiConfettiCanvas';
+      canvas.className = 'mebi-confetti-canvas';
+      canvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:99999;';
+      document.body.appendChild(canvas);
+    }
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    var colors = ['#2563eb', '#38bdf8', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#6366f1', '#14b8a6', '#f43f5e'];
+    var particles = [];
+    var count = 130;
+
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        x: width * 0.5 + (Math.random() - 0.5) * 320,
+        y: height * 0.42 + (Math.random() - 0.5) * 100,
+        vx: (Math.random() - 0.5) * 20,
+        vy: (Math.random() * -15) - 6,
+        size: Math.random() * 8 + 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 14,
+        wobble: Math.random() * 10,
+        wobbleSpeed: 0.12 + Math.random() * 0.1,
+        alpha: 1,
+        decay: 0.007 + Math.random() * 0.008
+      });
+    }
+
+    var startTime = Date.now();
+    var animId = null;
+
+    function renderConfetti() {
+      ctx.clearRect(0, 0, width, height);
+      var alive = 0;
+
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.42;
+        p.vx *= 0.985;
+        p.rotation += p.rotSpeed;
+        p.wobble += p.wobbleSpeed;
+        p.alpha -= p.decay;
+
+        if (p.alpha > 0 && p.y < height + 60) {
+          alive++;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.scale(Math.cos(p.wobble), 1);
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.68);
+          ctx.restore();
+        }
+      }
+
+      if (alive > 0 && Date.now() - startTime < 4200) {
+        animId = requestAnimationFrame(renderConfetti);
+      } else {
+        ctx.clearRect(0, 0, width, height);
+        if (canvas.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        }
+      }
+    }
+
+    if (animId) cancelAnimationFrame(animId);
+    animId = requestAnimationFrame(renderConfetti);
+  }
+
   // Global erişim
   window.MebiUI = {
     applyTheme: applyTheme,
     getSavedTheme: getSavedTheme,
     toggleTheme: toggleTheme,
     showToast: showMebiToast,
+    fireConfetti: fireConfetti,
     openDrawer: openDrawer,
     closeDrawer: closeDrawer,
     openWelcomeModal: openWelcomeModal,
@@ -538,6 +673,7 @@
     checkOrientation: checkOrientation
   };
 
+  window.MebiConfetti = { fire: fireConfetti };
   window.showMebiToast = showMebiToast;
 
 })(window);

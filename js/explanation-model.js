@@ -1,4 +1,4 @@
-import {buildModel, template, COLORS, CHARGES, LABELS, symbol, unique} from './particle-models.js?v=1.1';
+import {buildModel, template, COLORS, CHARGES, LABELS, symbol, unique} from './particle-models.js?v=910bef9ae690';
 
 // Share the laboratory's chemical model; never infer spectators from leftover quantity.
 function build(state) {
@@ -20,11 +20,14 @@ function build(state) {
 // A schematic projection of the exact same atom templates used inside the 3D beakers.
 function thumbnail(kind) {
   const t = template(kind), points = t.atoms.map(a => [a.position[0], a.position[1]]);
-  const scale = Math.min(300, 50 / Math.max(.08, ...points.map(p => Math.abs(p[0]) * 2)), 34 / Math.max(.08, ...points.map(p => Math.abs(p[1]) * 2)));
+  const scale = Math.min(320, 50 / Math.max(.08, ...points.map(p => Math.abs(p[0]) * 2)), 34 / Math.max(.08, ...points.map(p => Math.abs(p[1]) * 2)));
   const xy = i => [36 + points[i][0] * scale, 23 - points[i][1] * scale];
-  const bonds = t.bonds.map(([a,b]) => {const p=xy(a),q=xy(b);return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="#819296" stroke-width="3"/>`;}).join('');
-  const atoms = t.atoms.map((a,i) => {const [x,y]=xy(i);return `<circle cx="${x}" cy="${y}" r="${a.element === 'H' ? 6 : 9}" fill="${COLORS[a.element]}" stroke="#647077" stroke-width=".7"/><text x="${x}" y="${y+2.7}" text-anchor="middle" fill="#15222e" font-size="8" font-weight="700">${a.element}</text>`;}).join('');
-  return `<svg viewBox="0 0 72 46" aria-hidden="true" focusable="false">${bonds}${atoms}</svg>`;
+  const atoms = t.atoms.map((a,i) => {
+    const [x,y]=xy(i), r = a.element === 'H' ? 6.5 : Math.max(7.5, Math.min(13, a.radius * 360));
+    const textFill = ['C','Pb','I','N','O'].includes(a.element) ? '#ffffff' : '#15222e';
+    return `<circle cx="${x}" cy="${y}" r="${r}" fill="${COLORS[a.element]}" stroke="#4b575d" stroke-width=".7"/><text x="${x}" y="${y+2.7}" text-anchor="middle" fill="${textFill}" font-size="8" font-weight="700">${a.element}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 72 46" aria-hidden="true" focusable="false">${atoms}</svg>`;
 }
 function notationAliases(){
   const aliases=Object.create(null),normalize=window.MebiChemicalWriting.normalize;
@@ -38,5 +41,5 @@ function notationAliases(){
   aliases['H+']='H⁺';
   return aliases;
 }
-window.MebiExplanationModel = {build, thumbnail, notationAliases};
+window.MebiExplanationModel = {build, thumbnail, notationAliases, template, CHARGES, LABELS, symbol, COLORS};
 if (['card','model'].includes(window.TepkimeArenasi?.state.screen)) window.TepkimeArenasi.render(false);

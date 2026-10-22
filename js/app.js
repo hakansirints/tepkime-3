@@ -9,7 +9,7 @@
   /* ----------------- 1. UYGULAMA DURUMU (APPLICATION STATE) ----------------- */
   var S = {
     screen: 'menu',
-    headerCollapsed: null,
+    headerCollapsed: false,
     stageReview: null,
     particleInspection: null,
     explanationReview: null,
@@ -23,6 +23,7 @@
     categoryFilter: 'all',
     selectedSlot1: null,
     selectedSlot2: null,
+    pendingRepeatPair: null,
     activeReaction: null,
     prediction: [],
     labStep: 'predict', // predict | predictionSaved | ready | pouring | reacting | observed
@@ -42,18 +43,7 @@
   window.MebiExperiment.reset(S, false);
   window.MebiObservation.reset(S);
   var HISTORY = [];
-  var headerAutoCompact = window.innerHeight < 650 || window.innerWidth < 760;
-  var headerViewport = {width:window.innerWidth,height:window.innerHeight};
-  function headerIsCompact() { return S.headerCollapsed == null ? headerAutoCompact : S.headerCollapsed; }
   function fitStageHeader() {
-    var shell = document.querySelector('.mebi-top-shell.has-stage.is-header-expanded');
-    if (!shell) return;
-    var bar = shell.querySelector('.mebi-topbar');
-    var card = document.querySelector('.prediction-card:not(.is-minimized):not(.is-collapsed):not([data-floating-ghost])');
-    var content = card && card.querySelector('.prediction-content');
-    var crowded = !!(bar && bar.clientWidth && bar.scrollWidth > bar.clientWidth + 1);
-    if (content && content.getBoundingClientRect().height > 0 && content.getBoundingClientRect().height < 48) crowded = true;
-    if (crowded) { headerAutoCompact = true; S.headerCollapsed = null; render(false); }
     if (window.LabScene && window.LabScene.refreshLayout) window.LabScene.refreshLayout();
   }
   var fillToken = 0;
@@ -179,32 +169,18 @@
           '<span class="mebi-btn-badge">' + window.MebiSVG.icon('helpCircle') + '</span>' +
         '</button>';
 
-      var compact = headerIsCompact();
-      var html = '<div class="mebi-top-shell' + (stage ? ' has-stage' : '') + (compact && stage ? ' is-header-compact' : ' is-header-expanded') + '"><div class="mebi-topbar" id="stageMainHeader">' +
-        '<div class="mebi-brand" data-action="goMenu">' +
-          '<div class="mebi-brand-icon">' + window.MebiSVG.icon('shield') + '</div>' +
-          '<span>TEPKİME ARENASI</span>' +
-        '</div>' +
-
-        // Topbar Çukur İlerleme Rozeti
-        '<div class="mebi-progress-wrapper" title="Keşfedilen Tepkimeler">' +
+      var progressHTML = '<div class="mebi-progress-wrapper" title="Keşfedilen Tepkimeler: ' + totalDiscovered + ' / ' + totalReactions + ' (%' + pct + ')">' +
           '<span class="mebi-progress-star">' + window.MebiSVG.icon('star') + '</span>' +
-          '<span>' + totalDiscovered + ' / ' + totalReactions + ' Keşif</span>' +
-          '<div class="mebi-progress-bar-mini">' +
+          '<span class="mebi-progress-count">' + totalDiscovered + ' / ' + totalReactions + '<span class="mebi-progress-caption"> Keşif</span></span>' +
+          '<div class="mebi-progress-bar-mini" role="progressbar" aria-label="Keşfedilen tepkimeler" aria-valuemin="0" aria-valuemax="' + totalReactions + '" aria-valuenow="' + totalDiscovered + '">' +
             '<div class="mebi-progress-fill-mini" style="width:' + pct + '%;"></div>' +
           '</div>' +
-          '<span>%' + pct + '</span>' +
-        '</div>' +
-
-        '<div class="mebi-topbar-tools">' +
-          toolsHTML +
-        '</div>' +
-      '</div>' + (stage ? stepperHTML(stage, toolsHTML) : '') + '</div>';
-
-    return html;
+          '<span class="mebi-progress-percent">%' + pct + '</span>' +
+        '</div>';
+      return '<div class="mebi-top-shell has-stage is-header-compact is-unified-header' + (S.headerCollapsed ? ' is-stages-minimized' : '') + '">' + stepperHTML(stage || 'pool', toolsHTML, progressHTML) + '</div>';
   }
 
-  function stepperHTML(step, toolsHTML) {
+  function stepperHTML(step, toolsHTML, progressHTML) {
     var steps = [
       { key: 'pool', label: 'Seç' },
       { key: 'predict', label: 'Tahmin' },
@@ -214,12 +190,12 @@
     ];
     var order = { pool: 0, predict: 1, predictionSaved: 1, ready: 2, pouring: 2, reacting: 2, observed: 2, card: 3, model: 4 };
     var available = availableStageIndex(), busy = stageNavigationBusy();
-    var compact = headerIsCompact();
+    var minimized = S.headerCollapsed;
     var idx = S.stageReview ? order[S.stageReview] : (order[step] || 0);
     var pctLine = (idx / (steps.length - 1)) * 100;
 
     var html = '<div class="mebi-stepper">' +
-      '<div class="mebi-stepper-track">' +
+      '<div class="mebi-stepper-track" id="stageMainHeader"' + (minimized ? ' hidden' : '') + '>' +
         '<div class="mebi-step-line">' +
           '<div class="mebi-step-line-fill" style="width:' + pctLine + '%;"></div>' +
         '</div>';
@@ -239,8 +215,9 @@
     }
 
     html += '</div>' +
+      progressHTML +
       (toolsHTML ? '<div class="mebi-stepper-inline-tools">' + toolsHTML + '</div>' : '') +
-      '<button type="button" class="mebi-stage-toggle' + (compact ? ' is-compact' : '') + '" data-action="toggleStageHeader" aria-controls="stageMainHeader" aria-expanded="' + !compact + '" title="' + (compact ? 'Başlığı yeniden göster' : 'Yalnızca aşamaları göster') + '" aria-label="' + (compact ? 'Başlığı yeniden göster' : 'Yalnızca aşamaları göster') + '">' + window.MebiSVG.icon('down') + '</button>' +
+      '<button type="button" class="mebi-stage-toggle' + (minimized ? '' : ' is-compact') + '" data-action="toggleStageHeader" aria-controls="stageMainHeader" aria-expanded="' + !minimized + '" title="' + (minimized ? 'Aşamaları göster' : 'Aşamaları daralt') + '" aria-label="' + (minimized ? 'Aşamaları göster' : 'Aşamaları daralt') + '">' + window.MebiSVG.icon('down') + '</button>' +
     '</div>';
     return html;
   }
@@ -268,7 +245,7 @@
 
   // EKRAN 1: AÇILIŞ MENÜSÜ (Görseldeki Mint Kimya Temalı 16:9 Yatay Kart)
   function entranceIcon(name) {
-    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg)"></span>';
+    return '<span class="entrance-icon" style="--entrance-icon:url(assets/icons/phosphor/' + name + '.svg?v=910bef9ae690)"></span>';
   }
 
   function screenMenu() {
@@ -344,8 +321,52 @@
 
   function labSettingsHTML() { return ''; }
 
+  function savedPairExists(first, second) {
+    if (!first || !second || first === second) return false;
+    function reagentId(value) {
+      var reagent = window.MebiData.REAGENTS.find(function(r) { return r.id === value || r.f === value; });
+      return reagent && reagent.id;
+    }
+    return S.collection.some(function(item) {
+      if (!item || typeof item !== 'object') return false;
+      var values = typeof item.pair === 'string' ? item.pair.split('|') : [];
+      if (values.length !== 2 || !reagentId(values[0]) || !reagentId(values[1])) values = [item.r1, item.r2];
+      var a = reagentId(values[0]), b = reagentId(values[1]);
+      return a === first && b === second || a === second && b === first;
+    });
+  }
+
+  function focusReagent(id) {
+    var cards = document.querySelectorAll('.reagent-gallery-card');
+    for (var i = 0; i < cards.length; i++) if (cards[i].getAttribute('data-arg') === id) { cards[i].focus({preventScroll:true}); break; }
+  }
+
+  function selectReagent(id) {
+    if (window.MebiAudio) window.MebiAudio.playClick();
+    if (S.selectedSlot1 === id) S.selectedSlot1 = null;
+    else if (S.selectedSlot2 === id) S.selectedSlot2 = null;
+    else if (!S.selectedSlot1) S.selectedSlot1 = id;
+    else S.selectedSlot2 = id;
+    S.reagentPanelCollapsed = false;
+    finishSelection();
+  }
+
+  function repeatPairDialogHTML() {
+    var pending = S.pendingRepeatPair;
+    if (!pending || S.screen !== 'pool') return '';
+    var anchor = window.MebiData.getReagent(pending.first || pending.second);
+    var candidate = window.MebiData.getReagent(pending.candidate);
+    return '<dialog id="repeatPairDialog" class="gallery-repeat-dialog" aria-labelledby="repeatPairTitle" aria-describedby="repeatPairDescription">' +
+      '<h2 id="repeatPairTitle">Bu madde çiftiyle daha önce deney yaptın</h2>' +
+      '<p class="gallery-repeat-formulas">' + esc(anchor.f) + ' + ' + esc(candidate.f) + '</p>' +
+      '<p id="repeatPairDescription">Bu madde çiftiyle yaptığın deney Tepkime Koleksiyonuna kaydedilmiş. Aynı maddelerle yeniden deney yapmak istiyor musun?</p>' +
+      '<div class="gallery-repeat-actions"><button type="button" class="mebi-btn mebi-btn-secondary" data-action="cancelRepeatPair" autofocus>Vazgeç</button>' +
+      '<button type="button" class="mebi-btn mebi-btn-primary" data-action="confirmRepeatPair">Evet, yeniden deney yap</button></div></dialog>';
+  }
+
   function reagentGalleryHTML() {
     var q = window.MebiData.foldTR(S.searchQuery);
+    var anchor = S.selectedSlot1 || S.selectedSlot2;
     var cards = window.MebiData.REAGENTS.filter(function(r) {
       return (S.categoryFilter === 'all' || r.category === S.categoryFilter) &&
         (!q || window.MebiData.foldTR(r.id + ' ' + r.name + ' ' + r.f).indexOf(q) !== -1);
@@ -353,12 +374,13 @@
       var slot = S.selectedSlot1 === r.id ? 1 : (S.selectedSlot2 === r.id ? 2 : 0);
       var appearance = r.solid ? 'powder' : (r.id === 'Cu(NO3)2' ? 'blue' : 'clear');
       var description = r.solid ? 'Beyaz katı toz' : (appearance === 'blue' ? 'Mavi sulu çözelti' : 'Renksiz sulu çözelti');
-      return '<button type="button" class="reagent-gallery-card' + (slot ? ' is-selected' : '') +
+      var completed = savedPairExists(anchor, r.id);
+      return '<button type="button" class="reagent-gallery-card' + (slot ? ' is-selected' : '') + (completed ? ' is-previously-tested' : '') +
         '" data-action="clickReagent" data-arg="' + esc(r.id) + '" aria-pressed="' + !!slot +
-        '" aria-label="' + esc(r.f + ', ' + r.name + ', ' + description + (slot ? ', ' + slot + '. beher seçildi' : '')) + '">' +
+        '" aria-label="' + esc(r.f + ', ' + r.name + ', ' + description + (slot ? ', ' + slot + '. beher seçildi' : '') + (completed ? ', bu madde çifti daha önce denendi ve koleksiyona kaydedildi' : '')) + '">' +
         '<span class="reagent-card-visual is-' + appearance + '">' +
-          '<img src="image/reagents/' + appearance + '.webp?v=4" width="640" height="440" alt="" decoding="async" draggable="false">' +
-        '</span><span class="reagent-card-caption">' + (slot ? '<span class="reagent-card-selection">✓ ' + slot + '. beher</span>' : '') + '<strong>' + esc(r.f) + '</strong><span>' + esc(r.name) +
+          '<img src="image/reagents/' + appearance + '.webp?v=910bef9ae690" width="640" height="440" alt="" decoding="async" draggable="false">' +
+        '</span><span class="reagent-card-caption">' + (slot ? '<span class="reagent-card-selection">✓ ' + slot + '. beher</span>' : '') + '<strong>' + esc(r.f) + '</strong>' + (completed ? '<span class="reagent-card-history">Daha önce denendi</span>' : '') + '<span>' + esc(r.name) +
         ' <small>' + (r.solid ? '(katı toz)' : '(suda)') + '</small></span></span></button>';
     }).join('');
     var count = (S.selectedSlot1 ? 1 : 0) + (S.selectedSlot2 ? 1 : 0);
@@ -380,7 +402,7 @@
       '<div class="reagent-gallery-grid" aria-label="Madde kartları">' + (cards || '<p class="gallery-empty">Bu aramada madde bulunamadı.</p>') + '</div>' +
       '<footer class="reagent-gallery-footer"><div class="gallery-selected-slots" aria-label="Seçilen maddeler">' + slots + '</div>' +
       '<span class="gallery-selection-status" role="status" aria-live="polite">' + count + ' / 2 madde seçildi</span>' +
-      '<div class="gallery-actions"><button type="button" class="gallery-test" data-action="randomReactivePairForTesting">Test İçin Rastgele Seç</button><button type="button" class="gallery-clear" data-action="resetPool"' + (!count ? ' disabled' : '') + '>Temizle</button>' +
+      '<div class="gallery-actions"><button type="button" class="gallery-clear" data-action="resetPool"' + (!count ? ' disabled' : '') + '>Temizle</button>' +
       '<button type="button" class="gallery-continue" data-action="startExperiment"' + (count !== 2 || S.isFilling ? ' disabled' : '') +
       '>Tahmin aşamasına geç <span aria-hidden="true">→</span></button></div></footer></section>';
   }
@@ -630,20 +652,58 @@
   }
 
   // EKRAN 6: KOLEKSİYON (COLLECTION)
-                function screenCollection() {
+                function getCollectionCardCategory(c) {
+    if (c.typeCategory) return c.typeCategory;
+    var t = (c.type || '').toLowerCase();
+    if (t.indexOf('çökelme') >= 0 || t.indexOf('c - çökelme') >= 0) return 'ppt';
+    if (t.indexOf('asit-baz') >= 0 || t.indexOf('asit') >= 0) return 'acidbase';
+    if (t.indexOf('redoks') >= 0 || t.indexOf('yükseltgenme') >= 0) return 'redox';
+    if (t.indexOf('kompleks') >= 0) return 'complex';
+    return 'none';
+  }
+
+  function screenCollection() {
     var totalDiscovered = S.collection.length;
     var totalReactions = 36;
+
+    var currentFilter = S.collectionFilter || 'all';
+    var filteredCollection = S.collection.filter(function(c) {
+      if (currentFilter === 'all') return true;
+      return getCollectionCardCategory(c) === currentFilter;
+    });
+
+    var colFilters = [
+      ['all', 'Tümü'],
+      ['ppt', 'Çökelme'],
+      ['acidbase', 'Asit-Baz'],
+      ['redox', 'Redoks'],
+      ['complex', 'Kompleksleşme'],
+      ['none', 'Tepkimesiz']
+    ];
+
+    var filterButtonsHTML = '<div class="gallery-filters collection-filter-bar" role="group" aria-label="Deney türü filtresi">' +
+      colFilters.map(function(f) {
+        var isSelected = currentFilter === f[0];
+        return '<button type="button" class="collection-filter-btn' + (isSelected ? ' is-active' : '') + '" data-action="setCollectionFilter" data-arg="' + f[0] + '" aria-pressed="' + isSelected + '">' + f[1] + '</button>';
+      }).join('') + '</div>';
 
     var bodyHtml = '';
     if (totalDiscovered === 0) {
       bodyHtml = '<div class="collection-empty" style="text-align:center;padding:40px 20px;color:var(--mebi-text-secondary);">' +
         '<p style="font-size:15px;margin:0;">Henüz kaydedilmiş bir deney modeliniz bulunmuyor. Deneylerinizi tamamladığınızda modelleriniz bu alanda listelenecektir.</p>' +
       '</div>';
+    } else if (filteredCollection.length === 0) {
+      bodyHtml = '<div class="collection-empty" style="text-align:center;padding:40px 20px;color:var(--mebi-text-secondary);">' +
+        '<p style="font-size:15px;margin:0;">Bu filtreye uygun kaydedilmiş deney modeli bulunamadı.</p>' +
+      '</div>';
     } else {
       bodyHtml = '<div class="collection-grid">' +
-        S.collection.map(function(c, i) {
-          return '<div class="collection-card">' +
-            '<div class="collection-card-num">DENEY #' + String(i + 1).padStart(3, '0') + '</div>' +
+        filteredCollection.map(function(c, i) {
+          var cat = getCollectionCardCategory(c);
+          var originalIndex = S.collection.indexOf(c);
+          var numStr = String(originalIndex >= 0 ? originalIndex + 1 : i + 1).padStart(3, '0');
+          return '<div class="collection-card is-' + cat + '">' +
+            '<div class="collection-card-num">DENEY #' + numStr + '</div>' +
             '<div class="collection-card-formula">' + esc(c.r1) + ' + ' + esc(c.r2) + '</div>' +
             '<div class="collection-card-type">' + esc(c.type) + '</div>' +
             '<div class="collection-card-eq">' + esc(c.eq) + '</div>' +
@@ -669,15 +729,24 @@
     var html = topbarHTML(true, resumeStage) +
       '<div class="mebi-card collection-shell">' +
         '<div class="collection-heading" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">' +
-          '<div class="mebi-badge mebi-badge-success collection-title-badge">' +
-            '<span>LABORATUVAR GÜNLÜĞÜ</span>' +
-            '<span class="collection-title-sep">·</span>' +
-            '<span>KAYDEDİLEN DENEY MODELLERİ (' + totalDiscovered + ')</span>' +
+          '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">' +
+            '<div class="mebi-badge mebi-badge-success collection-title-badge">' +
+              '<span>LABORATUVAR GÜNLÜĞÜ</span>' +
+              '<span class="collection-title-sep">·</span>' +
+              '<span>KAYDEDİLEN DENEY MODELLERİ (' + totalDiscovered + ')</span>' +
+            '</div>' +
+            filterButtonsHTML +
           '</div>' +
-          '<button class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="closeCollection" title="Laboratuvar Günlüğünü Kapat" aria-label="Laboratuvar Günlüğünü Kapat">' +
-            '<span class="mebi-btn-badge">' + window.MebiSVG.icon('fullscreenExit') + '</span>' +
-            '<span>Kapat</span>' +
-          '</button>' +
+          (S.experimentCompleted
+            ? '<button class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="startNewExperiment" title="Yeni Bir Deney Yap" aria-label="Yeni Bir Deney Yap">' +
+                '<span class="mebi-btn-badge">' + window.MebiSVG.icon('flask') + '</span>' +
+                '<span>Yeni Bir Deney Yap</span>' +
+              '</button>'
+            : '<button class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="closeCollection" title="Laboratuvar Günlüğünü Kapat" aria-label="Laboratuvar Günlüğünü Kapat">' +
+                '<span class="mebi-btn-badge">' + window.MebiSVG.icon('fullscreenExit') + '</span>' +
+                '<span>Kapat</span>' +
+              '</button>'
+          ) +
         '</div>' +
         bodyHtml +
       '</div>';
@@ -759,8 +828,7 @@
   /* ----------------- 5. EYLEMLER VE YÖNLENDİRİCİ (ACTIONS & ROUTER) ----------------- */
   var actions = {
     toggleStageHeader: function() {
-      var compact = headerIsCompact();
-      S.headerCollapsed = !compact; render(false);
+      S.headerCollapsed = !S.headerCollapsed; render(false);
       var toggle = document.querySelector('.mebi-stage-toggle'); if (toggle) toggle.focus({preventScroll:true});
     },
     closeStageReview: function() { S.stageReview = null; render(false); },
@@ -790,6 +858,8 @@
       S.screen = 'menu';
       S.resumeScreen = null;
       S.resumeLabStep = null;
+      S.experimentCompleted = false;
+      S.showCompletionModal = false;
       S.labView = 'wide';
       if (window.LabScene && typeof window.LabScene.setView === 'function') {
         window.LabScene.setView('wide');
@@ -993,20 +1063,27 @@
     },
     clickReagent: function(id) {
       if (S.screen !== 'pool' || !window.MebiData.getReagent(id)) return;
-      if (window.MebiAudio) window.MebiAudio.playClick();
-      if (S.selectedSlot1 === id) {
-        S.selectedSlot1 = null;
-      } else if (S.selectedSlot2 === id) {
-        S.selectedSlot2 = null;
-      } else if (!S.selectedSlot1) {
-        S.selectedSlot1 = id;
-      } else if (!S.selectedSlot2) {
-        S.selectedSlot2 = id;
-      } else {
-        S.selectedSlot2 = id;
+      if (id !== S.selectedSlot1 && id !== S.selectedSlot2 && savedPairExists(S.selectedSlot1 || S.selectedSlot2, id)) {
+        S.pendingRepeatPair = {first:S.selectedSlot1, second:S.selectedSlot2, candidate:id};
+        render(false);
+        return;
       }
-      S.reagentPanelCollapsed = false;
-      finishSelection();
+      selectReagent(id);
+    },
+    cancelRepeatPair: function() {
+      var pending = S.pendingRepeatPair;
+      if (!pending) return;
+      S.pendingRepeatPair = null;
+      render(false);
+      focusReagent(pending.candidate);
+    },
+    confirmRepeatPair: function() {
+      var pending = S.pendingRepeatPair;
+      if (!pending) return;
+      S.pendingRepeatPair = null;
+      if (S.screen === 'pool' && S.selectedSlot1 === pending.first && S.selectedSlot2 === pending.second) selectReagent(pending.candidate);
+      else render(false);
+      focusReagent(pending.candidate);
     },
     clearSlot: function(num) {
       if (S.screen !== 'pool') return;
@@ -1023,22 +1100,6 @@
       S.selectedSlot2 = null;
       S.searchQuery = '';
       S.categoryFilter = 'all';
-      S.reagentPanelCollapsed = false;
-      finishSelection();
-    },
-    randomReactivePairForTesting: function() {
-      if (S.screen !== 'pool') return;
-      var reagents = window.MebiData.REAGENTS, pairs = [];
-      for (var i = 0; i < reagents.length; i++) {
-        for (var j = i + 1; j < reagents.length; j++) {
-          if (window.MebiData.getReaction(reagents[i].id, reagents[j].id).typeCategory !== 'none') pairs.push([reagents[i].id, reagents[j].id]);
-        }
-      }
-      if (!pairs.length) return;
-      var pair = pairs[Math.floor(Math.random() * pairs.length)];
-      if (Math.random() < 0.5) pair = [pair[1], pair[0]];
-      S.selectedSlot1 = pair[0]; S.selectedSlot2 = pair[1];
-      S.searchQuery = ''; S.categoryFilter = 'all';
       S.reagentPanelCollapsed = false;
       finishSelection();
     },
@@ -1120,19 +1181,7 @@
         render();
       }
 
-      if (btn) {
-        render(false);
-        var statusEl = document.getElementById('predictionSavedStatus');
-        if (statusEl) statusEl.innerHTML = window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi';
-        var beginBtn = document.getElementById('beginExperimentButton');
-        if (beginBtn) beginBtn.disabled = true;
-        S.beginExperimentTimer = setTimeout(function() {
-          S.beginExperimentTimer = null;
-          executeBegin();
-        }, 2000);
-      } else {
-        executeBegin();
-      }
+      animateSave(btn, executeBegin);
     },
     requestManualPour: function() {
       if (!window.MebiPrediction.started(S)) return;
@@ -1241,14 +1290,42 @@
       setTimeout(function() {
         if (S.activeReaction !== reactionAtStart || !S.experiment || S.experiment.run !== experimentRun || S.labStep !== 'reacting') return;
         S.labStep = 'observed';
+        window.MebiObservation.get(S).labVisible = false;
+        S.benchAttention = true;
         render();
       }, 4200);
     },
     showObservationDesk: function() {
       if (window.MebiObservation.showLab(S, true)) render(false);
     },
+    saveObservationAndProceed: function(arg, btn) {
+      var saved = window.MebiObservation.save(S);
+      if (saved) {
+        if (window.MebiAudio) window.MebiAudio.playSuccess();
+        animateSave(btn, function() { S.screen = 'card'; render(false); });
+      } else {
+        render(false);
+      }
+    },
+    openPredictionDialog: function() {
+      var dlg = document.getElementById('explanationPredictionDialog');
+      if (dlg && typeof dlg.showModal === 'function') {
+        if (!dlg.open) dlg.showModal();
+      }
+    },
+    closePredictionDialog: function() {
+      var dlg = document.getElementById('explanationPredictionDialog');
+      if (dlg && typeof dlg.close === 'function') {
+        if (dlg.open) dlg.close();
+      }
+    },
     openObservationCard: function() {
+      S.benchAttention = false;
+      if (window.MebiFloatingCards && window.MebiFloatingCards.expand) window.MebiFloatingCards.expand(S);
+      var card = document.querySelector('#app .observation-card');
+      if (card) card.classList.remove('is-attention-pulse');
       if (window.MebiObservation.showLab(S, false)) render(false);
+      else render(false);
     },
     setObservationChoice: function(value) {
       if (window.MebiObservation.setChoice(S, value)) render(false);
@@ -1271,19 +1348,11 @@
         var ok = window.MebiObservation.save(S);
         render(false);
         if (!ok) return;
-        var statusEl = document.getElementById('observationSavedStatus');
-        if (statusEl) statusEl.innerHTML = window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi';
-        var compBtn = document.getElementById('compareObservationButton');
-        if (compBtn) compBtn.disabled = true;
-        S.compareTransitionTimer = setTimeout(function() {
-          S.compareTransitionTimer = null;
+        animateSave(btn, function() {
           window.MebiObservation.setTab(S, 'compare');
           render(false);
-          var dock = document.getElementById('benchDock');
-          if (dock) dock.scrollTop = 0;
-          var panel = document.getElementById('observationPanel');
-          if (panel) panel.scrollTop = 0;
-        }, 2000);
+          var panel = document.getElementById('observationPanel');if(panel)panel.scrollTop=0;
+        });
         return;
       }
       var ok = window.MebiObservation.setTab(S, value);
@@ -1300,18 +1369,21 @@
     },
     backToObservation: function() {
       S.particleInspection = null; S.explanationReview = null; S.screen = 'lab'; S.labStep = 'observed';
-      window.MebiObservation.get(S).tab = 'compare'; window.MebiObservation.showLab(S, false); render(false);
+      window.MebiObservation.get(S).tab = 'observe'; window.MebiObservation.showLab(S, false); render(false);
     },
     saveExplanation: function() {
       if (S.screen !== 'card') return;
       window.MebiExplanation.save(S);
       render(false);
     },
-    toModel: function() {
+    toModel: function(arg, btn) {
       if (!window.MebiExplanation.eligible(S)) return;
       if (!window.MebiExplanation.save(S)) { S.screen='card'; render(false); return; }
-      S.stageReview=null; S.particleInspection=null; S.explanationReview=null; S.screen='model'; render(false);
-      var panel=document.querySelector('.model-content');if(panel)panel.scrollTop=0;
+      function executeToModel() {
+        S.stageReview=null; S.particleInspection=null; S.explanationReview=null; S.screen='model'; render(false);
+        var panel=document.querySelector('.model-content');if(panel)panel.scrollTop=0;
+      }
+      animateSave(btn, executeToModel);
     },
     backToExplanation: function() {
       if (S.screen!=='model') return;
@@ -1319,19 +1391,185 @@
     },
     saveModel: function() {
       if(S.screen!=='model')return;
-      if(window.MebiModel.save(S)){
-        var rx=S.activeReaction,draft=window.MebiModel.get(S),pair=[S.selectedSlot1,S.selectedSlot2].sort().join('|');
-        var item={r1:window.MebiData.getReagent(S.selectedSlot1).f,r2:window.MebiData.getReagent(S.selectedSlot2).f,type:rx.canonical,eq:window.MebiModel.summary(S),pair:pair,reaction:rx.typeCategory!=='none',explanationId:S.observation.record.id,model:{type:'particle-relationships',record:draft.revisions[draft.revisions.length-1]}};
-        var index=S.collection.findIndex(function(c){return c.pair===pair||c.eq===rx.eq;});
-        if(index<0)S.collection.push(item);else S.collection[index]=item;
-        if(!saveCollectionToStorage()) draft.storageError=true;
-      }
+      window.MebiModel.save(S);
       render(false);
       var feedback=document.getElementById('modelStatus');if(feedback)feedback.scrollIntoView({block:'nearest'});
+    },
+    saveModelAndToEquation: function(arg, btn) {
+      if(S.screen!=='model')return;
+      var draft=window.MebiModel.get(S);
+      var valid=window.MebiModel.check(S);
+      if(!valid){
+        render(false);
+        var feedback=document.getElementById('modelStatus');
+        if(feedback)feedback.scrollIntoView({block:'nearest'});
+        return;
+      }
+      window.MebiModel.save(S);
+      function executeAdvance() {
+        draft.subView='equation';
+        window.MebiModel.persist(S);
+        render(false);
+        var content=document.querySelector('.model-content');
+        if(content)content.scrollTop=0;
+      }
+      animateSave(btn, executeAdvance);
+    },
+    closeModelHelpModal: function() {
+      if(S.screen!=='model')return;
+      var draft=window.MebiModel.get(S);
+      draft.helpPopupShown=true;
+      var modal=document.getElementById('modelHelpModal');
+      if(modal)modal.classList.add('is-hidden');
     },
     checkModel: function() { if(S.screen==='model')window.MebiModel.check(S); },
     checkModelDock: function() { if(window.MebiAudio)window.MebiAudio.playClick(); if(window.MebiModel && window.MebiModel.checkDock)window.MebiModel.checkDock(S); },
     autoFillModelForTesting: function() { if(S.screen==='model'&&window.MebiModel.autoFillForTesting(S))render(false); },
+    setModelSubView: function(arg, btn) {
+      if (S.screen !== 'model') return;
+      var view = arg || (btn && btn.dataset && btn.dataset.arg) || 'relationships';
+      window.MebiModel.setSubView(S, view);
+      render(false);
+      var content = document.querySelector('.model-content');
+      if (content) content.scrollTop = 0;
+    },
+    addEquationTerm: function(arg, btn) {
+      if (S.screen !== 'model') return;
+      var side = (btn && btn.dataset && btn.dataset.side) || (arg && arg.side);
+      var kind = (btn && btn.dataset && btn.dataset.kind) || (arg && arg.kind);
+      if (side && kind) {
+        window.MebiModel.addTerm(S, side, kind);
+        render(false);
+      }
+    },
+    removeEquationTerm: function(arg, btn) {
+      if (S.screen !== 'model') return;
+      var side = (btn && btn.dataset && btn.dataset.side) || (arg && arg.side);
+      var idx = (btn && btn.dataset && parseInt(btn.dataset.index, 10)) != null ? parseInt(btn.dataset.index, 10) : (arg && arg.index);
+      if (side && !isNaN(idx)) {
+        window.MebiModel.removeTerm(S, side, idx);
+        render(false);
+      }
+    },
+    stepEquationCoeff: function(arg, btn) {
+      if (S.screen !== 'model') return;
+      var side = (btn && btn.dataset && btn.dataset.side) || (arg && arg.side);
+      var idx = (btn && btn.dataset && parseInt(btn.dataset.index, 10)) != null ? parseInt(btn.dataset.index, 10) : (arg && arg.index);
+      var delta = (btn && btn.dataset && parseInt(btn.dataset.delta, 10)) || (arg && arg.delta) || 1;
+      if (side && !isNaN(idx)) {
+        window.MebiModel.stepCoefficient(S, side, idx, delta);
+        render(false);
+      }
+    },
+    setEquationCoeff: function(arg, btn) {
+      if (S.screen !== 'model') return;
+      var side = (btn && btn.dataset && btn.dataset.side) || (arg && arg.side);
+      var idx = (btn && btn.dataset && parseInt(btn.dataset.index, 10)) != null ? parseInt(btn.dataset.index, 10) : (arg && arg.index);
+      var val = (arg && arg.value != null ? arg.value : (btn && btn.value)) || 1;
+      if (side && !isNaN(idx)) {
+        window.MebiModel.setCoefficient(S, side, idx, val);
+        render(false);
+      }
+    },
+    clearEquationDraft: function() {
+      if (S.screen !== 'model') return;
+      window.MebiModel.clearEquation(S);
+      render(false);
+    },
+    quickAddPlaceholder: function(arg, btn) {
+      if (S.screen !== 'model') return;
+      var side = (btn && btn.dataset && btn.dataset.side) || arg || 'reactants';
+      window.MebiModel.quickAddPlaceholder(S, side);
+      render(false);
+    },
+    dismissBalancedModal: function() {
+      if (window.MebiAudio) window.MebiAudio.playClick();
+      var draft = window.MebiModel.get(S);
+      if (draft) draft.showBalancedModal = false;
+      render(false);
+    },
+    dismissCompletionModal: function() {
+      if (window.MebiAudio) window.MebiAudio.playClick();
+      S.showCompletionModal = false;
+      render(false);
+    },
+    viewCollectionFromCompletion: function() {
+      if (window.MebiAudio) window.MebiAudio.playClick();
+      S.showCompletionModal = false;
+      actions.goCollection();
+    },
+    startNewExperiment: function() {
+      if (window.MebiAudio) window.MebiAudio.playClick();
+      S.showCompletionModal = false;
+      S.experimentCompleted = false;
+      var draft = window.MebiModel.get(S);
+      if (draft) {
+        draft.showBalancedModal = false;
+        draft.hasCelebrated = false;
+      }
+      actions.goPool();
+    },
+    checkEquation: function() {
+      if (S.screen !== 'model') return;
+      window.MebiModel.checkEquation(S);
+      render(false);
+    },
+    saveEquation: function(arg, btn) {
+      if (S.screen !== 'model') return;
+      if (window.MebiModel.saveEquation(S)) {
+        var rx = S.activeReaction, draft = window.MebiModel.get(S), pair = [S.selectedSlot1, S.selectedSlot2].sort().join('|');
+        var item = {
+          r1: window.MebiData.getReagent(S.selectedSlot1).f,
+          r2: window.MebiData.getReagent(S.selectedSlot2).f,
+          type: rx.canonical,
+          eq: window.MebiModel.summary(S),
+          pair: pair,
+          reaction: rx.typeCategory !== 'none',
+          explanationId: S.observation.record.id,
+          model: {
+            type: 'particle-relationships',
+            record: draft.revisions && draft.revisions.length ? draft.revisions[draft.revisions.length - 1] : null,
+            equation: draft.equationDraft
+          }
+        };
+        var index = S.collection.findIndex(function(c){ return c.pair === pair || c.eq === rx.eq; });
+        if (index < 0) S.collection.push(item); else S.collection[index] = item;
+        if (!saveCollectionToStorage()) draft.storageError = true;
+        S.experimentCompleted = true;
+        draft.showBalancedModal = false;
+        animateSave(btn, function() { S.showCompletionModal = true; render(false); });
+        return;
+      }
+      render(false);
+      var feedback = document.getElementById('modelStatus'); if (feedback) feedback.scrollIntoView({ block: 'nearest' });
+    },
+    dismissNonReactionNotice: function() {
+      if (!window.MebiNonReaction || !window.MebiNonReaction.scenario(S)) return;
+      window.MebiNonReaction.get(S).notice=null;
+      render(false);
+      var button=document.querySelector('[data-action="saveNonReaction"]');if(button)button.focus({preventScroll:true});
+    },
+    saveNonReaction: function(arg, btn) {
+      if (S.screen !== 'model' || !window.MebiNonReaction || !window.MebiNonReaction.scenario(S)) return;
+      var record=window.MebiNonReaction.save(S);
+      if (record) {
+        var pair=[S.selectedSlot1,S.selectedSlot2].sort().join('|');
+        var item={r1:window.MebiData.getReagent(S.selectedSlot1).f,r2:window.MebiData.getReagent(S.selectedSlot2).f,
+          pair:pair,reaction:false,type:'Bu koşullarda net kimyasal tepkime yok',
+          eq:'Yeni kimyasal ürün oluşumu gösterilmiyor. '+record.reason,
+          explanationId:S.observation.record.id,model:{type:'nonreaction-inventory',record:record,equation:null}};
+        var index=S.collection.findIndex(function(c){return c.pair===pair;});
+        if(index<0)S.collection.push(item);else S.collection[index]=item;
+        if (saveCollectionToStorage()) {
+          S.experimentCompleted=true;
+          animateSave(btn,function(){window.MebiNonReaction.showSaveNotice(S,true);render(false);});
+          return;
+        }
+        else {var draft=window.MebiNonReaction.get(S);draft.storageError=true;draft.saved=false;}
+      }
+      window.MebiNonReaction.showSaveNotice(S,false);
+      render(false);
+    },
     setExplanationStep: function(value) {
       if (S.screen !== 'card' || !window.MebiExplanation.setStep(S, value)) return;
       render(false);
@@ -1353,15 +1591,14 @@
       var content = document.querySelector('.explanation-content'); if(content)content.scrollTop=scroll;
       var heading = document.getElementById('explanationTitle'); if(heading)heading.focus({preventScroll:true});
     },
-    toCard: function() {
+    toCard: function(arg, btn) {
       if (S.screen !== 'lab' || S.labStep !== 'observed' || !window.MebiObservation.get(S).record) return;
       if (window.MebiAudio) window.MebiAudio.playClick();
       var obs = window.MebiObservation.get(S);
       if (obs && obs.reflection && obs.reflection.trim()) {
         window.MebiObservation.saveReflection(S);
       }
-      S.screen = 'card';
-      render();
+      animateSave(btn,function(){S.screen = 'card';render();});
     },
     openParticleInspection: function(view) {
       if (!window.MebiParticleInspection.eligible(S) || !window.LabScene || !window.LabScene.available || !/^(before|reaction)$/.test(view)) return;
@@ -1378,6 +1615,10 @@
     },
     toggleParticleNormal: function() {var p=S.particleInspection;if(!p)return;p.micro=!p.micro;window.MebiParticleInspection.paint(S);},
     seekParticleInspection: function(value) {var p=S.particleInspection;if(!p||p.view!=='reaction')return;p.time=Math.max(0,Math.min(16,Number(value)||0));p.revision++;window.MebiParticleInspection.paint(S);},
+    setCollectionFilter: function(filter) {
+      S.collectionFilter = filter;
+      render(false);
+    },
     clearCollection: function() {
       function doClear() {
         if (window.MebiAudio) window.MebiAudio.playClick();
@@ -1449,8 +1690,11 @@
 
   function dispatch(action, arg, btn) {
     if (!actions[action]) return;
-    if (/^(goMenu|goPool|changeReactants|resumeExperiment|goCollection|viewCollectionItem)$/.test(action)) S.stageReview = null;
-    if (!/^(navigateStage|closeStageReview|toggleStageHeader|cancelExperimentSafety|setObservationChoice|autoFillObservationForTesting|saveObservation|setObservationTab|saveObservationReflection|showObservationDesk|openObservationCard|toggleSafetyCheck|toggleAllSafetyChecks|acceptExperimentSafety|openParticleInspection|closeParticleInspection|toggleParticleNormal|seekParticleInspection|backToObservation|saveExplanation|toModel|saveModel|checkModel|checkModelDock|autoFillModelForTesting|backToExplanation|setExplanationStep|autoFillExplanationForTesting|reviewExplanationExperiment|closeExplanationExperiment)$/.test(action) && action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
+    if (S.saveTransition) return;
+    if (/^(startNewExperiment|viewCollectionFromCompletion)$/.test(action) && window.MebiNonReaction && window.MebiNonReaction.scenario(S)) window.MebiNonReaction.get(S).notice=null;
+    if (S.pendingRepeatPair && action !== 'confirmRepeatPair' && action !== 'cancelRepeatPair') return;
+    if (/^(goMenu|goPool|changeReactants|resumeExperiment|goCollection|viewCollectionItem|startNewExperiment|viewCollectionFromCompletion)$/.test(action)) S.stageReview = null;
+    if (!/^(navigateStage|closeStageReview|toggleStageHeader|cancelExperimentSafety|setObservationChoice|autoFillObservationForTesting|saveObservation|saveObservationAndProceed|openPredictionDialog|closePredictionDialog|setCollectionFilter|setObservationTab|saveObservationReflection|showObservationDesk|openObservationCard|toggleSafetyCheck|toggleAllSafetyChecks|acceptExperimentSafety|openParticleInspection|closeParticleInspection|toggleParticleNormal|seekParticleInspection|backToObservation|saveExplanation|toModel|saveModel|checkModel|checkModelDock|autoFillModelForTesting|backToExplanation|setExplanationStep|autoFillExplanationForTesting|reviewExplanationExperiment|closeExplanationExperiment|setModelSubView|addEquationTerm|removeEquationTerm|stepEquationCoeff|setEquationCoeff|clearEquationDraft|quickAddPlaceholder|checkEquation|saveEquation|saveModelAndToEquation|closeModelHelpModal|dismissBalancedModal|dismissCompletionModal|viewCollectionFromCompletion|startNewExperiment)$/.test(action) && action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
       HISTORY.push(JSON.stringify(S));
       if (HISTORY.length > 40) HISTORY.shift();
     }
@@ -1466,6 +1710,35 @@
     model: screenModel,
     collection: screenCollection
   };
+
+
+  function saveProgressHTML() {
+    return '<span class="mebi-saving-indicator" role="status">' +
+      '<span class="mebi-saving-ring">' +
+        '<svg viewBox="0 0 32 32"><circle class="ring-bg" cx="16" cy="16" r="12"></circle><circle class="ring-bar" cx="16" cy="16" r="12"></circle></svg>' +
+        '<span class="ring-icon">' + window.MebiSVG.icon('save') + '</span>' +
+      '</span>' +
+      '<span class="ring-text">Kaydediliyor…</span>' +
+    '</span>';
+  }
+
+  // Keep the same progress ring visible for every save-and-advance action.
+  function animateSave(btn, complete) {
+    if (!btn) { complete(); return; }
+    if (S.saveTransition) return;
+    S.saveTransition={action:btn.dataset.action};
+    paintSaveTransition();
+    setTimeout(function(){S.saveTransition=null;complete();},700);
+  }
+  function paintSaveTransition() {
+    if(!S.saveTransition)return;
+    var buttons=document.querySelectorAll('[data-action="'+S.saveTransition.action+'"]');
+    buttons.forEach(function(button){
+      button.disabled=true;
+      button.setAttribute('aria-busy','true');
+      if(!button.previousElementSibling || !button.previousElementSibling.classList.contains('mebi-saving-indicator'))button.insertAdjacentHTML('beforebegin',saveProgressHTML());
+    });
+  }
 
   function render(scrollTop) {
     var app = document.getElementById('app');
@@ -1484,7 +1757,7 @@
     var listScroll = oldList ? oldList.scrollTop : 0;
     var oldObservationPanel = app.querySelector('#observationPanel');
     var observationScroll = oldObservationPanel ? oldObservationPanel.scrollTop : 0;
-    app.innerHTML = fn();
+    app.innerHTML = fn() + repeatPairDialogHTML();
     var newList = app.querySelector('.prediction-content, .reagent-gallery-grid, .lab-reagent-list, .observation-dock');
     if (newList) newList.scrollTop = listScroll;
     var newObservationPanel = app.querySelector('#observationPanel');
@@ -1492,6 +1765,7 @@
     app.dataset.screen = S.stageReview === 'pool' ? 'pool' : S.stageReview ? 'lab' : S.screen;
     if (window.LabScene) window.LabScene.sync(S, dispatch);
     wireInputs();
+    paintSaveTransition();
     if (focusedSafety && S.screen === 'lab') {
       var safetyControl = app.querySelector('[data-safety-control="' + focusedSafety + '"]');
       if (safetyControl && !safetyControl.disabled) safetyControl.focus({ preventScroll:true });
@@ -1519,6 +1793,18 @@
     if (scrollTop !== false) {
       window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
     }
+    var repeatDialog = document.getElementById('repeatPairDialog');
+    if (repeatDialog && typeof repeatDialog.showModal === 'function') {
+      repeatDialog.addEventListener('cancel', function(event) { event.preventDefault(); dispatch('cancelRepeatPair'); });
+      repeatDialog.addEventListener('keydown', function(event) {
+        if (event.key !== 'Tab') return;
+        var buttons = repeatDialog.querySelectorAll('button:not([disabled])');
+        var first = buttons[0], last = buttons[buttons.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      });
+      repeatDialog.showModal();
+    }
   }
 
   function wireInputs() {
@@ -1526,6 +1812,7 @@
     window.MebiObservation.wireInputs(S);
     window.MebiExplanation.wire(S);
     window.MebiModel.wire(S);
+    if(window.MebiNonReaction)window.MebiNonReaction.wire(S);
     if(window.MebiParticleInspection)window.MebiParticleInspection.wire(S);
     var si = document.getElementById('poolSearchInput');
     if (si) {
@@ -1599,13 +1886,6 @@
 
   // Global erişim
   function resizeStageHeader() {
-    var compact = window.innerHeight < 650 || window.innerWidth < 760;
-    var smaller = window.innerWidth < headerViewport.width || window.innerHeight < headerViewport.height;
-    var changed = compact !== headerAutoCompact;
-    headerViewport = {width:window.innerWidth,height:window.innerHeight};
-    headerAutoCompact = compact;
-    if (smaller && compact && S.headerCollapsed === false) { S.headerCollapsed = null; changed = true; }
-    if (changed && S.headerCollapsed == null) render(false);
     if (window.requestAnimationFrame) window.requestAnimationFrame(fitStageHeader);
   }
   window.addEventListener('resize',resizeStageHeader);

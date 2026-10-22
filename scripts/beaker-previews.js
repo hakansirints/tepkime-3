@@ -67,11 +67,13 @@ for(let i=0;i<1500;i++){
 }
 vessel.group.add(grains);
 
-window.renderReagentPreview = type => {
-  const palettes={powder:['#43576b','#293b4d'],clear:['#adb3ba','#7d8791'],blue:['#f2e7d5','#ded0ba']};
-  if(!palettes[type])throw new Error('Unknown reagent preview: '+type);
+window.renderReagentPreview = (type, customPalette) => {
+  const defaultCommon = ['#43576b', '#293b4d'];
+  const palettes = { powder: defaultCommon, clear: defaultCommon, blue: defaultCommon };
+  const pal = customPalette || palettes[type] || defaultCommon;
+  if(!pal)throw new Error('Unknown reagent preview: '+type);
   const ctx=backdrop.getContext('2d'),gradient=ctx.createLinearGradient(0,0,0,440);
-  gradient.addColorStop(0,palettes[type][0]);gradient.addColorStop(1,palettes[type][1]);
+  gradient.addColorStop(0,pal[0]);gradient.addColorStop(1,pal[1]);
   ctx.fillStyle=gradient;ctx.fillRect(0,0,2,440);backdropTexture.needsUpdate=true;
   vessel.powder.visible=grains.visible=type==='powder';
   vessel.grains.visible=vessel.sediment.visible=false;

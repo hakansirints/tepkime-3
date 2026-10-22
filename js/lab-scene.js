@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 window.THREE = THREE;
 globalThis.THREE = THREE;
-import { OrbitControls } from './vendor/three/OrbitControls.js';
-import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js';
-import { createPowderMotion } from './powder-motion.js?v=2';
-import { createLiquidSurface } from './liquid-surface.js';
+import { OrbitControls } from './vendor/three/OrbitControls.js?v=910bef9ae690';
+import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js?v=910bef9ae690';
+import { createPowderMotion } from './powder-motion.js?v=910bef9ae690';
+import { createLiquidSurface } from './liquid-surface.js?v=910bef9ae690';
 
 function dismissLabLoader() {
   const loader = document.getElementById('mebiLabLoader');
@@ -358,7 +358,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let particleLoadError = false;
   function ensureParticleLayer() {
     if (particleLayer || particleLoading || particleLoadError) return;
-    particleLoading = import('./beaker-particles.js?v=3.2').then(module => {
+    particleLoading = import('./beaker-particles.js?v=910bef9ae690').then(module => {
       particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature});
       particleLayer.sync(state);resize();renderFrame();
     }).catch(error => {
@@ -621,6 +621,17 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   function moveCamera(position, target = focus, duration = 650, fov = 40) {
     stopCameraInertia();
     zoomMotion = null;
+    if (duration <= 1 || (typeof reducedMotion !== 'undefined' && reducedMotion.matches)) {
+      cameraTransition = null;
+      camera.position.copy(position);
+      controls.target.copy(target);
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+      controls.update();
+      camera.lookAt(target);
+      camera.updateMatrixWorld();
+      return;
+    }
     cameraTransition = { from: camera.position.clone(), to: position.clone(),
       targetFrom: controls.target.clone(), targetTo: target.clone(), fromFov: camera.fov, toFov: fov,
       started: performance.now(), duration };
@@ -884,13 +895,32 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     const r2 = window.MebiData.getReagent(state && state.selectedSlot2);
     const rx = state && state.activeReaction;
     const step = state ? state.labStep : 'predict';
-    const reacting = !!rx && (step === 'reacting' || step === 'observed');
     const experiment = state ? window.MebiExperiment.get(state) : null;
+    const hasActiveRx = !!rx && rx.typeCategory !== 'none';
+    const transfer = experiment ? experiment.transfer : (/^(reacting|observed)$/.test(step) ? 1 : 0);
+    const reacting = hasActiveRx ? (step === 'reacting' || step === 'observed' || (step === 'pouring' && transfer > 0.03)) : (step === 'reacting' || step === 'observed');
     const now = performance.now(), dt = Math.min(.10, Math.max(0, (now - motionAt) / 1000)); motionAt = now;
     if (experiment && state.screen === 'lab' && (step === 'ready' || step === 'pouring')) {
       const complete = window.MebiExperiment.advance(state, document.hidden ? 0 : dt, reducedMotion.matches);
       if (experiment.flow > 0 && previousFlow === 0 && experiment.mode === 'manual' && window.MebiAudio) window.MebiAudio.playPour();
       previousFlow = experiment.flow;
+      if (hasActiveRx && experiment.transfer > 0.03) {
+        const tProg = THREE.MathUtils.clamp((experiment.transfer - 0.03) / 0.85, 0, 1);
+        const curT = rx.tempInit + (rx.tempFinal - rx.tempInit) * tProg;
+        state.currentTemp = Math.round(curT * 10) / 10;
+        const digitalValEl = document.getElementById('digitalTempValue');
+        if (digitalValEl) digitalValEl.textContent = state.currentTemp.toFixed(1);
+        const sensorEl = document.getElementById('sensorTempDisplay');
+        if (sensorEl) {
+          const curD = (state.currentTemp - rx.tempInit).toFixed(1);
+          const curSign = curD > 0 ? ('+' + curD) : curD;
+          sensorEl.innerHTML = window.MebiSVG.icon('temp') + '<span>' + state.currentTemp.toFixed(1) + '°C</span><span style="font-size:11px;opacity:0.85;margin-left:4px;">(ΔT: ' + curSign + '°C)</span>';
+        }
+        if (experiment.transfer > 0.08 && !experiment.fizzPlayed && (rx.obs.indexOf('gas') > -1 || rx.hasTempRise)) {
+          experiment.fizzPlayed = true;
+          if (window.MebiAudio) window.MebiAudio.playFizz();
+        }
+      }
       if (experiment.mode === 'idle' && !experiment.safetyOpen) controls.enabled = true;
       window.MebiExperiment.paint(state);
       if (complete && !completionQueued) {
@@ -906,8 +936,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
     }
     const pouring = !!experiment && experiment.mode !== 'idle' && state.screen === 'lab';
     const progress = pouring ? experiment.path : 0;
-    const transfer = experiment ? experiment.transfer : (reacting ? 1 : 0);
-    const reactionProgress = state?.particleInspection && state.particleReplayProgress != null ? state.particleReplayProgress : state?.explanationReview ? state.explanationReplayProgress || 0 : reacting ? THREE.MathUtils.clamp((performance.now() - reactionStarted) / 1200, 0, 1) : 0;
+    const reactionProgress = state?.particleInspection && state.particleReplayProgress != null ? state.particleReplayProgress : state?.explanationReview ? state.explanationReplayProgress || 0 : reacting ? (step === 'pouring' ? THREE.MathUtils.clamp((transfer - 0.03) / 0.82, 0, 1) : THREE.MathUtils.clamp((performance.now() - reactionStarted) / 1200, 0, 1)) : 0;
     const fill1 = updateFilling(main, r1, 0, time);
     const fill2 = updateFilling(secondary, r2, 1, time);
     const mlDepth = (vessel, ml) => ml * Math.pow(vessel.height / 6.68, 3) / (Math.PI * Math.pow(vessel.innerRadius - .002, 2));

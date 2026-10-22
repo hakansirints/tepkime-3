@@ -197,3 +197,67 @@
   #app .mebi-top-shell.is-header-compact .mebi-stepper-inline-tools { margin-left:auto; }
   #app .mebi-top-shell.is-header-compact .mebi-stage-toggle { margin-left:0; }
 }
+
+/* Shared single-row header: stages, discovery progress, then utility controls. */
+body #app .mebi-top-shell.is-unified-header > .mebi-stepper {
+  height:59px;
+  min-height:59px;
+  padding:6px 14px !important;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+body #app .is-unified-header .mebi-stepper-track {
+  min-width:0;
+  width:auto;
+  flex:1 1 0 !important;
+  gap:4px !important;
+}
+body #app .is-unified-header .mebi-stepper-track[hidden] { display:none !important; }
+body #app .is-unified-header button.mebi-step-item { min-width:0; padding:6px 8px !important; }
+body #app .is-unified-header .mebi-progress-wrapper {
+  display:flex !important;
+  flex:0 0 auto;
+  min-width:0;
+  gap:7px;
+  padding:6px 9px;
+  font-size:11px;
+  line-height:20px;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+body #app .is-unified-header .mebi-progress-star svg { width:16px; height:16px; }
+body #app .is-unified-header .mebi-progress-bar-mini { width:54px; min-width:0; height:6px; }
+body #app .is-unified-header .mebi-stepper-inline-tools {
+  display:flex !important;
+  flex:0 0 auto;
+  align-items:center;
+  gap:5px;
+  margin-left:0;
+}
+body #app .is-unified-header .mebi-stage-toggle { margin-left:0; }
+body #app .is-unified-header.is-stages-minimized .mebi-progress-wrapper { margin-right:auto; }
+@media(max-width:1000px) {
+  body #app .is-unified-header .mebi-progress-wrapper { gap:5px; padding:5px 7px; font-size:10px; }
+  body #app .is-unified-header .mebi-progress-caption { display:none; }
+  body #app .is-unified-header .mebi-progress-bar-mini { width:38px; }
+  body #app .is-unified-header .mebi-progress-percent { display:none; }
+  body #app .is-unified-header .mebi-step-label { font-size:11px !important; }
+  body #app .is-unified-header button.mebi-step-item { gap:4px !important; padding:5px 4px !important; }
+}
+@media(max-width:700px) {
+  body #app .mebi-top-shell.is-unified-header > .mebi-stepper { gap:4px; padding:4px 7px !important; }
+  body #app .is-unified-header .mebi-stepper-track { gap:2px !important; padding:3px !important; }
+  body #app .is-unified-header .mebi-step-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  body #app .is-unified-header .is-active .mebi-step-label { position:static; width:auto; height:auto; overflow:visible; clip-path:none; font-size:10.5px !important; }
+  body #app .is-unified-header button.mebi-step-item.is-active { flex:1.8 1 0 !important; }
+  body #app .is-unified-header button.mebi-step-item { padding:4px 2px !important; }
+  body #app .is-unified-header .mebi-stepper-inline-tools { gap:2px; }
+  body #app .is-unified-header .mebi-stepper-inline-tools :is(.mebi-btn,.lab-settings-trigger) { min-width:28px; width:28px; min-height:28px; height:28px; padding:0; }
+  body #app .is-unified-header .mebi-progress-wrapper { gap:4px; padding:4px 5px; }
+  body #app .is-unified-header .mebi-progress-bar-mini { width:28px; }
+  body #app .is-unified-header .mebi-stage-toggle { width:28px !important; height:28px !important; }
+}
+@media(max-height:650px) and (orientation:landscape) {
+  body #app .mebi-top-shell.is-unified-header > .mebi-stepper { height:38px !important; min-height:38px; padding-block:2px !important; }
+  body #app .mebi-top-shell.is-unified-header .mebi-stepper-inline-tools { margin-left:0 !important; gap:3px !important; }
+}

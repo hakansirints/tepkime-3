@@ -23,14 +23,15 @@
     var copper = (a && a.id === 'Cu(NO3)2') || (b && b.id === 'Cu(NO3)2' && transfer > 0);
     var color = copper ? BLUE : CLEAR;
     var target = color;
-    if (active && reactionProgress > 0) {
+    var effProgress = Math.max(reactionProgress, active && transfer > 0.03 ? Math.min(1, (transfer - 0.03) / 0.8) : 0);
+    if (active && effProgress > 0) {
       if (reaction.typeCategory === 'ppt' && copper) target = CLEAR;
       else if (reaction.toColor) target = reaction.toColor;
     }
     return { liquid: liquid, powder: powder, color: color, targetColor: target,
       opacity: copper || (active && reaction.toColor && reaction.typeCategory !== 'ppt') ? 0.62 : 0.24,
-      gas: !!(liquid && active && reactionProgress > 0 && reaction.obs.indexOf('gas') !== -1),
-      precipitate: !!(liquid && active && reactionProgress > 0 && reaction.obs.indexOf('precipitate') !== -1) };
+      gas: !!(liquid && active && effProgress > 0 && reaction.obs.indexOf('gas') !== -1),
+      precipitate: !!(liquid && active && effProgress > 0 && reaction.obs.indexOf('precipitate') !== -1) };
   }
   function spectatorSpecies(reaction) {
     var text = reaction && reaction.spectators || '';
