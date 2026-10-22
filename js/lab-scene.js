@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 window.THREE = THREE;
 globalThis.THREE = THREE;
-import { OrbitControls } from './vendor/three/OrbitControls.js?v=910bef9ae690';
-import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js?v=910bef9ae690';
-import { createPowderMotion } from './powder-motion.js?v=910bef9ae690';
-import { createLiquidSurface } from './liquid-surface.js?v=910bef9ae690';
+import { OrbitControls } from './vendor/three/OrbitControls.js?v=cfeeea0217f0';
+import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js?v=cfeeea0217f0';
+import { createPowderMotion } from './powder-motion.js?v=cfeeea0217f0';
+import { createLiquidSurface } from './liquid-surface.js?v=cfeeea0217f0';
 
 function dismissLabLoader() {
   const loader = document.getElementById('mebiLabLoader');
@@ -358,7 +358,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let particleLoadError = false;
   function ensureParticleLayer() {
     if (particleLayer || particleLoading || particleLoadError) return;
-    particleLoading = import('./beaker-particles.js?v=910bef9ae690').then(module => {
+    particleLoading = import('./beaker-particles.js?v=cfeeea0217f0').then(module => {
       particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature});
       particleLayer.sync(state);resize();renderFrame();
     }).catch(error => {
