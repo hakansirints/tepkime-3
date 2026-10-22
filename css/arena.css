@@ -1486,14 +1486,14 @@ html, body {
 /* ----------------- 3. DENEY TEZGAHI VE SİMÜLASYON (GERÇEK LABORATUVAR MASASI) ----------------- */
 .lab-bench {
   background-color: #0b0f19;
-  background-image: url('../image/deney-masa.jpg?v=cfeeea0217f0');
+  background-image: url('../image/deney-masa.jpg?v=56b7ccbc1a23');
   background-image: -webkit-image-set(
-    url('../image/deney-masa.webp?v=cfeeea0217f0') 1x,
-    url('../image/deney-masa.jpg?v=cfeeea0217f0') 1x
+    url('../image/deney-masa.webp?v=56b7ccbc1a23') 1x,
+    url('../image/deney-masa.jpg?v=56b7ccbc1a23') 1x
   );
   background-image: image-set(
-    url('../image/deney-masa.webp?v=cfeeea0217f0') type('image/webp'),
-    url('../image/deney-masa.jpg?v=cfeeea0217f0') type('image/jpeg')
+    url('../image/deney-masa.webp?v=56b7ccbc1a23') type('image/webp'),
+    url('../image/deney-masa.jpg?v=56b7ccbc1a23') type('image/jpeg')
   );
   background-size: cover;
   background-position: center bottom;

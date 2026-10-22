@@ -1,0 +1,175 @@
+/* Final theme layer. Keep light-only component rules from leaking into dark UI. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --mebi-text-secondary: #b8bcc9;
+  --mebi-text-muted: #aeb3c2;
+  --mebi-border-focus: #7dd3fc;
+  --mebi-success-taban: #6ee7b7;
+  --mebi-danger-taban: #fda4af;
+  --mebi-warning-taban: #fde68a;
+  --mebi-info-taban: #ddd6fe;
+  --dark-surface: #1e1e24;
+  --dark-raised: #292b35;
+  --dark-input: #18181b;
+  --dark-line: #4b5060;
+  --dark-ink: #f1f5f9;
+  --dark-muted: #b8bcc9;
+  --dark-link: #7dd3fc;
+  --dark-action: #0369a1;
+}
+
+/* Shared controls, stage navigation and keyboard focus. */
+[data-theme="dark"] #app .mebi-btn-primary {
+  background: var(--dark-action) !important;
+  border-color: #0ea5e9 !important;
+  color: #fff !important;
+}
+[data-theme="dark"] #app .mebi-btn-primary:hover:not(:disabled) { background: #075985 !important; }
+[data-theme="dark"] #app button.mebi-step-item.is-active { background: var(--dark-action) !important; }
+[data-theme="dark"] #app button.mebi-step-item.is-active .mebi-step-label { color: #fff !important; }
+[data-theme="dark"] #app button.mebi-step-item .mebi-step-node { background: #303440 !important; color: #cbd5e1 !important; }
+[data-theme="dark"] #app button.mebi-step-item:is(.is-active,.is-done) .mebi-step-node { background: #164e63 !important; color: #cffafe !important; }
+[data-theme="dark"] body.mebi-mobile-landscape #app .mebi-top-shell.has-stage.is-unified-header,
+[data-theme="dark"] body.mebi-mobile-landscape #app .mebi-top-shell.has-stage.is-unified-header > .mebi-stepper { background: #202026 !important; border-color: #454550 !important; }
+[data-theme="dark"] #app :is(.model-card,.nr-card) .prediction-eyebrow { color: #ddd6fe !important; }
+[data-theme="dark"] #app #modelCard .prediction-eyebrow { color: #ddd6fe !important; }
+[data-theme="dark"] #app :is(textarea,select,input[type="number"]) { background: var(--dark-input) !important; color: var(--dark-ink) !important; border-color: #626a7d !important; }
+[data-theme="dark"] :is(input,textarea)::placeholder { color: #afb7c8 !important; opacity: 1; }
+[data-theme="dark"] #app [contenteditable]::before { color: #afb7c8 !important; }
+[data-theme="dark"] #app :is(input[type="radio"],input[type="checkbox"]) { accent-color: #38bdf8; }
+[data-theme="dark"] :is(button,input,select,textarea,[contenteditable],summary):focus-visible { outline-color: #7dd3fc; }
+
+/* Entrance cards retain the existing blue identity with dark inner surfaces. */
+[data-theme="dark"] body #app[data-screen="menu"] .entrance-card .entrance-step {
+  background: #1e293b !important; border-color: #526482 !important; color: #bfdbfe !important;
+}
+[data-theme="dark"] #app .entrance-brand-icon { background: #1e3553 !important; color: #bfdbfe !important; }
+[data-theme="dark"] #app :is(.entrance-step-icon,.entrance-step-label) { color: #dbeafe !important; }
+[data-theme="dark"] #app .entrance-step-number { background: #234266 !important; color: #dbeafe !important; }
+[data-theme="dark"] #app .entrance-menu .arena-mint-pill-btn:not(.is-primary) { background: #25324b !important; color: #e0f2fe !important; border-color: #526482 !important; }
+[data-theme="dark"] #app .entrance-menu .arena-mint-pill-btn:not(.is-primary) :is(.pill-btn-text,.pill-btn-icon-wrap) { color: #e0f2fe !important; }
+[data-theme="dark"] #app .entrance-menu .arena-mint-reset-link { color: #bfdbfe !important; }
+
+/* Prediction and observation: matrix labels, temperatures and saved evidence. */
+[data-theme="dark"] #app .learning-matrix :is(th,td) { border-color: var(--dark-line) !important; }
+[data-theme="dark"] #app .learning-matrix thead th { color: #cbd5e1 !important; }
+[data-theme="dark"] #app .learning-matrix tbody th { color: var(--dark-ink) !important; }
+[data-theme="dark"] #app .learning-matrix .prediction-label small { color: var(--dark-muted) !important; }
+[data-theme="dark"] #app .learning-matrix .learning-mark:hover { background: #343947 !important; }
+[data-theme="dark"] #app .learning-mark[aria-pressed="true"] .learning-tick { background: var(--dark-action) !important; border-color: #38bdf8 !important; }
+[data-theme="dark"] #app .observation-card .observation-peek-toggle { background: var(--dark-action) !important; color: #fff !important; }
+[data-theme="dark"] #app :is(.observation-temperature,.observation-saved-note,.comparison-reflection) { background: #252d3a !important; border-color: #566479 !important; color: #cbd5e1 !important; }
+[data-theme="dark"] #app .observation-temperature strong { color: #f1f5f9 !important; }
+[data-theme="dark"] #app .observation-notes.comparison-evidence .observation-saved-note { background: #252d3a !important; border-color: #566479 !important; }
+[data-theme="dark"] #app .observation-notes.comparison-evidence .observation-saved-note :is(strong,blockquote) { color: #f1f5f9 !important; }
+[data-theme="dark"] #app #observationCard.is-collapsed { background: #202630 !important; border-color: #566479 !important; color: #f1f5f9 !important; }
+[data-theme="dark"] #app #observationCard.is-collapsed > .learning-card-header { background: #202630 !important; }
+[data-theme="dark"] #app .observation-saved-note :is(strong,blockquote) { color: #f1f5f9 !important; }
+[data-theme="dark"] #app :is(.observation-notes,.observation-comparison-head,.observation-comparison-row,.observation-row) { border-color: var(--dark-line) !important; }
+[data-theme="dark"] #app :is(.observation-reason,.observation-reason summary,.observation-comparison-row p) { color: #bae6fd !important; }
+[data-theme="dark"] #app .observation-reason div { color: #e2e8f0 !important; background: #252d3a !important; border-color: #566479 !important; }
+[data-theme="dark"] #app .comparison-result.is-match { background: #123e35 !important; color: #a7f3d0 !important; }
+[data-theme="dark"] #app .comparison-result.is-different { background: #4c2230 !important; color: #fecdd3 !important; }
+[data-theme="dark"] #app .comparison-result.is-uncertain { background: #463716 !important; color: #fde68a !important; }
+[data-theme="dark"] #app :is(.observation-tabs,.explanation-format-buttons) { background: #292d39 !important; border-color: #566479 !important; }
+[data-theme="dark"] #app .observation-tabs button { color: #e2e8f0 !important; }
+[data-theme="dark"] #app .observation-tabs button[aria-selected="true"] { background: var(--dark-action) !important; color: #fff !important; }
+
+/* Validation is still red, but no longer uses the light theme's pink paper. */
+[data-theme="dark"] #app :is(.prediction-row,.observation-row).has-error { background: #41222c !important; outline-color: #fb7185 !important; }
+[data-theme="dark"] #app :is(.prediction-row,.observation-row).has-error th { color: #fecdd3 !important; }
+[data-theme="dark"] #app :is(.prediction-reason,.observation-textarea).has-error { background: #41222c !important; color: #fff1f2 !important; border-color: #fb7185 !important; }
+[data-theme="dark"] #app #observationNote.has-error { background: #41222c !important; color: #fff1f2 !important; border-color: #fb7185 !important; }
+[data-theme="dark"] #app :is(.observation-message,.prediction-message,.prediction-error,.explanation-feedback.is-error) { color: #fecdd3 !important; }
+
+/* Live experiment instrument panel and the folded observation entry. */
+[data-theme="dark"] #app .experiment-live-data[data-layout="vertical"],
+[data-theme="dark"] #app .observation-live-dock > .beaker-particle-entry {
+  background: #202630 !important; border-color: #566479 !important; color: #f1f5f9 !important; box-shadow: 0 10px 25px #0004 !important;
+}
+[data-theme="dark"] #app .experiment-card-heading { color: #7dd3fc !important; }
+[data-theme="dark"] #app .experiment-formula { background: #183d5c !important; color: #dbeafe !important; }
+[data-theme="dark"] #app :is(.experiment-amount-meter,.experiment-thermometer-track) { background: #454e60 !important; }
+[data-theme="dark"] #app .experiment-temperature-values .is-current strong { color: #fda4af !important; }
+[data-theme="dark"] .lab-3d-active #app[data-screen="lab"] #benchDock .mebi-btn-primary { background: #0369a1 !important; color: #fff !important; }
+[data-theme="dark"] #app .experiment-safety-card.is-all-approved .experiment-safety-progress-pill,
+[data-theme="dark"] #app .experiment-safety-accept.is-ready { background: #065f46 !important; color: #ecfdf5 !important; border-color: #34d399 !important; }
+[data-theme="dark"] #app .experiment-safety-accept.is-ready:hover { background: #047857 !important; }
+[data-theme="dark"] #app :is(.experiment-transfer-status,.lab-hand-guide) { color: #dbeafe !important; }
+[data-theme="dark"] .lab-3d-active #app .lab-hand-guide { background: #202630 !important; border-color: #566479 !important; }
+[data-theme="dark"] #app .hand-guide-pill { color: #dbeafe !important; background: #202630 !important; border-color: #566479 !important; }
+
+/* Explanation decision, action links and the chemical writing toolbar. */
+[data-theme="dark"] #app #explanationCard:not(.nr-card) #explanationDecisionGroup { background: #242b38 !important; border-color: #566479 !important; color: #f1f5f9 !important; }
+[data-theme="dark"] #app #explanationCard #explanationDecisionGroup legend { color: #e2e8f0 !important; }
+[data-theme="dark"] #app #explanationCard .explanation-change-option { background: #202630 !important; border-color: #626a7d !important; color: #f1f5f9 !important; }
+[data-theme="dark"] #app #explanationCard .explanation-change-option:has(input:checked) { background: #163d52 !important; border-color: #38bdf8 !important; }
+[data-theme="dark"] #app #explanationCard .explanation-change-option strong { color: #f1f5f9 !important; }
+[data-theme="dark"] #app #explanationCard .explanation-change-option small { color: #cbd5e1 !important; }
+[data-theme="dark"] #app #explanationCard .explanation-decision-actions .explanation-writing-btn { background: #303b50 !important; color: #e0f2fe !important; border-color: #607391 !important; }
+[data-theme="dark"] #app #explanationCard .explanation-decision-actions .explanation-writing-btn svg { color: #7dd3fc !important; }
+[data-theme="dark"] #app #explanationCard .explanation-decision-actions .explanation-writing-btn:hover { background: #16435b !important; }
+[data-theme="dark"] #app :is(.explanation-format-buttons button,#explanationFormatState) { color: #bae6fd !important; }
+[data-theme="dark"] #app .explanation-format-buttons button[aria-pressed="true"] { background: #16435b !important; border-color: #38bdf8 !important; }
+[data-theme="dark"] #app .mebi-comparison-dialog .modal-close-btn-topright { background: #303b50 !important; color: #f1f5f9 !important; border-color: #607391 !important; }
+[data-theme="dark"] #app .explanation-prediction-dialog.mebi-comparison-dialog { border-color: #607391 !important; }
+
+/* Model and equation detail states. Scientific species colors stay in the SVGs. */
+[data-theme="dark"] #app :is(.model-map-empty,.equation-aux-sep) { color: #b8c2d5 !important; }
+[data-theme="dark"] #app :is(.model-info-modal-close,.model-info-close) { color: #cbd5e1 !important; }
+[data-theme="dark"] #app #modelCard #modelStatus { color: #cbd5e1 !important; }
+[data-theme="dark"] #app #modelCard .explanation-feedback.is-error { background: #47232f !important; border-color: #b7506b !important; }
+[data-theme="dark"] #app #modelCard .explanation-feedback.is-error #modelStatus { color: #fecdd3 !important; }
+[data-theme="dark"] #app .equation-inline-error { background: #47232f !important; color: #fecdd3 !important; border-color: #b7506b !important; }
+[data-theme="dark"] #app .equation-live-plus { color: #cbd5e1 !important; }
+[data-theme="dark"] #app .equation-conservation-table th { color: #cbd5e1 !important; }
+[data-theme="dark"] #app .nr-card { --nr-muted: #b8c2d5; }
+[data-theme="dark"] #app .nr-reason textarea::placeholder { color: #b8c2d5 !important; }
+
+/* Translucent annotations need enough dark backing over an illuminated room. */
+[data-theme="dark"] #app .beaker-particle-legend { background: rgba(15,23,42,.88) !important; border-color: #657186 !important; }
+[data-theme="dark"] #app .beaker-particle-pair-badge { opacity: 1; animation: none; background: rgba(15,23,42,.92) !important; border-color: #657186 !important; }
+[data-theme="dark"] #app .beaker-particle-pair-badge :is(.pair-badge-name,.pair-badge-plus) { color: #f1f5f9 !important; }
+[data-theme="dark"] #app .beaker-particle-pair-badge .pair-badge-desc { color: #cbd5e1 !important; }
+[data-theme="dark"] #app .beaker-particle-legend :is(h4,small) { color: #cbd5e1 !important; }
+[data-theme="dark"] #app .beaker-particle-legend .beaker-particle-key span { color: #f1f5f9 !important; }
+[data-theme="dark"] #app .beaker-particle-timeline input { background: transparent !important; accent-color: #38bdf8; }
+
+/* Journal shell, filters and the five semantic card types. */
+[data-theme="dark"] #app[data-screen="collection"] > .mebi-card.collection-shell { background: var(--dark-surface) !important; border-color: #566479 !important; color: var(--dark-ink) !important; }
+[data-theme="dark"] #app .collection-shell :is(.collection-heading,.collection-footer) { background: #262b35 !important; border-color: #566479 !important; }
+[data-theme="dark"] #app .collection-shell .collection-heading .mebi-badge { background: #123e35 !important; color: #a7f3d0 !important; border-color: #417365 !important; }
+[data-theme="dark"] #app .collection-shell .collection-filter-btn { background: #292f3c !important; color: #e2e8f0 !important; border-color: #626a7d !important; }
+[data-theme="dark"] #app .collection-shell .collection-filter-btn.is-active { background: var(--dark-action) !important; color: #fff !important; }
+[data-theme="dark"] #app .collection-shell .collection-card { background: #292f3c !important; color: #f1f5f9 !important; border-color: #626a7d !important; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-ppt { background: #153d34 !important; --journal-accent: #a7f3d0; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-acidbase { background: #442634 !important; --journal-accent: #fecdd3; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-redox { background: #173b50 !important; --journal-accent: #bae6fd; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-complex { background: #35294e !important; --journal-accent: #ddd6fe; }
+[data-theme="dark"] #app .collection-shell .collection-card.is-none { background: #30313b !important; --journal-accent: #e2e8f0; }
+[data-theme="dark"] #app .collection-shell .collection-card :is(.collection-card-num,.collection-card-type) { color: var(--journal-accent,#e2e8f0) !important; }
+[data-theme="dark"] #app .collection-shell .collection-card :is(.collection-card-formula,.collection-card-eq) { color: #f1f5f9 !important; }
+[data-theme="dark"] #app .collection-shell [data-action="clearCollection"] { color: #fecdd3 !important; }
+[data-theme="dark"] #app .reagent-gallery :is(.reagent-card-selection,.gallery-continue) { background: #0369a1 !important; color: #fff !important; }
+
+/* Shared guide and confirmation surfaces live outside #app. */
+[data-theme="dark"] #resetModalCard { background: #202630 !important; color: #f1f5f9 !important; border-color: #607391 !important; }
+[data-theme="dark"] #resetModalCard :is(.reset-modal-header,.reset-modal-footer) { background: #292f3c !important; border-color: #566479 !important; }
+[data-theme="dark"] #resetModalCard .reset-modal-icon-badge { background: #47232f !important; color: #fecdd3 !important; border-color: #b7506b !important; }
+[data-theme="dark"] #resetModalCard .reset-modal-badge { background: #47232f !important; color: #fecdd3 !important; border-color: #b7506b !important; }
+[data-theme="dark"] :is(#resetModalTitle,#resetModalText) { color: #f1f5f9 !important; }
+[data-theme="dark"] :is(#btnCloseResetModal,.mebi-orientation-close-btn) { background: #303b50 !important; color: #f1f5f9 !important; border-color: #607391 !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-johnstone-pill { background: #173b50 !important; color: #bae6fd !important; border-color: #397391 !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-johnstone-pill.pill-emerald { background: #153d34 !important; color: #a7f3d0 !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-johnstone-pill.pill-purple { background: #35294e !important; color: #ddd6fe !important; }
+[data-theme="dark"] #welcomeModalOverlay :is(.welcome-tab-btn.tab-active,#btnWelcomeNext,.welcome-step-badge.bg-sky) { background: #0369a1 !important; color: #fff !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-tab-btn .tab-num { background: #303b50 !important; color: #f1f5f9 !important; }
+[data-theme="dark"] #welcomeModalOverlay #welcomeStepCounter { color: #cbd5e1 !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-step-badge.bg-emerald { background: #16634f !important; color: #fff !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-step-badge.bg-purple { background: #6b35a8 !important; color: #fff !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-step-badge.bg-amber { background: #92400e !important; color: #fff !important; }
+[data-theme="dark"] #welcomeModalOverlay .welcome-step-badge.bg-cyan { background: #155e75 !important; color: #fff !important; }
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="dark"] #app :is(.beaker-particle-legend,.beaker-particle-pair-badge) { background: #0f172a !important; }
+}
