@@ -1,3 +1,4 @@
+const enterStudentInputs = require('./student-inputs.cjs');
 /* Inline saving, five-step guide, floating forms and compact light/dark layouts. */
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),assert=require('node:assert/strict');
 let playwright;try{playwright=require('playwright');}catch{playwright=require(path.join(os.homedir(),'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}
@@ -104,7 +105,7 @@ const output=path.join(os.tmpdir(),'tepkime-prediction-qa');fs.mkdirSync(output,
   await page.evaluate(()=>TepkimeArenasi.dispatch('startExperiment'));
   assert(await page.locator('#beginExperimentButton').isDisabled());
   assert.equal(await page.getByText('Bu tarayıcıdaki tahmin kayıtları',{exact:false}).count(),0);
-  await page.locator('[data-action="autoFillPredictionForTesting"]').click();
+  await enterStudentInputs(page, 'prediction');
   assert.equal(await page.locator('.prediction-choices [aria-pressed="true"]').count(),5);
   const before=await page.locator('.prediction-reason').evaluateAll(inputs=>inputs.map(input=>input.value));
   assert(before.every(reason=>reason&&!/test/i.test(reason)));
@@ -167,7 +168,7 @@ const output=path.join(os.tmpdir(),'tepkime-prediction-qa');fs.mkdirSync(output,
     assert((await page.locator('#observationPanel').boundingBox()).height>40,'Observation content height at '+width+': '+JSON.stringify(await page.locator('#observationPanel').boundingBox()));
    }
   }
-  await page.locator('[data-action="autoFillObservationForTesting"]').click();
+  await enterStudentInputs(page, 'observation');
   assert.equal(await page.locator('.observation-options [aria-pressed="true"]').count(),5);
   assert(!/test/i.test(await page.locator('#observationNote').inputValue()));
   assert.equal(await page.evaluate(()=>TepkimeArenasi.state.observation.record),null);

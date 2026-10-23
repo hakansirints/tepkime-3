@@ -245,7 +245,7 @@
 
   // EKRAN 1: AÇILIŞ MENÜSÜ (Görseldeki Mint Kimya Temalı 16:9 Yatay Kart)
   function entranceIcon(name) {
-    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg?v=56b7ccbc1a23)"></span>';
+    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg?v=02f5093fd7f5)"></span>';
   }
 
   function screenMenu() {
@@ -379,7 +379,7 @@
         '" data-action="clickReagent" data-arg="' + esc(r.id) + '" aria-pressed="' + !!slot +
         '" aria-label="' + esc(r.f + ', ' + r.name + ', ' + description + (slot ? ', ' + slot + '. beher seçildi' : '') + (completed ? ', bu madde çifti daha önce denendi ve koleksiyona kaydedildi' : '')) + '">' +
         '<span class="reagent-card-visual is-' + appearance + '">' +
-          '<img src="image/reagents/' + appearance + '.webp?v=56b7ccbc1a23" width="640" height="440" alt="" decoding="async" draggable="false">' +
+          '<img src="image/reagents/' + appearance + '.webp?v=02f5093fd7f5" width="640" height="440" alt="" decoding="async" draggable="false">' +
         '</span><span class="reagent-card-caption">' + (slot ? '<span class="reagent-card-selection">✓ ' + slot + '. beher</span>' : '') + '<strong>' + esc(r.f) + '</strong>' + (completed ? '<span class="reagent-card-history">Daha önce denendi</span>' : '') + '<span>' + esc(r.name) +
         ' <small>' + (r.solid ? '(katı toz)' : '(suda)') + '</small></span></span></button>';
     }).join('');
@@ -1150,12 +1150,6 @@
     togglePredictionNone: function() {
       if (window.MebiPrediction.toggleNone(S)) render(false);
     },
-    autoFillPredictionForTesting: function() {
-      if (window.MebiPrediction.autoFillForTesting(S)) render(false);
-    },
-    autoFillObservationForTesting: function() {
-      if (window.MebiObservation.autoFillForTesting(S)) render(false);
-    },
     savePrediction: function() {
       window.MebiPrediction.save(S);
       render(false);
@@ -1424,7 +1418,6 @@
     },
     checkModel: function() { if(S.screen==='model')window.MebiModel.check(S); },
     checkModelDock: function() { if(window.MebiAudio)window.MebiAudio.playClick(); if(window.MebiModel && window.MebiModel.checkDock)window.MebiModel.checkDock(S); },
-    autoFillModelForTesting: function() { if(S.screen==='model'&&window.MebiModel.autoFillForTesting(S))render(false); },
     setModelSubView: function(arg, btn) {
       if (S.screen !== 'model') return;
       var view = arg || (btn && btn.dataset && btn.dataset.arg) || 'relationships';
@@ -1576,9 +1569,6 @@
       var content = document.querySelector('.explanation-content'); if(content)content.scrollTop=0;
       var heading = document.getElementById('explanationTitle'); if(heading)heading.focus({preventScroll:true});
     },
-    autoFillExplanationForTesting: function() {
-      if (S.screen === 'card' && window.MebiExplanation.autoFillForTesting(S)) render(false);
-    },
     reviewExplanationExperiment: function() {
       if (S.screen !== 'card' || !window.MebiExplanation.eligible(S)) return;
       S.explanationReview = {elapsed:0,frameAt:null,observationId:S.observation.record.id,scroll:document.querySelector('.explanation-content')?.scrollTop || 0};
@@ -1694,7 +1684,7 @@
     if (/^(startNewExperiment|viewCollectionFromCompletion)$/.test(action) && window.MebiNonReaction && window.MebiNonReaction.scenario(S)) window.MebiNonReaction.get(S).notice=null;
     if (S.pendingRepeatPair && action !== 'confirmRepeatPair' && action !== 'cancelRepeatPair') return;
     if (/^(goMenu|goPool|changeReactants|resumeExperiment|goCollection|viewCollectionItem|startNewExperiment|viewCollectionFromCompletion)$/.test(action)) S.stageReview = null;
-    if (!/^(navigateStage|closeStageReview|toggleStageHeader|cancelExperimentSafety|setObservationChoice|autoFillObservationForTesting|saveObservation|saveObservationAndProceed|openPredictionDialog|closePredictionDialog|setCollectionFilter|setObservationTab|saveObservationReflection|showObservationDesk|openObservationCard|toggleSafetyCheck|toggleAllSafetyChecks|acceptExperimentSafety|openParticleInspection|closeParticleInspection|toggleParticleNormal|seekParticleInspection|backToObservation|saveExplanation|toModel|saveModel|checkModel|checkModelDock|autoFillModelForTesting|backToExplanation|setExplanationStep|autoFillExplanationForTesting|reviewExplanationExperiment|closeExplanationExperiment|setModelSubView|addEquationTerm|removeEquationTerm|stepEquationCoeff|setEquationCoeff|clearEquationDraft|quickAddPlaceholder|checkEquation|saveEquation|saveModelAndToEquation|closeModelHelpModal|dismissBalancedModal|dismissCompletionModal|viewCollectionFromCompletion|startNewExperiment)$/.test(action) && action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
+    if (!/^(navigateStage|closeStageReview|toggleStageHeader|cancelExperimentSafety|setObservationChoice|saveObservation|saveObservationAndProceed|openPredictionDialog|closePredictionDialog|setCollectionFilter|setObservationTab|saveObservationReflection|showObservationDesk|openObservationCard|toggleSafetyCheck|toggleAllSafetyChecks|acceptExperimentSafety|openParticleInspection|closeParticleInspection|toggleParticleNormal|seekParticleInspection|backToObservation|saveExplanation|toModel|saveModel|checkModel|checkModelDock|backToExplanation|setExplanationStep|reviewExplanationExperiment|closeExplanationExperiment|setModelSubView|addEquationTerm|removeEquationTerm|stepEquationCoeff|setEquationCoeff|clearEquationDraft|quickAddPlaceholder|checkEquation|saveEquation|saveModelAndToEquation|closeModelHelpModal|dismissBalancedModal|dismissCompletionModal|viewCollectionFromCompletion|startNewExperiment)$/.test(action) && action !== 'undoLast' && action !== 'toggleTheme' && action !== 'toggleAudio' && action !== 'zoomParticle' && action !== 'toggleFullscreen' && action !== 'testOrientation') {
       HISTORY.push(JSON.stringify(S));
       if (HISTORY.length > 40) HISTORY.shift();
     }

@@ -168,7 +168,7 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
 #app :is(.prediction-footer,.observation-footer,.explanation-footer) .mebi-btn-primary:hover:not(:disabled) {
  background:#0369a1 !important;
 }
-#app :is(.prediction-footer,.observation-footer,.explanation-footer) :is(.mebi-btn-secondary,.prediction-autofill,[data-explanation-test],[data-model-test]) {
+#app :is(.prediction-footer,.observation-footer,.explanation-footer) .mebi-btn-secondary {
  background:#ffffff !important;
  border:1.5px solid #cbd5e1 !important;
  color:#475569 !important;
@@ -176,7 +176,7 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
  border-radius:9px !important;
  font-weight:800 !important;
 }
-#app :is(.prediction-footer,.observation-footer,.explanation-footer) :is(.mebi-btn-secondary,.prediction-autofill,[data-explanation-test],[data-model-test]):hover:not(:disabled) {
+#app :is(.prediction-footer,.observation-footer,.explanation-footer) .mebi-btn-secondary:hover:not(:disabled) {
  background:#f1f5f9 !important;
  color:#0f172a !important;
  border-color:#94a3b8 !important;
@@ -860,11 +860,6 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
   border: 1px solid #e2e8f0 !important;
   border-radius: 20px !important;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18) !important;
-}
-#app .explanation-test-button {
-  background: #f8fafc !important;
-  border: 1px dashed #cbd5e1 !important;
-  color: #475569 !important;
 }
 
 /* Collapsed observation card top-right anchoring */
@@ -1576,12 +1571,12 @@ body.lab-3d-active #app:is([data-screen="pool"],[data-screen="lab"],[data-screen
 }
 
 /* Footer Butonları */
-[data-theme="dark"] #app :is(.prediction-footer,.observation-footer,.explanation-footer) :is(.mebi-btn-secondary,.prediction-autofill,[data-explanation-test],[data-model-test]) {
+[data-theme="dark"] #app :is(.prediction-footer,.observation-footer,.explanation-footer) .mebi-btn-secondary {
   background: #2b2b32 !important;
   border-color: #3f3f46 !important;
   color: #e4e4e7 !important;
 }
-[data-theme="dark"] #app :is(.prediction-footer,.observation-footer,.explanation-footer) :is(.mebi-btn-secondary,.prediction-autofill,[data-explanation-test],[data-model-test]):hover:not(:disabled) {
+[data-theme="dark"] #app :is(.prediction-footer,.observation-footer,.explanation-footer) .mebi-btn-secondary:hover:not(:disabled) {
   background: #383842 !important;
   color: #ffffff !important;
   border-color: #52525b !important;

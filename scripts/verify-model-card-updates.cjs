@@ -1,3 +1,4 @@
+const enterStudentInputs = require('./student-inputs.cjs');
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -40,7 +41,7 @@ async function run() {
     await dispatch('clickReagent', 'NaOH');
     await dispatch('clickReagent', 'HCl');
     await dispatch('startExperiment');
-    await dispatch('autoFillPredictionForTesting');
+    await enterStudentInputs(page, 'prediction');
     await dispatch('beginExperiment');
     await page.evaluate(() => {
       const s = TepkimeArenasi.state;
@@ -51,7 +52,7 @@ async function run() {
       MebiObservation.reset(s);
       TepkimeArenasi.render(false);
     });
-    await dispatch('autoFillObservationForTesting');
+    await enterStudentInputs(page, 'observation');
     await dispatch('saveObservation');
     await dispatch('setObservationTab', 'compare');
     await dispatch('toCard');
@@ -111,10 +112,8 @@ async function run() {
     assert(await checkModelBtn.isVisible(), 'Rollerimi Gözden Geçir butonu footer içinde olmalı');
     passedChecks.push('"Rollerimi Gözden Geçir" butonu footer\'a taşındı');
 
-    // 4.3 "Test İçin Doldur" butonu
-    const testFillBtn = footerActions.locator('[data-action="autoFillModelForTesting"]');
-    assert(await testFillBtn.isVisible(), 'Test İçin Doldur butonu footer içinde olmalı');
-    passedChecks.push('"Test İçin Doldur" butonu footer\'a taşındı');
+    assert.equal(await page.getByText('Test İçin Doldur', {exact:true}).count(), 0);
+    passedChecks.push('Model kartında test doldurma düğmesi bulunmuyor');
 
     // 4.4 "Açıklamama Dön" ve "Modelimi Kaydet" butonları
     const backBtn = footerActions.locator('[data-action="backToExplanation"]');
@@ -124,11 +123,7 @@ async function run() {
     passedChecks.push('Footer eylem butonları tam ve eksiksiz');
 
     // 5. Fonksiyonel kontroller
-    // Test İçin Doldur'a tıklayalım
-    await testFillBtn.click();
-    await page.waitForTimeout(100);
-    const feedbackText = await page.locator('#modelStatus').innerText();
-    assert(feedbackText.includes('Test için tanecik rolleri dolduruldu'), 'Test için doldur çalışmalı');
+    await enterStudentInputs(page, 'model');
 
     // Rollerimi Gözden Geçir'e tıklayalım
     await checkModelBtn.click();

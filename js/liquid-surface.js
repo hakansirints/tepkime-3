@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three/three.module.js?v=56b7ccbc1a23';
+import * as THREE from './vendor/three/three.module.js?v=02f5093fd7f5';
 
 // Clip the free surface to the tilted cylinder; keep it level in world space.
 export function createLiquidSurface(vessel) {

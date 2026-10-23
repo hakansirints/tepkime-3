@@ -28,7 +28,6 @@ GitHub Pages yayını `main` dalının kökünden yapılır. Yayınlamadan önce
 - Tek açıklama kartı: yatay gözlem özeti, değişim yorumu, kayıtlı gözlem ve açıklama yazımı.
 - Gözlem yorumu kartından deneyin otomatik tekrarına; açıklama ve Model kartlarından 3B beherlere gidip dönüş.
 - Önceki gözlemlerin salt okunur özeti, değişim türü yorumu ve kartı büyütmeyen tahmin penceresi.
-- Açıklama kartında ve Model aşamasında geçici Test İçin Doldur düğmesi.
 - Word benzeri küçük alt/üst simge araçları, klavye kısayolları; otomatik taslak ve açıklama geçmişi.
 - Açıklamanın sonunda **Model Aşamasına Geç** bağlantısı; tanecik rol seçimleri ve bunlarla güncellenen ilişki şeması.
 - Tepkimeye katılanları, ürünleri, seyirci iyonları ve katalizörleri ayırt etme; kontrol edilen tanecik modelini koleksiyona kaydetme.

@@ -44,7 +44,7 @@ async function run() {
       TepkimeArenasi.dispatch('clickReagent', 'HCl');
       TepkimeArenasi.dispatch('clickReagent', 'NaOH');
       TepkimeArenasi.dispatch('startExperiment');
-      TepkimeArenasi.dispatch('autoFillPredictionForTesting');
+      MebiPrediction.items.forEach(i=>{MebiPrediction.setChoice(TepkimeArenasi.state,i.key+':unsure');MebiPrediction.setReason(TepkimeArenasi.state,i.key,'Bu belirtiyi deneyde gözlemleyeceğim.');});TepkimeArenasi.render(false);
       TepkimeArenasi.dispatch('savePrediction');
       TepkimeArenasi.dispatch('beginExperiment');
       TepkimeArenasi.dispatch('triggerPour');
@@ -136,7 +136,7 @@ async function run() {
 
     // Otomatik doldur ve Karşılaştır aşamasına geç
     await page.evaluate(() => {
-      TepkimeArenasi.dispatch('autoFillObservationForTesting');
+      MebiPrediction.items.forEach(i=>MebiObservation.setChoice(TepkimeArenasi.state,i.key+':no'));MebiObservation.setNote(TepkimeArenasi.state,'Karışımın görünüşünü ve termometreyi gözlemledim.');TepkimeArenasi.render(false);
       TepkimeArenasi.dispatch('setObservationTab', 'compare');
     });
     await page.waitForTimeout(200);
@@ -204,10 +204,10 @@ async function run() {
     // ==========================================
     // Bir deney kaydedip koleksiyona geç
     await page.evaluate(() => {
-      TepkimeArenasi.dispatch('autoFillExplanationForTesting');
+      Object.assign(MebiExplanation.get(TepkimeArenasi.state),{changeType:'chemical',html:'Gözlemimi taneciklerin yeniden düzenlenmesiyle ilişkilendiriyorum.'});TepkimeArenasi.render(false);
       TepkimeArenasi.dispatch('saveExplanation');
       TepkimeArenasi.dispatch('toModel');
-      TepkimeArenasi.dispatch('autoFillModelForTesting');
+      MebiModel.data(TepkimeArenasi.state).species.forEach(p=>MebiModel.assign(TepkimeArenasi.state,p.kind,p.role));TepkimeArenasi.render(false);
       TepkimeArenasi.dispatch('saveModel');
       TepkimeArenasi.dispatch('goCollection');
     });

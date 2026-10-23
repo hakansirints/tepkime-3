@@ -1,3 +1,4 @@
+const enterStudentInputs = require('./student-inputs.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
@@ -40,7 +41,7 @@ async function observe(page, a, b, animate = false) {
   await dispatch(page, 'clickReagent', b);
   await page.waitForFunction(() => !window.TepkimeArenasi.state.isFilling);
   await dispatch(page, 'startExperiment');
-  await dispatch(page, 'autoFillPredictionForTesting');
+  await enterStudentInputs(page, 'prediction');
   if (animate) await advance(page, '[data-action="beginExperiment"]', () => window.TepkimeArenasi.state.labStep === 'ready');
   else await dispatch(page, 'beginExperiment');
   await page.evaluate(() => {
@@ -48,12 +49,12 @@ async function observe(page, a, b, animate = false) {
     s.labStep = 'observed'; s.poured = true; s.experiment.transfer = 1; s.currentTemp = s.activeReaction.tempFinal;
     window.MebiObservation.reset(s); window.TepkimeArenasi.render(false);
   });
-  await dispatch(page, 'autoFillObservationForTesting');
+  await enterStudentInputs(page, 'observation');
   if (animate) await advance(page, '[data-action="saveObservationAndProceed"]', () => window.TepkimeArenasi.state.screen === 'card');
   else { await dispatch(page, 'saveObservationAndProceed'); }
 }
 async function toModel(page, animate = false) {
-  await dispatch(page, 'autoFillExplanationForTesting');
+  await enterStudentInputs(page, 'explanation');
   if (animate) await advance(page, '[data-action="toModel"]', () => window.TepkimeArenasi.state.screen === 'model');
   else await dispatch(page, 'toModel');
 }
@@ -78,7 +79,7 @@ async function shot(page, name) { await page.screenshot({ path: path.join(out, n
   assert(await page.locator('.observation-card:not(.is-comparing)').isVisible());
   await advance(page, '[data-action="saveObservationAndProceed"]', () => window.TepkimeArenasi.state.screen === 'card');
   await toModel(page, true);
-  await dispatch(page, 'autoFillModelForTesting');
+  await enterStudentInputs(page, 'model');
   await dispatch(page, 'closeModelHelpModal');
   await advance(page, '[data-action="saveModelAndToEquation"]', () => window.MebiModel.get(window.TepkimeArenasi.state).subView === 'equation');
   checks.push('progress ring on prediction, observation, explanation and model saves; observation return');

@@ -72,7 +72,7 @@ async function run() {
 
     // 1.4 Deney aşamasına geç butonuna basıldığında kart üzerinde mesaj görünmeli ve 2 sn sonra deney aşamasına geçmeli
     await page.evaluate(() => {
-      TepkimeArenasi.dispatch('autoFillPredictionForTesting');
+      MebiPrediction.items.forEach(i=>{MebiPrediction.setChoice(TepkimeArenasi.state,i.key+':unsure');MebiPrediction.setReason(TepkimeArenasi.state,i.key,'Bu belirtiyi deneyde gözlemleyeceğim.');});TepkimeArenasi.render(false);
     });
     await page.waitForTimeout(200);
 
@@ -157,7 +157,7 @@ async function run() {
 
     // 2.5 Tahmin ve gözlemi karşılaştır butonuna tıklandığında mesaj görünmeli ve 2 saniye sonra geçmeli
     await page.evaluate(() => {
-      TepkimeArenasi.dispatch('autoFillObservationForTesting');
+      MebiPrediction.items.forEach(i=>MebiObservation.setChoice(TepkimeArenasi.state,i.key+':no'));MebiObservation.setNote(TepkimeArenasi.state,'Karışımın görünüşünü ve termometreyi gözlemledim.');TepkimeArenasi.render(false);
     });
     await page.waitForTimeout(200);
 

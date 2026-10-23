@@ -1,3 +1,4 @@
+const enterStudentInputs = require('./student-inputs.cjs');
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -42,7 +43,7 @@ async function run() {
     await dispatch('clickReagent', 'CaCl2');
     await dispatch('clickReagent', 'NaOH');
     await dispatch('startExperiment');
-    await dispatch('autoFillPredictionForTesting');
+    await enterStudentInputs(page, 'prediction');
     await dispatch('beginExperiment');
     await page.evaluate(() => {
       const s = window.TepkimeArenasi.state;
@@ -53,7 +54,7 @@ async function run() {
       window.MebiObservation.reset(s);
       window.TepkimeArenasi.render(false);
     });
-    await dispatch('autoFillObservationForTesting');
+    await enterStudentInputs(page, 'observation');
     await dispatch('saveObservation');
     await dispatch('setObservationTab', 'compare');
     await dispatch('toCard');

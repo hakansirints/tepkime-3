@@ -1,7 +1,7 @@
 /* The particle-relationship activity and equation-balancing builder in Model stage (5. Model). */
 (function(window){
   'use strict';
-  var KEY='tepkime_arenasi_particle_models_v1',TEST_TOOLS_ENABLED=true;
+  var KEY='tepkime_arenasi_particle_models_v1';
   var roles=[
     ['reactant','Tepkimeye katılan'],
     ['solid','Oluşan çökelti / katı'],
@@ -174,18 +174,6 @@
     return true;
   }
 
-  function autoFillForTesting(state){
-    var model = data(state);
-    if (!TEST_TOOLS_ENABLED || !canEnter(state) || !model) return false;
-    var draft = get(state);
-    model.species.forEach(function(p){
-      draft.assignments[p.kind] = p.role;
-    });
-    draft.error = false;
-    draft.message = '';
-    persist(state);
-    return true;
-  }
 
   function isSpeciesFormulaTooLong(p){
     if (!p) return false;
@@ -1257,7 +1245,6 @@
     }
 
     var helpBox = '<details class="explanation-help" open><summary id="modelStepTitle" tabindex="-1">Rolleri ayırt ederken nelere bakmalıyım?</summary><p>Katı tepkeni başlangıçta serbest iyon gibi gösterme. Çözeltide kalan her tanecik seyirci değildir; artan tepken ve katalizörü ayırt et. Oluşan suyu çözücü sudan, katı iyonik örgüyü molekülün bağ yapısından ayır.</p></details>';
-    var testBtn = TEST_TOOLS_ENABLED ? '<button type="button" class="explanation-test-button mebi-btn mebi-btn-secondary mebi-btn-sm" data-model-test data-action="autoFillModelForTesting">' + window.MebiSVG.icon('flaskOutline') + '<span>Test İçin Doldur</span></button>' : '';
     var toEquationBtn = '<button type="button" data-action="setModelSubView" data-arg="equation" class="mebi-btn mebi-btn-secondary mebi-btn-sm">Denklemimi Kur →</button>';
 
     return '<section class="prediction-card explanation-card model-card" id="modelCard" aria-labelledby="modelTitle">' +
@@ -1307,7 +1294,6 @@
         '</div>' +
         '<div class="prediction-actions">' +
           '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="backToExplanation">← Açıklamama Dön</button>' +
-          testBtn +
           '<button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="saveModelAndToEquation" id="saveModelToEquationBtn">Tanecik Modelini Kaydet ve Denklemi Kur →</button>' +
         '</div>' +
       '</footer>' +
@@ -1446,7 +1432,6 @@
     updateSpeciesFeedback: updateSpeciesFeedback,
     save: save,
     persist: persist,
-    autoFillForTesting: autoFillForTesting,
     summary: summary,
     validate: validate,
     assign: assign,

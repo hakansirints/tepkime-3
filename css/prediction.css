@@ -76,9 +76,8 @@
 .prediction-footer strong { font-size:12px; color:#0f172a !important; font-weight:800 !important; }
 .prediction-footer p { margin:3px 0 0; color:#64748b !important; font-size:11px; }
 .prediction-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; flex:none; }
-.prediction-autofill { margin-right:auto; }
 .prediction-save-group { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
-.prediction-actions-full { width:100% !important; justify-content:space-between !important; }
+.prediction-actions-full { width:100% !important; justify-content:flex-end !important; }
 .prediction-saved-status { display:inline-flex; align-items:center; gap:4px; color:#0284c7 !important; font-size:11px; font-weight:700; }
 .prediction-saved-status:empty { display:none; }
 .prediction-actions .mebi-btn { min-height:36px; height:auto; border-radius:9px !important; font-weight:800 !important; font-size:11px !important; white-space:nowrap; }
@@ -143,7 +142,6 @@
   .prediction-progress > p.is-storage-error { display:block; }
   .prediction-progress > strong { font-size:10px; }
   .prediction-actions { gap:6px; }
-  .prediction-actions .prediction-autofill { max-width:118px; white-space:normal; padding:5px 8px; font-size:9px; }
   .prediction-save-group { gap:5px; }
   .prediction-saved-status { max-width:96px; font-size:10px; line-height:1.3; }
   .prediction-saved-status svg { flex:none; }

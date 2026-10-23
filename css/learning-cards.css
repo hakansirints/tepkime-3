@@ -136,7 +136,6 @@
  .observation-card .observation-footer .prediction-actions { gap:4px; }
  .observation-card .observation-footer .prediction-actions .mebi-btn { font-size:9px; padding:6px 8px; min-height:34px; white-space:normal; }
  .observation-card .observation-footer #compareObservationButton { max-width:145px; }
- .observation-card:not(.is-comparing) .observation-footer .prediction-actions [data-action="autoFillObservationForTesting"] { max-width:110px; }
 }
 
 

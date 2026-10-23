@@ -26,8 +26,7 @@
   .prediction-actions .mebi-btn { white-space:normal; text-wrap:balance; line-height:1.25; }
   .prediction-save-group { min-width:0; }
   .prediction-footer .prediction-saved-status { max-width:none; }
-  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:start; }
-  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions .prediction-autofill { width:100%; max-width:none; margin:0; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; }
   #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-save-group { display:flex; flex-direction:column; align-items:stretch; gap:3px; }
   #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions .mebi-btn { width:100%; min-height:32px; padding:4px 5px; font-size:10px; }
   .reagent-gallery-toolbar { display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
@@ -61,7 +60,7 @@
   }
   #explanationCard .prediction-actions > * { grid-column:span 2; margin:0; min-width:0; max-width:none; }
   #explanationCard .prediction-actions > :nth-last-child(-n+2) { grid-column:span 3; }
-  #explanationCard .prediction-actions :is(.mebi-btn,.explanation-test-button) { min-height:30px; font-size:10px; line-height:1.2; padding:4px 6px; white-space:normal; }
+  #explanationCard .prediction-actions .mebi-btn { min-height:30px; font-size:10px; line-height:1.2; padding:4px 6px; white-space:normal; }
   #modelCard .explanation-feedback { max-width:44%; }
   #modelCard .prediction-actions { display:flex; flex-wrap:nowrap; gap:4px; }
   #modelCard .prediction-actions .mebi-btn { min-width:0; padding:5px 8px; }
@@ -113,7 +112,6 @@
   .prediction-pair { gap:4px; }
   .prediction-none > span { display:none; }
   .prediction-progress { gap:2px; }
-  #app .prediction-card .prediction-autofill { max-width:105px; }
   .prediction-saved-status { font-size:9px; }
   #app .prediction-card .observation-form-layout,#app .prediction-card .observation-compare-layout { grid-template-columns:minmax(0,1fr); gap:10px; }
   .observation-notes { border-left:0; padding-left:0; }
@@ -126,7 +124,7 @@
   #explanationCard .explanation-evidence-list label { gap:3px; padding:5px; }
   #explanationCard .explanation-evidence-list strong { font-size:10px; }
   #modelCard .explanation-map-path { gap:5px; grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr); }
-  #modelCard .explanation-step-tools .mebi-btn,#modelCard .explanation-test-button { min-height:32px; }
+  #modelCard .explanation-step-tools .mebi-btn { min-height:32px; }
   .gallery-actions button { padding:5px 8px; }
   .reagent-gallery-grid { grid-auto-rows:112px; }
   .reagent-card-visual { flex-basis:46px; }

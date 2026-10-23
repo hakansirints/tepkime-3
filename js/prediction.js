@@ -98,29 +98,6 @@
     state.predictionAnswers[key].reason = value;
     return true;
   }
-  // Temporary shortcut for testing the experiment flow; never saves or starts it.
-  function autoFillForTesting(state) {
-    if (!editable(state) || !state.activeReaction) return false;
-    var reaction = state.activeReaction, actual = outcomes(reaction);
-    var pair = [state.selectedSlot1,state.selectedSlot2].map(function(id) { return window.MebiData.getReagent(id).f; }).join(' ve ');
-    var gas = (reaction.products || '').match(/(?:CO₂|O₂|Cl₂|H₂|CO2|O2|Cl2|H2)(?=\(gaz)/);
-    var reasons = {
-      gas:actual.gas ? pair + ' karışımında ' + (gas ? gas[0] + ' gazı' : 'gaz ürünü') + ' oluştuğu için kabarcık çıkışı bekliyorum.' : pair + ' karışımında gaz ürünü oluşması öngörülmediği için yeni gaz kabarcıkları beklemiyorum.',
-      precipitate:actual.precipitate ? 'Bu karışımda suda çözünmeyen yeni bir katı oluşması öngörüldüğü için çökelti bekliyorum. ' + reaction.mainProductSymbol + ' katı ürünler arasında yer alır.' : 'Bu karışımda yeni, çözünmeyen bir katı ürün oluşması öngörülmüyor. Başlangıçta bulunan katı madde tek başına çökelti sayılmaz.',
-      color:actual.color ? 'Başlangıçtaki maddelerden farklı renkte ürünler oluşacağı için renk değişimi bekliyorum. Beklenen ürünler: ' + reaction.products : 'Bu karışım için başlangıçtaki madde renklerinden farklı, yeni bir renk oluşması öngörülmediği için belirgin renk değişimi beklemiyorum.'
-    };
-    var initial = Number(reaction.tempInit), final = Number(reaction.tempFinal);
-    var temperature = 'Bu karışımın eğitim modelinde sıcaklık ' + (final === initial ? initial.toLocaleString('tr-TR') + ' °C’de değişmeden kalır.' : initial.toLocaleString('tr-TR') + ' °C’den ' + final.toLocaleString('tr-TR') + ' °C’ye ' + (final > initial ? 'yükselir.' : 'düşer.'));
-    reasons.tempRise = temperature + (actual.tempRise ? ' Son değer daha yüksek olduğu için sıcaklık artışı bekliyorum.' : ' Son değer daha yüksek olmadığı için sıcaklık artışı beklemiyorum.');
-    reasons.tempFall = temperature + (actual.tempFall ? ' Son değer daha düşük olduğu için sıcaklık düşmesi bekliyorum.' : ' Son değer daha düşük olmadığı için sıcaklık düşmesi beklemiyorum.');
-    invalidateSave(state);
-    items.forEach(function(item) {
-      state.predictionAnswers[item.key] = { choice:actual[item.key] ? 'yes' : 'no', reason:reasons[item.key] };
-    });
-    state.predictionNonePrevious = null;
-    state.predictionMessage = '';
-    return true;
-  }
   function toggleNone(state) {
     if (!editable(state)) return false;
     invalidateSave(state);
@@ -183,7 +160,7 @@
   function materialHTML(id) {
     var reagent = window.MebiData.getReagent(id);
     var kind = reagent.solid ? 'powder' : reagent.id === 'Cu(NO3)2' ? 'blue' : 'clear';
-    return '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=56b7ccbc1a23" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz' : 'suda') + '</small></span></div>';
+    return '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=02f5093fd7f5" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz' : 'suda') + '</small></span></div>';
   }
   function answersHTML(answers) {
     return items.map(function(item) { return '<div class="prediction-summary-row"><strong>' + item.label + '</strong><span class="prediction-answer">' + label(answers[item.key].choice) + '</span><p>' + esc(answers[item.key].reason) + '</p></div>'; }).join('');
@@ -222,7 +199,6 @@
       '<div class="prediction-pair" aria-label="Seçilen maddeler">' + materialHTML(state.selectedSlot1) + '<span aria-hidden="true">+</span>' + materialHTML(state.selectedSlot2) + '</div></header>' +
       '<div class="prediction-content">' + content + '</div><p id="predictionMessage" class="prediction-message" role="alert">' + esc(state.predictionMessage) + '</p>' +
       '<footer class="prediction-footer"><div class="prediction-actions prediction-actions-full">' +
-      '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm prediction-autofill" data-action="autoFillPredictionForTesting">Test İçin Otomatik Doldur</button>' +
       '<div class="prediction-save-group">' +
       '<span id="predictionSavedStatus" class="prediction-saved-status" role="status" aria-live="polite">' + (saved ? window.MebiSVG.icon('check') + ' Tahmininiz kaydedildi' : '') + '</span>' +
       '<button type="button" id="beginExperimentButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="beginExperiment" title="' + (complete(state) === 5 || saved ? 'Deney aşamasına geç' : 'Önce 5 belirti kararını tamamla') + '"' + (complete(state) !== 5 && !saved ? ' disabled' : '') + '>' + window.MebiSVG.icon('save') + ' Kaydet ve Deney Aşamasına Geç</button></div></div></footer></section>';
@@ -253,5 +229,5 @@
     if (editable(state)) updateStatus(state);
   }
   window.MebiPrediction = { items:items, reset:reset, setChoice:setChoice, setReason:setReason, toggleNone:toggleNone, complete:complete, save:save, edit:edit, begin:begin,
-    started:started, outcomes:outcomes, matches:matches, render:render, reviewHTML:reviewHTML, wireInputs:wireInputs, feedbackHTML:feedbackHTML, decisionListHTML:decisionListHTML, autoFillForTesting:autoFillForTesting };
+    started:started, outcomes:outcomes, matches:matches, render:render, reviewHTML:reviewHTML, wireInputs:wireInputs, feedbackHTML:feedbackHTML, decisionListHTML:decisionListHTML };
 })(window);

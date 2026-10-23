@@ -121,31 +121,6 @@
     o.reflection = o.reflection.trim(); o.savedReflection = o.reflection; o.reflectionSaved = true; o.message = ''; writeEntry(state, true); return true;
   }
   function number(value) { return Number(value).toLocaleString('tr-TR', { minimumFractionDigits:1, maximumFractionDigits:1 }); }
-  function autoFillForTesting(state) {
-    if (!canObserve(state)) return false;
-    var o = get(state);
-    if (o.tab === 'compare' && o.record) {
-      var changed = [], confirmed = [], uncertain = [];
-      items().forEach(function(item) {
-        var predicted = o.record.prediction.answers[item.key].choice, observed = o.record.answers[item.key];
-        if (predicted === 'unsure' || observed === 'unsure') uncertain.push(item.label.toLocaleLowerCase('tr-TR'));
-        else (predicted === observed ? confirmed : changed).push(item.label.toLocaleLowerCase('tr-TR'));
-      });
-      return setReflection(state, (changed.length ? 'Gözlem kaydımda ' + changed.join(', ') + ' ile ilgili bulgular tahminimden farklıydı; bu tahminlerimi kaydettiğim verilere göre yeniden değerlendiriyorum. ' : '') +
-        (confirmed.length ? confirmed.join(', ') + ' ile ilgili tahminlerim gözlem kaydımla uyumlu. ' : '') +
-        (uncertain.length ? uncertain.join(', ') + ' konusunda karara varmak için ek gözleme ihtiyacım var.' : ''));
-    }
-    var actual = window.MebiPrediction.outcomes(state.activeReaction);
-    var initial = Number(state.activeReaction.tempInit), current = Number(state.currentTemp);
-    if (!isFinite(initial) || !isFinite(current)) return false;
-    actual.tempRise = current > initial; actual.tempFall = current < initial;
-    items().forEach(function(item) { o.answers[item.key] = actual[item.key] ? 'yes' : 'no'; });
-    var observations = [actual.gas ? 'Kabarcık oluştu.' : 'Kabarcık gözlemedim.',
-      actual.precipitate ? 'Çökelti oluştu.' : 'Çökelti gözlemedim.',
-      actual.color ? 'Karışımın rengi değişti.' : 'Renk değişimi gözlemedim.',
-      actual.tempRise || actual.tempFall ? 'Sıcaklık ' + number(initial) + ' °C’den ' + number(current) + ' °C’ye ' + (actual.tempRise ? 'yükseldi.' : 'düştü.') : 'Sıcaklık ' + number(current) + ' °C’de sabit kaldı.'];
-    o.note = observations.join(' '); o.message = ''; return true;
-  }
   function temperatureHTML(state) {
     var o = get(state), t = o.record ? o.record.temperature : { initial:state.activeReaction.tempInit, final:state.currentTemp };
     return '<div class="observation-temperature" aria-label="Sanal deney sıcaklık verileri"><span>İlk: <strong>' + number(t.initial) + ' °C</strong></span><span>Son: <strong>' + number(t.final) + ' °C</strong></span><span>ΔT: <strong>' + number(t.final - t.initial) + ' °C</strong></span></div>';
@@ -180,7 +155,7 @@
   function pairHTML(state) {
     return '<div class="prediction-pair" aria-label="Deneyde karıştırılan maddeler">' + [state.selectedSlot1,state.selectedSlot2].map(function(id, index) {
       var reagent = window.MebiData.getReagent(id), kind = reagent.solid ? 'powder' : reagent.id === 'Cu(NO3)2' ? 'blue' : 'clear';
-      return (index ? '<span aria-hidden="true">+</span>' : '') + '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=56b7ccbc1a23" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz · ' + window.MebiExperiment.initialAmount(reagent).solidGrams.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' g' : 'suda · ' + window.MebiExperiment.defaults.solutionMl + ' mL') + '</small></span></div>';
+      return (index ? '<span aria-hidden="true">+</span>' : '') + '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=02f5093fd7f5" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz · ' + window.MebiExperiment.initialAmount(reagent).solidGrams.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' g' : 'suda · ' + window.MebiExperiment.defaults.solutionMl + ' mL') + '</small></span></div>';
     }).join('') + '</div>';
   }
   function deskHTML(state) {
@@ -216,8 +191,7 @@
   function render(state) {
     var o = get(state), comparing = o.tab === 'compare' && o.record;
     var message = o.storageError ? 'Bu oturumda kaydedildi; tarayıcıda kalıcı kayıt yapılamadı.' : o.message || 'Emin Değilim geçerli bir yanıttır.';
-    var leftActions = '<div class="prediction-footer-left"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="restartExperiment">Deneyi Yeniden Başlat</button>' +
-      '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="autoFillObservationForTesting">Test İçin Otomatik Doldur</button></div>';
+    var leftActions = '<div class="prediction-footer-left"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="restartExperiment">Deneyi Yeniden Başlat</button></div>';
     var rightActions = comparing ?
       '<div class="prediction-actions"><button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="setObservationTab" data-arg="observe" data-observation-control="back-observe">Gözlem Kartına Dön</button>' +
       '<button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="toCard">Açıklama Aşamasına Devam Et</button></div>' :
@@ -252,5 +226,5 @@
   }
 
   window.MebiObservation = { pairHTML:pairHTML, reset:reset, get:get, editable:editable, complete:complete, setChoice:setChoice, setNote:setNote, save:save,
-    setTab:setTab, showLab:showLab, setReflection:setReflection, saveReflection:saveReflection, autoFillForTesting:autoFillForTesting, render:render, deskHTML:deskHTML, reviewModalHTML:reviewModalHTML, wireInputs:wireInputs };
+    setTab:setTab, showLab:showLab, setReflection:setReflection, saveReflection:saveReflection, render:render, deskHTML:deskHTML, reviewModalHTML:reviewModalHTML, wireInputs:wireInputs };
 })(window);

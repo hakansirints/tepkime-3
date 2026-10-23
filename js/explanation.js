@@ -2,8 +2,6 @@
 (function(window) {
   'use strict';
   var KEY = 'tepkime_arenasi_explanations_v1';
-  // Temporary QA control for the combined explanation card.
-  var TEST_TOOLS_ENABLED = true;
   var writingPrompt='“... gözledim. Bunun, taneciklerin ... değişimiyle ilişkili olduğunu düşünüyorum; çünkü ... .” Gözlemini ve bu gözlemin nedenine ilişkin düşünceni birlikte yaz.';
   var changeTypes = [['chemical','Kimyasal değişim','Yeni madde oluştuğunu düşünüyorum.'],['physical','Fiziksel değişim','Yeni madde oluşmadığını düşünüyorum.']];
   function isNonReaction(state) { return !!(window.MebiNonReaction && window.MebiNonReaction.scenario(state)); }
@@ -57,22 +55,9 @@
     try { var data=entries(); data[draft.observationId]={observationId:draft.observationId,layoutVersion:3,html:cleanHTML(draft.html),legacyAssignments:draft.legacyAssignments,evidence:draft.evidence,changeType:draft.changeType,revisions:draft.revisions,visits:draft.visits,step:draft.step};window.localStorage.setItem(KEY,JSON.stringify(data));draft.storageError=false; }
     catch(e) { draft.storageError=true; }
   }
-  function model(state) { return window.MebiExplanationModel ? window.MebiExplanationModel.build(state) : null; }
   function setStep(state,value) {
     if(!eligible(state)||[1,2].indexOf(Number(value))<0)return false;
     get(state).step=Number(value);persist(state);return true;
-  }
-  function autoFillForTesting(state) {
-    if (!TEST_TOOLS_ENABLED || !eligible(state)) return false;
-    var draft=get(state),data=model(state),record=state.observation.record;
-    if(!data)return false;
-    draft.changeType=data.model.products.length?'chemical':'physical';
-    function names(role) { return data.species.filter(function(p){return p.role===role;}).map(function(p){return p.label;}).join(', '); }
-    var products=data.species.filter(function(p){return ['solid','gas','water','other'].indexOf(p.role)>=0;}).map(function(p){return p.label+' ('+({solid:'katı ürün',gas:'gaz',water:'oluşan su',other:'diğer ürün'}[p.role])+')';}).join(', ');
-    var text=products ? names('reactant')+' tanecikleri yeniden düzenlenerek '+products+' oluşturur. ' : 'Bu modelde yeni kimyasal ürün oluşumu gösterilmiyor. ';
-    text+='Gözlem kaydımla ilişkim: '+record.note+' Modelde atom türleri ve toplam yük korunur.';
-    draft.html=esc(text);
-    get(state);draft.error=false;draft.message='';persist(state);return true;
   }
   function status(state) {
     var draft=get(state), el=document.getElementById('explanationStatus'), nonReaction=isNonReaction(state);
@@ -104,9 +89,6 @@
     if (!eligible(state) || !(changeTypes.some(function(item){return item[0]===value;}) || (value==='unsure' && isNonReaction(state)))) return;
     var draft=get(state);draft.changeType=value;
     draft.message='';draft.error=false;persist(state);
-  }
-  function testButton() {
-    return TEST_TOOLS_ENABLED ? '<button type="button" class="explanation-test-button" data-explanation-test data-action="autoFillExplanationForTesting" title="Geçici test aracı: yalnızca bu kartı doldurur">'+window.MebiSVG.icon('flaskOutline')+'<span>Test İçin Doldur</span></button>' : '';
   }
   function changeIconSVG(type) {
     if (type === 'chemical') {
@@ -203,7 +185,6 @@
         '</div>' +
         '<div class="prediction-actions">' +
           '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="backToObservation">← Gözlem Kartına Dön</button>' +
-          testButton() +
           '<span id="explanationSavedStatus" class="prediction-saved-status" role="status" aria-live="polite"></span>' +
           '<button type="button" id="toModelButton" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="toModel">' +
             window.MebiSVG.icon('save') + ' Kaydet ve Model Aşamasına Geç' +
@@ -263,5 +244,5 @@
     }
     status(state);
   }
-  window.MebiExplanation={eligible:eligible,get:get,render:render,wire:wire,save:save,persist:persist,cleanHTML:cleanHTML,setStep:setStep,autoFillForTesting:autoFillForTesting};
+  window.MebiExplanation={eligible:eligible,get:get,render:render,wire:wire,save:save,persist:persist,cleanHTML:cleanHTML,setStep:setStep,};
 })(window);
