@@ -212,8 +212,7 @@
   #app .observation-card:not(.is-comparing) .observation-footer .prediction-actions { display:flex; width:auto; margin-left:auto; }
   #app .observation-card:not(.is-comparing) .observation-footer .prediction-actions .mebi-btn { width:auto; max-width:none; }
 
-  /* Every mobile beaker inspection replaces the stage bar with the pair. */
-  body[data-particle-inspection="true"] #app .mebi-top-shell { display:none !important; }
+  /* The shared header remains available as a floating recall icon in inspections. */
   body[data-particle-inspection="true"] #beakerParticlePairBadge {
     top:8px !important; left:8px !important; transform:none !important;
     width:calc(100vw - var(--right-panel,210px) - 24px); max-width:520px;

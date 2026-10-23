@@ -9,7 +9,7 @@
   /* ----------------- 1. UYGULAMA DURUMU (APPLICATION STATE) ----------------- */
   var S = {
     screen: 'menu',
-    headerCollapsed: false,
+    headerCollapsed: mobileHeaderDevice(),
     stageReview: null,
     particleInspection: null,
     explanationReview: null,
@@ -44,11 +44,39 @@
   window.MebiObservation.reset(S);
   var HISTORY = [];
   var headerLayoutFrame = 0, headerResizeObserver = null, measuredHeader = null;
+  var headerDeviceMode = mobileHeaderDevice();
+  var headerScreenKey = null;
+  function mobileHeaderDevice() {
+    return window.innerWidth <= 900 || (window.innerWidth <= 1024 && window.innerHeight <= 650) ||
+      (window.innerWidth <= 1366 && window.matchMedia && window.matchMedia('(pointer:coarse)').matches);
+  }
+  function syncStageHeader() {
+    var shell = document.getElementById('mebiStageHeader');
+    var recall = document.getElementById('mebiHeaderRecall');
+    document.body.dataset.headerCollected = String(S.headerCollapsed);
+    if (shell) {
+      shell.hidden = S.headerCollapsed;
+      shell.inert = S.headerCollapsed;
+      shell.classList.toggle('is-header-collected', S.headerCollapsed);
+      var toggle = shell.querySelector('.mebi-stage-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', String(!S.headerCollapsed));
+    }
+    if (recall) recall.hidden = !S.headerCollapsed;
+    var app = document.getElementById('app');
+    if (app && app.style && app.style.setProperty) {
+      var bottom = shell && !shell.hidden ? Math.max(shell.getBoundingClientRect().bottom,
+        shell.querySelector('.mebi-stepper').getBoundingClientRect().bottom) : 0;
+      app.style.setProperty('--lab-card-top', Math.ceil(bottom + (window.innerHeight < 650 ? 8 : 12)) + 'px');
+    }
+  }
   function scheduleStageLayout() {
     if (headerLayoutFrame) return;
     headerLayoutFrame = window.requestAnimationFrame(function() { headerLayoutFrame = 0; fitStageHeader(); });
   }
   function fitStageHeader() {
+    var mobile = mobileHeaderDevice();
+    if (mobile !== headerDeviceMode) { headerDeviceMode = mobile; S.headerCollapsed = mobile; }
+    syncStageHeader();
     var header = document.querySelector('.mebi-top-shell');
     if (window.ResizeObserver && header !== measuredHeader) {
       if (!headerResizeObserver) headerResizeObserver = new window.ResizeObserver(scheduleStageLayout);
@@ -192,7 +220,8 @@
           '</div>' +
           '<span class="mebi-progress-percent">%' + pct + '</span>' +
         '</div>';
-      return '<div class="mebi-top-shell has-stage is-header-compact is-unified-header' + (S.headerCollapsed ? ' is-stages-minimized' : '') + '">' + stepperHTML(stage || 'pool', toolsHTML, progressHTML) + '</div>';
+      return '<div id="mebiStageHeader" class="mebi-top-shell has-stage is-header-compact is-unified-header' + (S.headerCollapsed ? ' is-header-collected' : '') + '"' + (S.headerCollapsed ? ' hidden inert' : '') + '>' + stepperHTML(stage || 'pool', toolsHTML, progressHTML) + '</div>' +
+        '<button type="button" id="mebiHeaderRecall" class="mebi-header-recall" data-action="toggleStageHeader" aria-controls="mebiStageHeader" aria-expanded="false" aria-label="Başlık kartını geri aç" title="Başlık kartını geri aç"' + (S.headerCollapsed ? '' : ' hidden') + '>' + window.MebiSVG.icon('panelsTopLeft') + '</button>';
   }
 
   function stepperHTML(step, toolsHTML, progressHTML) {
@@ -210,7 +239,7 @@
     var pctLine = (idx / (steps.length - 1)) * 100;
 
     var html = '<div class="mebi-stepper">' +
-      '<div class="mebi-stepper-track" id="stageMainHeader"' + (minimized ? ' hidden' : '') + '>' +
+      '<div class="mebi-stepper-track" id="stageMainHeader">' +
         '<div class="mebi-step-line">' +
           '<div class="mebi-step-line-fill" style="width:' + pctLine + '%;"></div>' +
         '</div>';
@@ -232,7 +261,7 @@
     html += '</div>' +
       progressHTML +
       (toolsHTML ? '<div class="mebi-stepper-inline-tools">' + toolsHTML + '</div>' : '') +
-      '<button type="button" class="mebi-stage-toggle' + (minimized ? '' : ' is-compact') + '" data-action="toggleStageHeader" aria-controls="stageMainHeader" aria-expanded="' + !minimized + '" title="' + (minimized ? 'Aşamaları göster' : 'Aşamaları daralt') + '" aria-label="' + (minimized ? 'Aşamaları göster' : 'Aşamaları daralt') + '">' + window.MebiSVG.icon('down') + '</button>' +
+      '<button type="button" class="mebi-stage-toggle is-compact" data-action="toggleStageHeader" aria-controls="mebiStageHeader" aria-expanded="' + !minimized + '" title="Başlık kartını sol üste topla" aria-label="Başlık kartını sol üste topla">' + window.MebiSVG.icon('panelsTopLeft') + '</button>' +
     '</div>';
     return html;
   }
@@ -260,7 +289,7 @@
 
   // EKRAN 1: AÇILIŞ MENÜSÜ (Görseldeki Mint Kimya Temalı 16:9 Yatay Kart)
   function entranceIcon(name) {
-    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg?v=f1bb324965c5)"></span>';
+    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg?v=e8aaf3d3a426)"></span>';
   }
 
   function screenMenu() {
@@ -394,7 +423,7 @@
         '" data-action="clickReagent" data-arg="' + esc(r.id) + '" aria-pressed="' + !!slot +
         '" aria-label="' + esc(r.f + ', ' + r.name + ', ' + description + (slot ? ', ' + slot + '. beher seçildi' : '') + (completed ? ', bu madde çifti daha önce denendi ve koleksiyona kaydedildi' : '')) + '">' +
         '<span class="reagent-card-visual is-' + appearance + '">' +
-          '<img src="image/reagents/' + appearance + '.webp?v=f1bb324965c5" width="640" height="440" alt="" decoding="async" draggable="false">' +
+          '<img src="image/reagents/' + appearance + '.webp?v=e8aaf3d3a426" width="640" height="440" alt="" decoding="async" draggable="false">' +
         '</span><span class="reagent-card-caption">' + (slot ? '<span class="reagent-card-selection">✓ ' + slot + '. beher</span>' : '') + '<strong>' + esc(r.f) + '</strong>' + (completed ? '<span class="reagent-card-history">Daha önce denendi</span>' : '') + '<span>' + esc(r.name) +
         ' <small>' + (r.solid ? '(katı toz)' : '(suda)') + '</small></span></span></button>';
     }).join('');
@@ -843,8 +872,15 @@
   /* ----------------- 5. EYLEMLER VE YÖNLENDİRİCİ (ACTIONS & ROUTER) ----------------- */
   var actions = {
     toggleStageHeader: function() {
-      S.headerCollapsed = !S.headerCollapsed; render(false);
-      var toggle = document.querySelector('.mebi-stage-toggle'); if (toggle) toggle.focus({preventScroll:true});
+      S.headerCollapsed = !S.headerCollapsed;
+      S.labSettingsOpen = false;
+      var settings = document.getElementById('labSettingsPanel');
+      if (settings) settings.hidden = true;
+      var settingsTrigger = document.querySelector('.lab-settings-trigger');
+      if (settingsTrigger) settingsTrigger.setAttribute('aria-expanded','false');
+      fitStageHeader();
+      var toggle = document.querySelector(S.headerCollapsed ? '#mebiHeaderRecall' : '.mebi-stage-toggle');
+      if (toggle) toggle.focus({preventScroll:true});
     },
     closeStageReview: function() { S.stageReview = null; render(false); },
     navigateStage: function(value) {
@@ -1748,6 +1784,8 @@
   function render(scrollTop) {
     var app = document.getElementById('app');
     if (!app) return;
+    var nextHeaderScreen = S.screen + '|' + (S.stageReview || '') + '|' + !!S.particleInspection + '|' + stageIndex();
+    if (headerScreenKey !== nextHeaderScreen) { headerScreenKey = nextHeaderScreen; S.headerCollapsed = mobileHeaderDevice(); }
     if(S.explanationReview && (S.screen!=='lab'||S.stageReview||!S.observation?.record||S.explanationReview.observationId!==S.observation.record.id))S.explanationReview=null;
     if(S.particleInspection && (S.screen!=='lab'||S.stageReview||!window.MebiParticleInspection.eligible(S)))S.particleInspection=null;
     document.body.dataset.particleInspection=String(!!S.particleInspection);
@@ -1758,16 +1796,17 @@
     var focusedPrediction = focusedCard && focusedCard.getAttribute ? focusedCard.getAttribute('data-prediction-control') : null;
     var focusedSafety = focusedCard && focusedCard.getAttribute ? focusedCard.getAttribute('data-safety-control') : null;
     var fn = S.stageReview ? stageReviewHTML : SCREENS[S.screen] || screenMenu;
-    var oldList = app.querySelector('.prediction-content, .reagent-gallery-grid, .lab-reagent-list, .observation-dock');
+    var oldList = app.querySelector('.prediction-content, .reagent-gallery-grid, .collection-grid, .lab-reagent-list, .observation-dock');
     var listScroll = oldList ? oldList.scrollTop : 0;
     var oldObservationPanel = app.querySelector('#observationPanel');
     var observationScroll = oldObservationPanel ? oldObservationPanel.scrollTop : 0;
     app.innerHTML = fn() + repeatPairDialogHTML();
-    var newList = app.querySelector('.prediction-content, .reagent-gallery-grid, .lab-reagent-list, .observation-dock');
+    var newList = app.querySelector('.prediction-content, .reagent-gallery-grid, .collection-grid, .lab-reagent-list, .observation-dock');
     if (newList) newList.scrollTop = listScroll;
     var newObservationPanel = app.querySelector('#observationPanel');
     if (newObservationPanel) newObservationPanel.scrollTop = observationScroll;
     app.dataset.screen = S.stageReview === 'pool' ? 'pool' : S.stageReview ? 'lab' : S.screen;
+    syncStageHeader();
     if (window.LabScene) window.LabScene.sync(S, dispatch);
     wireInputs();
     paintSaveTransition();
@@ -1859,6 +1898,9 @@
 
       // Klavye ile role="button" ve role="checkbox" erişimi (Enter ve Boşluk tuşu)
       app.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && S.headerCollapsed && e.target.closest('#mebiHeaderRecall')) {
+          e.preventDefault(); dispatch('toggleStageHeader'); return;
+        }
         if (e.key === 'Enter' || e.key === ' ') {
           var btn = e.target.closest('[data-action][role="button"], [data-action][role="checkbox"]');
           if (btn && !btn.disabled && !btn.classList.contains('is-disabled')) {

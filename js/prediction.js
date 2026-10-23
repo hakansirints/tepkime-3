@@ -160,7 +160,7 @@
   function materialHTML(id) {
     var reagent = window.MebiData.getReagent(id);
     var kind = reagent.solid ? 'powder' : reagent.id === 'Cu(NO3)2' ? 'blue' : 'clear';
-    return '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=f1bb324965c5" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz' : 'suda') + '</small></span></div>';
+    return '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=e8aaf3d3a426" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz' : 'suda') + '</small></span></div>';
   }
   function answersHTML(answers) {
     return items.map(function(item) { return '<div class="prediction-summary-row"><strong>' + item.label + '</strong><span class="prediction-answer">' + label(answers[item.key].choice) + '</span><p>' + esc(answers[item.key].reason) + '</p></div>'; }).join('');

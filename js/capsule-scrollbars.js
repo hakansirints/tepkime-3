@@ -2,7 +2,7 @@
 (function(window, document) {
   'use strict';
   if (!window.ResizeObserver || !window.MutationObserver) return;
-  var entries = new Map(), pending = new Set(), frame = 0, sequence = 0, root;
+  var entries = new Map(), portals = new Map(), pending = new Set(), frame = 0, sequence = 0, root;
   var skip = 'html,body,svg,svg *,canvas,script,style,link,option,.mebi-stepper-track,.welcome-tabs-track';
   var resize = new window.ResizeObserver(function() { schedule(); });
 
@@ -10,13 +10,23 @@
     if (node) pending.add(node);
     if (!frame) frame = window.requestAnimationFrame(flush);
   }
+  function overlay(node) { return node.nodeType === 1 ? node.closest('.mebi-capsule-scrollbars') : node.parentElement && node.parentElement.closest('.mebi-capsule-scrollbars'); }
+  function portal(el) {
+    var dialog=el.closest('dialog');
+    if (!dialog) return root;
+    if (!portals.has(dialog)) {
+      var layer=document.createElement('div'); layer.className='mebi-capsule-scrollbars';
+      dialog.appendChild(layer); portals.set(dialog,layer);
+    }
+    return portals.get(dialog);
+  }
   function candidate(el) {
-    if (!el.isConnected || el.matches(skip) || root.contains(el)) return;
+    if (!el.isConnected || el.matches(skip) || overlay(el)) return;
     var css = window.getComputedStyle(el);
     if (/^(auto|scroll)$/.test(css.overflowY) || /^(auto|scroll)$/.test(css.overflowX)) attach(el);
   }
   function scan(node) {
-    if (node.nodeType !== 1 || !node.isConnected || root.contains(node)) return;
+    if (node.nodeType !== 1 || !node.isConnected || overlay(node)) return;
     candidate(node);
     node.querySelectorAll('*').forEach(candidate);
   }
@@ -24,7 +34,11 @@
     if (entries.has(el)) return;
     var generatedId = !el.id;
     if (generatedId) el.id = 'mebi-capsule-content-' + (++sequence);
-    var entry = {el:el, generatedId:generatedId, id:el.id, axes:[], children:new Set()};
+    var entry = {el:el, generatedId:generatedId, id:el.id, axes:[], children:new Set(),portal:portal(el),inlineScroll:[]};
+    ['scrollbar-width','scrollbar-gutter'].forEach(function(property) {
+      entry.inlineScroll.push({property:property,value:el.style.getPropertyValue(property),priority:el.style.getPropertyPriority(property)});
+      el.style.setProperty(property,property==='scrollbar-width'?'none':'auto','important');
+    });
     ['y','x'].forEach(function(axis) {
       var rail = document.createElement('div'), thumb = document.createElement('button');
       rail.className = 'capsule-rail'; rail.dataset.axis = axis; rail.hidden = true;
@@ -34,7 +48,7 @@
       thumb.setAttribute('aria-orientation',axis === 'y' ? 'vertical' : 'horizontal');
       thumb.setAttribute('aria-valuemin','0'); thumb.setAttribute('aria-valuemax','100');
       thumb.setAttribute('aria-valuenow','0');
-      rail.appendChild(thumb); root.appendChild(rail);
+      rail.appendChild(thumb); entry.portal.appendChild(rail);
       var control = {axis:axis,rail:rail,thumb:thumb,travel:0,max:0,size:0,drag:null};
       entry.axes.push(control); wire(entry,control);
     });
@@ -48,7 +62,7 @@
       if (child.parentElement !== entry.el) { resize.unobserve(child); entry.children.delete(child); }
     });
     Array.from(entry.el.children).forEach(function(child) {
-      if (!entry.children.has(child)) { entry.children.add(child); resize.observe(child); }
+      if (!overlay(child) && !entry.children.has(child)) { entry.children.add(child); resize.observe(child); }
     });
   }
   function detach(entry) {
@@ -56,6 +70,10 @@
     entry.children.forEach(function(child) { resize.unobserve(child); });
     entry.axes.forEach(function(control) { control.rail.remove(); });
     entry.el.classList.remove('mebi-capsule-scroller');
+    entry.inlineScroll.forEach(function(style) {
+      if (style.value) entry.el.style.setProperty(style.property,style.value,style.priority);
+      else entry.el.style.removeProperty(style.property);
+    });
     if (entry.generatedId && entry.el.id === entry.id) entry.el.removeAttribute('id');
     entries.delete(entry.el);
   }
@@ -109,11 +127,16 @@
     nodes.forEach(scan);
     // Hide our hit targets while checking which card is actually in front.
     root.style.visibility = 'hidden';
+    portals.forEach(function(layer) { layer.style.visibility='hidden'; });
     entries.forEach(function(entry) {
       if (!entry.el.isConnected) detach(entry);
       else { observeChildren(entry); position(entry); }
     });
     root.style.visibility = '';
+    portals.forEach(function(layer,dialog) {
+      layer.style.visibility='';
+      if (!layer.childElementCount || !dialog.isConnected) { layer.remove(); portals.delete(dialog); }
+    });
   }
   function move(entry,control,value) {
     value = Math.max(0,Math.min(control.max,value));
@@ -161,10 +184,10 @@
     },{passive:false});
   }
   function init() {
-    root=document.createElement('div'); root.id='mebiCapsuleScrollbars'; document.body.appendChild(root);
+    root=document.createElement('div'); root.id='mebiCapsuleScrollbars'; root.className='mebi-capsule-scrollbars'; document.body.appendChild(root);
     new window.MutationObserver(function(records) {
       records.forEach(function(record) {
-        if (record.target===root || root.contains(record.target)) return;
+        if (overlay(record.target)) return;
         if (record.type==='childList') record.addedNodes.forEach(function(node) { if (node.nodeType===1) pending.add(node); });
         else if (record.type==='attributes') {
           if (record.attributeName==='class') {
@@ -173,7 +196,7 @@
           } else if (record.target.nodeType===1 && !entries.has(record.target)) candidate(record.target);
         }
       });
-      if (records.some(function(record) { return record.target!==root && !root.contains(record.target); })) schedule();
+      if (records.some(function(record) { return !overlay(record.target); })) schedule();
     }).observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeOldValue:true,attributeFilter:['class','style','hidden','open']});
     document.addEventListener('scroll',function() { schedule(); },true);
     document.addEventListener('input',function() { schedule(); },true);

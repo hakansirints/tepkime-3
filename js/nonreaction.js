@@ -169,9 +169,11 @@
     if (!notice) return '';
     var success=notice.type==='success';
     return '<dialog id="nrNotice" class="nr-notice" role="'+(success?'dialog':'alertdialog')+'" aria-labelledby="nrNoticeTitle" aria-describedby="nrNoticeMessage">'+
-      '<h2 id="nrNoticeTitle">'+(success?'Sonucun kaydedildi':'Modelini ve sonucunu gözden geçir')+'</h2>'+
+      '<header class="nr-notice-heading"><span class="nr-notice-icon" aria-hidden="true">'+icon(success?'check':'info')+'</span><h2 id="nrNoticeTitle">'+(success?'Sonucun kaydedildi':'Modelini ve sonucunu gözden geçir')+'</h2></header>'+
+      '<div class="nr-notice-body">'+
       '<p id="nrNoticeMessage">'+esc(notice.message)+'</p>'+
       (notice.errors&&notice.errors.length?'<ul>'+notice.errors.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul>':'')+
+      '</div>'+
       '<div class="nr-notice-actions">'+(success?
         '<button type="button" class="mebi-btn mebi-btn-secondary mebi-btn-sm" data-action="startNewExperiment">Yeni bir Deney Yap</button><button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="viewCollectionFromCompletion">Laboratuvar Günlüğünü Görüntüle</button>':
         '<button type="button" class="mebi-btn mebi-btn-primary mebi-btn-sm" data-action="dismissNonReactionNotice" autofocus>Tamam</button>')+'</div></dialog>';
