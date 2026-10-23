@@ -1,0 +1,25 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+let now=1000,mobile=true,activations=0;
+const handlers={},scroller={scrollTop:0};
+const button={disabled:false,closest(selector){return selector==='.prediction-content'?scroller:this;},focus(){}};
+const target={closest(){return button;}};
+const app={contains(el){return el===button;},addEventListener(type,fn){handlers[type]=fn;}};
+const c={Date:{now:()=>now},matchMedia:()=>({matches:mobile})};c.window=c;
+vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../js/learning-inputs.js'),'utf8'),c);
+const input=c.MebiLearningInputs.wire(app,()=>activations++);
+function event(extra={}){return{target,pointerType:'touch',isPrimary:true,pointerId:1,clientX:20,clientY:20,cancelable:true,preventDefault(){},...extra};}
+handlers.pointerdown(event());handlers.pointerup(event());assert.equal(activations,1);
+assert(input.suppressClick(event({detail:1})),'Compatibility click must not activate a second time');
+assert(!input.suppressClick(event({detail:0})),'Keyboard activation remains available');
+assert(!input.suppressClick(event({detail:1,pointerType:'mouse'})),'A real mouse click is not suppressed after touch');
+assert(input.suppressClick(event({detail:1,pointerType:'mouse',sourceCapabilities:{firesTouchEvents:true}})),'Legacy touch compatibility clicks are suppressed');
+now+=800;assert(!input.suppressClick(event({detail:1})));
+handlers.pointerdown(event());handlers.pointermove(event({clientY:40}));handlers.pointerup(event({clientY:40}));assert.equal(activations,1,'Swiping a checkbox scrolls without selecting');
+handlers.pointerdown(event());scroller.scrollTop=40;handlers.pointerup(event());assert.equal(activations,1,'Native scrolling cancels selection');
+handlers.pointerdown(event());handlers.pointercancel(event());handlers.pointerup(event());assert.equal(activations,1);
+handlers.pointerdown(event({pointerType:'mouse'}));handlers.pointerup(event({pointerType:'mouse'}));assert.equal(activations,1,'Mouse keeps the normal click path');
+handlers.pointerdown(event({isPrimary:false}));handlers.pointerup(event({isPrimary:false}));assert.equal(activations,1);
+button.disabled=true;handlers.pointerdown(event());handlers.pointerup(event());assert.equal(activations,1);button.disabled=false;
+mobile=false;handlers.pointerdown(event());handlers.pointerup(event());assert.equal(activations,1,'Desktop touch remains on the normal click path');mobile=true;
+handlers.pointerdown(event());handlers.pointerup(event());assert.equal(activations,2,'The next deliberate tap works');
+console.log(JSON.stringify({passed:true,checks:['one activation per touch','compatibility click suppressed','keyboard and mouse paths preserved','swipes and scrolls do not select','pointer cancellation','secondary pointer ignored','disabled choices ignored','desktop behavior preserved','successive taps work']}));

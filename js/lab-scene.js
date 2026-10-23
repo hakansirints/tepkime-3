@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 window.THREE = THREE;
 globalThis.THREE = THREE;
-import { OrbitControls } from './vendor/three/OrbitControls.js?v=6849fe5248cf';
-import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js?v=6849fe5248cf';
-import { createPowderMotion } from './powder-motion.js?v=6849fe5248cf';
-import { createLiquidSurface } from './liquid-surface.js?v=6849fe5248cf';
+import { OrbitControls } from './vendor/three/OrbitControls.js?v=43e372203aa1';
+import { createBeakerFactory, BEAKER_RADIUS } from './beaker-model.js?v=43e372203aa1';
+import { createPowderMotion } from './powder-motion.js?v=43e372203aa1';
+import { createLiquidSurface } from './liquid-surface.js?v=43e372203aa1';
 
 function dismissLabLoader() {
   const loader = document.getElementById('mebiLabLoader');
@@ -358,7 +358,7 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
   let particleLoadError = false;
   function ensureParticleLayer() {
     if (particleLayer || particleLoading || particleLoadError) return;
-    particleLoading = import('./beaker-particles.js?v=6849fe5248cf').then(module => {
+    particleLoading = import('./beaker-particles.js?v=43e372203aa1').then(module => {
       particleLayer = module.createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature});
       particleLayer.sync(state);resize();renderFrame();
     }).catch(error => {
@@ -583,6 +583,10 @@ for(let x of [-2,2]){roomBox(.022,.7,.022,x,4.4,.05,roomMat(t.metal));roomBox(1.
       const shell = document.querySelector('.mebi-top-shell'), stepper = document.querySelector('.mebi-stepper');
       const headerBottom = Math.max(shell ? shell.getBoundingClientRect().bottom : 0,stepper ? stepper.getBoundingClientRect().bottom : 0);
       app.style.setProperty('--lab-card-top', Math.ceil(headerBottom + (h < 650 ? 8 : 12)) + 'px');
+      const pair = document.getElementById('beakerParticlePairBadge');
+      const roleDock = document.getElementById('particleInspectionModelDock');
+      app.style.setProperty('--particle-summary-bottom', Math.ceil(pair ? pair.getBoundingClientRect().bottom : 46) + 'px');
+      app.style.setProperty('--particle-bottom-reserve', Math.ceil(roleDock ? roleDock.getBoundingClientRect().height + 16 : 16) + 'px');
     }
     if (left && !left.classList.contains('is-collapsed')) {
       const heading = left.querySelector('.lab-panel-heading');

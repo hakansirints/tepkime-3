@@ -1,4 +1,4 @@
-import {buildModel,template,COLORS,symbol,unique} from './particle-models.js?v=6849fe5248cf';
+import {buildModel,template,COLORS,symbol,unique} from './particle-models.js?v=43e372203aa1';
 
 /* One batched layer in the existing WebGL scene. No label is drawn inside a beaker. */
 export function createBeakerParticles({THREE,scene,renderer,camera,controls,main,secondary,secondaryHome,setTemperature}){

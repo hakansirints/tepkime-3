@@ -43,7 +43,22 @@
   window.MebiExperiment.reset(S, false);
   window.MebiObservation.reset(S);
   var HISTORY = [];
+  var headerLayoutFrame = 0, headerResizeObserver = null, measuredHeader = null;
+  function scheduleStageLayout() {
+    if (headerLayoutFrame) return;
+    headerLayoutFrame = window.requestAnimationFrame(function() { headerLayoutFrame = 0; fitStageHeader(); });
+  }
   function fitStageHeader() {
+    var header = document.querySelector('.mebi-top-shell');
+    if (window.ResizeObserver && header !== measuredHeader) {
+      if (!headerResizeObserver) headerResizeObserver = new window.ResizeObserver(scheduleStageLayout);
+      headerResizeObserver.disconnect(); measuredHeader = header;
+      if (header) {
+        headerResizeObserver.observe(header);
+        var stepper = header.querySelector('.mebi-stepper');
+        if (stepper) headerResizeObserver.observe(stepper);
+      }
+    }
     if (window.LabScene && window.LabScene.refreshLayout) window.LabScene.refreshLayout();
   }
   var fillToken = 0;
@@ -245,7 +260,7 @@
 
   // EKRAN 1: AÇILIŞ MENÜSÜ (Görseldeki Mint Kimya Temalı 16:9 Yatay Kart)
   function entranceIcon(name) {
-    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg?v=6849fe5248cf)"></span>';
+    return '<span class="entrance-icon" style="--entrance-icon:url(../assets/icons/phosphor/' + name + '.svg?v=43e372203aa1)"></span>';
   }
 
   function screenMenu() {
@@ -379,7 +394,7 @@
         '" data-action="clickReagent" data-arg="' + esc(r.id) + '" aria-pressed="' + !!slot +
         '" aria-label="' + esc(r.f + ', ' + r.name + ', ' + description + (slot ? ', ' + slot + '. beher seçildi' : '') + (completed ? ', bu madde çifti daha önce denendi ve koleksiyona kaydedildi' : '')) + '">' +
         '<span class="reagent-card-visual is-' + appearance + '">' +
-          '<img src="image/reagents/' + appearance + '.webp?v=6849fe5248cf" width="640" height="440" alt="" decoding="async" draggable="false">' +
+          '<img src="image/reagents/' + appearance + '.webp?v=43e372203aa1" width="640" height="440" alt="" decoding="async" draggable="false">' +
         '</span><span class="reagent-card-caption">' + (slot ? '<span class="reagent-card-selection">✓ ' + slot + '. beher</span>' : '') + '<strong>' + esc(r.f) + '</strong>' + (completed ? '<span class="reagent-card-history">Daha önce denendi</span>' : '') + '<span>' + esc(r.name) +
         ' <small>' + (r.solid ? '(katı toz)' : '(suda)') + '</small></span></span></button>';
     }).join('');
@@ -1763,7 +1778,7 @@
     window.MebiExperiment.wire(S);
     wireDragAndDrop();
     if (window.MebiFloatingCards) window.MebiFloatingCards.wire(S);
-    if (window.requestAnimationFrame) window.requestAnimationFrame(fitStageHeader);
+    if (window.requestAnimationFrame) scheduleStageLayout();
     if (focusedReagent && S.screen === 'pool') {
       var replacementCard = app.querySelector('.reagent-gallery-card[data-arg="' + focusedReagent + '"]');
       if (replacementCard) replacementCard.focus({ preventScroll: true });
@@ -1822,7 +1837,13 @@
   document.addEventListener('DOMContentLoaded', function() {
     var app = document.getElementById('app');
     if (app) {
+      var learningTouches = window.MebiLearningInputs && window.MebiLearningInputs.wire(app, function(button) {
+        dispatch(button.getAttribute('data-action'), button.getAttribute('data-arg'), button);
+      });
       app.addEventListener('click', function(e) {
+        if (learningTouches && learningTouches.suppressClick(e)) {
+          e.preventDefault(); e.stopPropagation(); return;
+        }
         var btn = e.target.closest('[data-action]');
         if (!btn) return;
         if (btn.disabled || btn.classList.contains('is-disabled')) return;
@@ -1830,6 +1851,11 @@
         var arg = btn.getAttribute('data-arg');
         dispatch(action, arg, btn);
       });
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleStageLayout, {passive:true});
+        window.visualViewport.addEventListener('scroll', scheduleStageLayout, {passive:true});
+      }
 
       // Klavye ile role="button" ve role="checkbox" erişimi (Enter ve Boşluk tuşu)
       app.addEventListener('keydown', function(e) {

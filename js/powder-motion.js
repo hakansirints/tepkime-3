@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three/three.module.js?v=6849fe5248cf';
+import * as THREE from './vendor/three/three.module.js?v=43e372203aa1';
 
 // A granular bed clipped by the vessel and gravity, with a small repose offset.
 // It is a visual model, rather than a powder-density or particle-dynamics solver.

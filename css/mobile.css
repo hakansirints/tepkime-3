@@ -26,9 +26,9 @@
   .prediction-actions .mebi-btn { white-space:normal; text-wrap:balance; line-height:1.25; }
   .prediction-save-group { min-width:0; }
   .prediction-footer .prediction-saved-status { max-width:none; }
-  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; }
-  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-save-group { display:flex; flex-direction:column; align-items:stretch; gap:3px; }
-  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions .mebi-btn { width:100%; min-height:32px; padding:4px 5px; font-size:10px; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions { display:flex; justify-content:flex-end !important; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-save-group { display:flex; flex:0 1 auto; align-items:center; justify-content:flex-end; gap:3px; }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-actions .mebi-btn { flex:0 1 auto; width:auto; min-height:32px; padding:5px 10px; font-size:10px; }
   .reagent-gallery-toolbar { display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
   .reagent-gallery-tools { width:100%; max-width:none; gap:8px; }
   .reagent-gallery-heading { min-width:0; }
@@ -55,11 +55,9 @@
   #explanationCard .explanation-footer { flex-direction:column; align-items:stretch; }
   #explanationCard .explanation-feedback { max-width:none; }
   #explanationCard .explanation-feedback p { font-size:10px; line-height:1.3; }
-  #explanationCard .explanation-footer .prediction-actions {
-    display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); width:100%; gap:4px;
-  }
-  #explanationCard .prediction-actions > * { grid-column:span 2; margin:0; min-width:0; max-width:none; }
-  #explanationCard .prediction-actions > :nth-last-child(-n+2) { grid-column:span 3; }
+  #explanationCard .explanation-footer .prediction-actions { display:flex; justify-content:flex-end; width:100%; gap:4px; }
+  #explanationCard .prediction-actions > * { flex:0 1 auto; margin:0; min-width:0; max-width:none; width:auto; }
+  #explanationCard .prediction-actions > [data-action="backToObservation"] { margin-right:auto; }
   #explanationCard .prediction-actions .mebi-btn { min-height:30px; font-size:10px; line-height:1.2; padding:4px 6px; white-space:normal; }
   #modelCard .explanation-feedback { max-width:44%; }
   #modelCard .prediction-actions { display:flex; flex-wrap:nowrap; gap:4px; }
@@ -171,7 +169,7 @@
     scrollbar-width:thin; scrollbar-color:var(--mebi-border-hover) transparent;
     overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
   }
-  #app .prediction-card:not(.is-collapsed) > .prediction-content { flex:1 1 0; padding-right:6px; }
+  #app > section.prediction-card:not(.is-collapsed) > .prediction-content { flex:1 1 0; padding-right:6px; }
   #app .prediction-content > *,#app .beaker-particle-scroll > * { flex-shrink:0; }
   #app :is(.prediction-content,.reagent-gallery-grid,.beaker-particle-scroll,.model-dock-species)::-webkit-scrollbar { width:8px; height:8px; }
   #app :is(.prediction-content,.reagent-gallery-grid,.beaker-particle-scroll,.model-dock-species)::-webkit-scrollbar-thumb { border:2px solid transparent; border-radius:8px; background:var(--mebi-border-hover); background-clip:padding-box; }
@@ -214,18 +212,18 @@
   #app .observation-card:not(.is-comparing) .observation-footer .prediction-actions { display:flex; width:auto; margin-left:auto; }
   #app .observation-card:not(.is-comparing) .observation-footer .prediction-actions .mebi-btn { width:auto; max-width:none; }
 
-  /* Only the model's beaker inspection replaces the stage bar with the pair. */
-  body[data-particle-inspection="true"]:has(#particleInspectionModelDock) #app .mebi-top-shell { display:none !important; }
-  body[data-particle-inspection="true"]:has(#particleInspectionModelDock) #beakerParticlePairBadge {
+  /* Every mobile beaker inspection replaces the stage bar with the pair. */
+  body[data-particle-inspection="true"] #app .mebi-top-shell { display:none !important; }
+  body[data-particle-inspection="true"] #beakerParticlePairBadge {
     top:8px !important; left:8px !important; transform:none !important;
     width:calc(100vw - var(--right-panel,210px) - 24px); max-width:520px;
     min-height:36px; padding:5px 10px; gap:8px; opacity:1 !important; animation:none !important;
   }
-  body[data-particle-inspection="true"]:has(#particleInspectionModelDock) .pair-badge-item { flex:1 1 0; min-width:0; gap:6px; }
-  body[data-particle-inspection="true"]:has(#particleInspectionModelDock) .pair-badge-info { min-width:0; }
-  body[data-particle-inspection="true"]:has(#particleInspectionModelDock) .pair-badge-thumb { width:26px; height:26px; }
-  body[data-particle-inspection="true"]:has(#particleInspectionModelDock) .pair-badge-name { font-size:11px; }
-  body[data-particle-inspection="true"]:has(#particleInspectionModelDock) .pair-badge-desc { font-size:9px; white-space:normal; }
+  body[data-particle-inspection="true"] .pair-badge-item { flex:1 1 0; min-width:0; gap:6px; }
+  body[data-particle-inspection="true"] .pair-badge-info { min-width:0; }
+  body[data-particle-inspection="true"] .pair-badge-thumb { width:26px; height:26px; }
+  body[data-particle-inspection="true"] .pair-badge-name { font-size:11px; }
+  body[data-particle-inspection="true"] .pair-badge-desc { font-size:9px; white-space:normal; }
   #app #particleInspectionModelDock {
     left:8px !important; transform:none !important; top:auto !important;
     bottom:max(8px,env(safe-area-inset-bottom)) !important;
@@ -243,4 +241,53 @@
   #app #particleInspectionModelDock .species-card-visual { min-height:22px !important; padding:0 !important; justify-content:center !important; }
   #app #particleInspectionModelDock .species-card-symbol { flex:1 1 100% !important; }
   #app #particleInspectionModelDock .model-dock-species { max-height:calc(45dvh - 45px); }
+}
+
+/* Mobile actions stay as wide as their labels; taps use the whole mark. */
+@media (max-width:1024px) and (max-height:650px) and (orientation:landscape) {
+  #app #beginExperimentButton,#app #explanationCard #toModelButton {
+    width:max-content !important; max-width:100%; flex:0 1 auto !important;
+    margin-left:auto !important; display:inline-flex; justify-content:center;
+  }
+  #app .prediction-card[aria-labelledby="predictionTitle"] .prediction-save-group { width:auto; margin-left:auto; }
+  #app #explanationCard .prediction-actions > [data-action="toModel"] { width:max-content; flex:0 1 auto; }
+  #app #explanationCard #explanationEditor { font-size:14px !important; line-height:1.45 !important; }
+  #app .learning-matrix button.learning-mark {
+    position:relative; width:36px !important; height:36px !important; min-height:36px !important;
+    padding:0 !important; border:1.5px solid var(--mebi-border-hover) !important;
+    border-radius:8px; background:var(--mebi-bg-surface-solid) !important;
+    color:var(--mebi-primary); touch-action:manipulation;
+    -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;
+  }
+  #app .learning-matrix button.learning-mark::before { content:""; position:absolute; inset:-4px; }
+  #app .learning-matrix button.learning-mark .learning-tick {
+    width:20px; height:20px; border:0 !important; background:transparent !important;
+    box-shadow:none !important; pointer-events:none;
+  }
+  #app .learning-matrix button.learning-mark svg { width:18px; height:18px; pointer-events:none; }
+  #app .learning-matrix button.learning-mark[aria-pressed="true"] { background:#0284c7 !important; border-color:#0284c7 !important; color:#fff !important; }
+  [data-theme="dark"] #app .learning-matrix button.learning-mark { background:#303b50 !important; border-color:#607391 !important; }
+  [data-theme="dark"] #app .learning-matrix button.learning-mark[aria-pressed="true"] { background:#0284c7 !important; border-color:#38bdf8 !important; color:#fff !important; }
+  #app .learning-matrix button.learning-mark:focus-visible { outline:2px solid var(--mebi-primary); outline-offset:3px; }
+  #app :is(input[type="checkbox"],input[type="radio"]) { touch-action:manipulation; accent-color:var(--mebi-primary); }
+
+  body.lab-3d-active #app[data-screen="lab"] .lab-experiment-heading,
+  body.lab-3d-active #app[data-screen="lab"] #benchDock:not(.observation-live-dock) {
+    position:fixed !important; top:var(--lab-card-top,51px) !important;
+    max-height:calc(100dvh - var(--lab-card-top,51px) - max(8px,env(safe-area-inset-bottom))) !important;
+  }
+  body[data-particle-inspection="true"] #app .beaker-particle-legend.is-merged {
+    position:fixed !important; left:8px !important; right:auto !important;
+    top:calc(var(--particle-summary-bottom,46px) + 8px) !important;
+    width:clamp(128px,21vw,174px) !important; box-sizing:border-box;
+    max-width:calc(100vw - var(--right-panel,210px) - 24px);
+    max-height:calc(100dvh - var(--particle-summary-bottom,46px) - var(--particle-bottom-reserve,16px) - 8px) !important;
+    padding:7px 8px !important; overflow:auto; scrollbar-gutter:stable;
+    overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  }
+  #app .beaker-particle-legend.is-merged .beaker-particle-key { gap:5px !important; min-height:30px !important; }
+  #app .beaker-particle-legend.is-merged .beaker-particle-key svg { width:28px !important; height:25px !important; flex-basis:28px !important; }
+  #app .beaker-particle-legend.is-merged .beaker-particle-key span { min-width:0; font-size:10px !important; }
+  #app .explanation-prediction-dialog.mebi-comparison-dialog { height:calc(100dvh - 24px) !important; }
+  #app .mebi-comparison-dialog > .prediction-content { flex:1 1 auto !important; min-height:80px; overflow:auto !important; }
 }
