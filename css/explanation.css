@@ -2571,6 +2571,7 @@
   display: flex !important;
   align-items: center !important;
   flex-wrap: wrap !important;
+  justify-content: center !important;
   gap: 8px !important;
   margin-top: 12px !important;
   padding-top: 10px !important;
@@ -2707,3 +2708,36 @@
 [data-theme="dark"] #app .equation-check-button.is-balanced {color:#a7f3d0;background:#064e3b;border-color:#34d399;}
 @keyframes equationCheckGlow {50% {box-shadow:0 0 0 5px #34d39918,0 0 25px #34d39988;}}
 @media(prefers-reduced-motion:reduce) {#app .equation-check-button.is-balanced {animation:none;}}
+
+/* Shared evidence tools in reaction and nonreaction explanations. */
+#app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action] {
+  --evidence-bg:#e0f2fe; --evidence-fg:#075985; --evidence-border:#7dd3fc;
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  flex:0 1 auto !important; gap:5px !important; min-height:34px !important;
+  padding:6px 12px !important; border:1px solid var(--evidence-border) !important;
+  border-radius:9999px !important; background:var(--evidence-bg) !important;
+  color:var(--evidence-fg) !important; font-family:inherit !important;
+  font-size:11px !important; font-weight:700 !important; line-height:1.3 !important;
+  white-space:normal !important; text-align:center !important; box-shadow:none !important;
+}
+#app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action="reviewExplanationExperiment"] {
+  --evidence-bg:#fef3c7; --evidence-fg:#92400e; --evidence-border:#fcd34d;
+}
+#app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action="openParticleInspection"] {
+  --evidence-bg:#ede9fe; --evidence-fg:#5b21b6; --evidence-border:#c4b5fd;
+}
+:root[data-theme="dark"] #app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action] {
+  --evidence-bg:#123b52; --evidence-fg:#bae6fd; --evidence-border:#326783;
+}
+:root[data-theme="dark"] #app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action="reviewExplanationExperiment"] {
+  --evidence-bg:#493416; --evidence-fg:#fde68a; --evidence-border:#876524;
+}
+:root[data-theme="dark"] #app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action="openParticleInspection"] {
+  --evidence-bg:#35265d; --evidence-fg:#ddd6fe; --evidence-border:#6d56a2;
+}
+#app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action]:hover {
+  background:color-mix(in srgb,var(--evidence-fg) 10%,var(--evidence-bg)) !important;
+}
+#app #explanationCard.prediction-card :is(.explanation-decision-actions,.nr-decision-tools) > button[data-action] svg {
+  width:14px !important; height:14px !important; flex:none !important; color:inherit !important;
+}

@@ -14,7 +14,7 @@
   }
   function syncAutoOpen(card, state, labState) {
     var ring = card.querySelector('.observation-auto-open');
-    if (!state.collapsed || labState.screen !== 'lab' || labState.labStep !== 'observed' || labState.stageReview || labState.particleInspection || labState.explanationReview) {
+    if (!state.autoOpenPending || !state.collapsed || labState.screen !== 'lab' || labState.labStep !== 'observed' || labState.stageReview || labState.particleInspection || labState.explanationReview) {
       stopAutoOpen();
       if (ring) ring.remove();
       return;
@@ -29,7 +29,7 @@
       autoOpenTimer = null;
       var liveCard = document.querySelector('#app #observationCard');
       if (current !== state || !state.collapsed || !liveCard || labState.screen !== 'lab' || labState.labStep !== 'observed' || labState.stageReview || labState.particleInspection || labState.explanationReview) return;
-      state.collapsed = false; state.autoOpenAt = 0; labState.benchAttention = false;
+      state.collapsed = false; state.autoOpenAt = 0; state.autoOpenPending = false; labState.benchAttention = false;
       apply(liveCard, state, labState);
     }, Math.max(0, state.autoOpenAt - Date.now()));
   }
@@ -67,6 +67,10 @@
   }
   function toggle(card, state, labState) {
     cleanup();
+    // Only the first arrival after an experiment opens automatically. A manual
+    // peek stays collapsed until the student chooses to reopen the card.
+    state.autoOpenPending = false;
+    stopAutoOpen();
     var content = card.querySelector('.prediction-content');
     if (!state.collapsed) state.scroll = content ? content.scrollTop : 0;
     state.collapsed = !state.collapsed;
@@ -89,14 +93,15 @@
     var card=document.querySelector('#app #observationCard');
     if (!card) { stopAutoOpen(); return; }
     var identity=labState.observation.attemptId;
-    if (!current || current.identity!==identity) { stopAutoOpen(); current={identity:identity,collapsed:true,scroll:0,autoOpenAt:0}; }
+    if (!current || current.identity!==identity) { stopAutoOpen(); current={identity:identity,collapsed:true,scroll:0,autoOpenAt:0,autoOpenPending:true}; }
     var state=current;
     card.classList.add('floating-card-enabled');
     var btn = card.querySelector('.observation-peek-toggle');
     if (!btn) {
       card.insertAdjacentHTML('afterbegin','<button type="button" class="observation-peek-toggle" data-observation-control="peek" aria-controls="observationPanel"></button>');
       btn = card.querySelector('.observation-peek-toggle');
-      btn.addEventListener('click',function() {
+      btn.addEventListener('click',function(event) {
+        event.stopPropagation();
         if (state.collapsed && labState) labState.benchAttention = false;
         toggle(card,state,labState);
       });
@@ -104,6 +109,8 @@
     apply(card,state,labState);
   }
   function expand(labState) {
+    if (current) current.autoOpenPending = false;
+    stopAutoOpen();
     if (current && current.collapsed) {
       current.collapsed = false;
       if (labState) labState.benchAttention = false;
@@ -115,6 +122,8 @@
     }
   }
   function collapse(labState) {
+    if (current) current.autoOpenPending = false;
+    stopAutoOpen();
     if (current && !current.collapsed) {
       current.collapsed = true;
       var card = document.querySelector('#app #observationCard');

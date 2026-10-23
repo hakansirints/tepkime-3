@@ -49,6 +49,7 @@ node scripts/verify-prediction.cjs
 node scripts/verify-experiment.cjs
 node scripts/verify-experiment-replay.cjs
 node scripts/verify-observation.cjs
+node scripts/verify-observation-peek.cjs
 node scripts/verify-particle-models.cjs
 node scripts/verify-powder-motion.cjs
 ```
