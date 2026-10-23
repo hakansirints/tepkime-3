@@ -155,7 +155,7 @@
   function pairHTML(state) {
     return '<div class="prediction-pair" aria-label="Deneyde karıştırılan maddeler">' + [state.selectedSlot1,state.selectedSlot2].map(function(id, index) {
       var reagent = window.MebiData.getReagent(id), kind = reagent.solid ? 'powder' : reagent.id === 'Cu(NO3)2' ? 'blue' : 'clear';
-      return (index ? '<span aria-hidden="true">+</span>' : '') + '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=e8aaf3d3a426" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz · ' + window.MebiExperiment.initialAmount(reagent).solidGrams.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' g' : 'suda · ' + window.MebiExperiment.defaults.solutionMl + ' mL') + '</small></span></div>';
+      return (index ? '<span aria-hidden="true">+</span>' : '') + '<div class="prediction-material"><span class="prediction-material-image is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=2c9b49d4c90a" width="640" height="440" alt=""></span><span><strong>' + esc(reagent.f) + '</strong><small>' + esc(reagent.name) + ' · ' + (reagent.solid ? 'katı toz · ' + window.MebiExperiment.initialAmount(reagent).solidGrams.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' g' : 'suda · ' + window.MebiExperiment.defaults.solutionMl + ' mL') + '</small></span></div>';
     }).join('') + '</div>';
   }
   function deskHTML(state) {

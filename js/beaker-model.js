@@ -1,4 +1,4 @@
-import * as THREE from './vendor/three/three.module.js?v=e8aaf3d3a426';
+import * as THREE from './vendor/three/three.module.js?v=2c9b49d4c90a';
 
 // One glassware model for the laboratory and the rendered reagent cards.
 export const BEAKER_HEIGHT = 1.1;

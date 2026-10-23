@@ -13,6 +13,7 @@
 
 - 50 tarayıcı görünümü: 844 × 390 ve 1280 × 720; açık/koyu temalar; başlık açık/simge durumları; seçim, tahmin, model, koleksiyon ve tanecik incelemesi.
 - Ek kısa mobil görünümler: 568 × 320 ve 956 × 320 koleksiyon; 568 × 320, 956 × 352 ve 1280 × 720 hata pencereleri.
+- Ayrıca 1024 × 768 tablet görünümünde açık/koyu tema ve açık/simge başlık durumlarıyla 4 koleksiyon kontrolü yapıldı. Toplam 54 görünüm denetlendi; koleksiyon kuralı yüksekliği 650 pikseli aşan tabletleri de kapsar.
 - JavaScript hatası, yatay sayfa taşması, simgenin kartların arkasında kalması ve başlığın ana kartı örtmesi bulunmadı. Kısa koleksiyon ekranlarında kaydırılabilir alanın yeterli yüksekliği doğrulandı.
 - Gerçek formda başlığı açıp kapatırken aynı metin alanının DOM'da kaldığı, değerin ve kaydırmanın korunduğu doğrulandı. Mobilde varsayılan simge ve masaüstünde varsayılan açık durum ayrıca denetlendi.
 - 956 × 352 görünümde beş maddeli kontrol penceresi 920 × 253 piksel oldu. 568 × 320 görünümde son hata maddesine kapsül sürüklenerek erişildi; `Tamam` düğmesi görünür kaldı.
@@ -20,4 +21,4 @@
 
 Eski `verify-selection.cjs` testi daha önce kaldırılmış `randomReactivePairForTesting` üretim komutunu beklediği için duruyor. Bu görevde eski test dosyası değiştirilmedi; seçim ve başlık yerleşimi gerçek tarayıcıda denetlendi.
 
-Yayın varlık sürümü: `e8aaf3d3a426`.
+Yayın varlık sürümü: `2c9b49d4c90a`.
