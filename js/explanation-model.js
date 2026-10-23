@@ -1,4 +1,4 @@
-import {buildModel, template, COLORS, CHARGES, LABELS, symbol, unique} from './particle-models.js?v=43e372203aa1';
+import {buildModel, template, COLORS, CHARGES, LABELS, symbol, unique} from './particle-models.js?v=f1bb324965c5';
 
 // Share the laboratory's chemical model; never infer spectators from leftover quantity.
 function build(state) {

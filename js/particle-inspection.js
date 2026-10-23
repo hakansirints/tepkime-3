@@ -12,7 +12,7 @@
   function item(r) {
     var kind = r.solid ? 'powder' : r.id === 'Cu(NO3)2' ? 'blue' : 'clear';
     var amount = r.solid ? 'katı · 5 g' : 'suda · 50 mL';
-    return '<div class="pair-badge-item"><span class="pair-badge-thumb is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=43e372203aa1" width="640" height="440" alt=""></span><div class="pair-badge-info"><strong class="pair-badge-name">' + r.f + '</strong><span class="pair-badge-desc">' + r.name + ' · ' + amount + '</span></div></div>';
+    return '<div class="pair-badge-item"><span class="pair-badge-thumb is-' + kind + '"><img src="image/reagents/' + kind + '.webp?v=f1bb324965c5" width="640" height="440" alt=""></span><div class="pair-badge-info"><strong class="pair-badge-name">' + r.f + '</strong><span class="pair-badge-desc">' + r.name + ' · ' + amount + '</span></div></div>';
   }
   return '<div class="beaker-particle-pair-badge" id="beakerParticlePairBadge" aria-label="İncelenen tepkime">' + item(r1) + '<span class="pair-badge-plus" aria-hidden="true">+</span>' + item(r2) + '</div>';
  }
